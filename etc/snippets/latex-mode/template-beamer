@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: beamer template
+# key: tmplb
+# --
+\documentclass[${1:11pt}]{beamer}
+
+\title{$2}
+\subtitle{$3}
+\author{$4}
+\institute{$5}
+\date{$6}
+
+\begin{document}
+
+\maketitle
+
+$0
+\end{document}

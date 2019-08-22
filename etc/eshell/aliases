@@ -1,0 +1,2 @@
+alias l ls -Alh $*
+alias g git $*

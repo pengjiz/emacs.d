@@ -1,0 +1,243 @@
+;;; eshell-extras.el --- Extra Eshell extensions  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Extra extensions for Eshell.
+
+;;; Code:
+
+(require 'esh-mode)
+(require 'em-ls)
+(require 'em-unix)
+(require 'em-dirs)
+(require 'em-prompt)
+(require 'em-hist)
+(require 'vc-git)
+(require 'ring)
+(eval-when-compile
+  (require 'subr-x))
+
+;;; Faces and options
+
+(defcustom eshell-extras-prompt-git-dirty-label
+  "*"
+  "The indicator to show that the Git working tree is dirty."
+  :type 'string
+  :group 'eshell-prompt)
+
+(defface eshell-extras-prompt-python-env
+  '((t (:inherit eshell-ls-executable)))
+  "Face used by Python environment name in the prompt."
+  :group 'eshell-prompt)
+
+(defface eshell-extras-prompt-directory
+  '((t (:inherit eshell-ls-directory)))
+  "Face used by the current directory in the prompt."
+  :group 'eshell-prompt)
+
+(defface eshell-extras-prompt-git-branch
+  '((t (:inherit eshell-ls-special)))
+  "Face used by the current Git branch name in the prompt."
+  :group 'eshell-prompt)
+
+(defface eshell-extras-prompt-git-status
+  '((t (:inherit (bold warning))))
+  "Face used by the Git working tree status."
+  :group 'eshell-prompt)
+
+(defface eshell-extras-prompt-success
+  '((t (:inherit success)))
+  "Face used by the prompt when the last command succeeds."
+  :group 'eshell-prompt)
+
+(defface eshell-extras-prompt-error
+  '((t (:inherit (bold error))))
+  "Face used by the prompt when the last command fails."
+  :group 'eshell-prompt)
+
+(defface eshell-extras-autosuggest-suggestion
+  '((((background dark))
+     :foreground "DimGrey" :inherit default)
+    (((background light))
+     :foreground "LightGrey" :inherit default))
+  "Face used by autosuggest suggestions."
+  :group 'eshell-hist)
+
+;;; Commands
+
+;; Common
+(defun eshell/take (directory)
+  "Make DIRECTORY and cd to it."
+  (eshell/mkdir "-p" directory)
+  (eshell/cd directory))
+
+;; Show command status
+(defun eshell-extras--set-process (&rest _)
+  "Set `mode-line-process' when a command is started."
+  (setf mode-line-process ":run"))
+
+(defun eshell-extras--clear-process (&rest _)
+  "Clear `mode-line-process' when end a command is finished."
+  (setf mode-line-process nil))
+
+(defun eshell-extras--setup-command ()
+  "Setup command related extensions."
+  (advice-add #'eshell-command-started :before #'eshell-extras--set-process)
+  (advice-add #'eshell-command-finished :after #'eshell-extras--clear-process))
+
+;;; Prompt
+
+(defun eshell-extras--call-git-string (command &rest args)
+  "Execute COMMAND and ARGS with Git.
+Return the first line of output if any. Otherwise return nil."
+  (with-temp-buffer
+    (apply #'vc-git--call '(t nil) command args)
+    (unless (bobp)
+      (goto-char (point-min))
+      (buffer-substring-no-properties (point)
+                                      (line-end-position)))))
+
+(defun eshell-extras--get-git-branch ()
+  "Get the current Git branch name or short SHA."
+  (or (eshell-extras--call-git-string "symbolic-ref" "--short" "HEAD")
+      (eshell-extras--call-git-string "rev-parse" "--short" "HEAD")))
+
+(defun eshell-extras--get-git-status ()
+  "Get the status of the current Git working tree."
+  (when (eshell-extras--call-git-string "status" "--porcelain")
+    eshell-extras-prompt-git-dirty-label))
+
+(defun eshell-extras--get-prompt ()
+  "Return a prompt for Eshell."
+  (let* ((path (file-name-nondirectory (abbreviate-file-name (eshell/pwd))))
+         (env (bound-and-true-p conda-current-environment))
+         (branch (eshell-extras--get-git-branch))
+         (status (and branch (eshell-extras--get-git-status))))
+    (concat
+     ;; Python environment
+     (when env
+       (format "(%s) " (propertize env 'face 'eshell-extras-prompt-python-env)))
+     ;; Current working directory
+     (propertize path 'face 'eshell-extras-prompt-directory)
+     ;; Git branch name or short SHA
+     (when branch
+       (propertize (concat "@" branch) 'face 'eshell-extras-prompt-git-branch))
+     ;; Git working tree status
+     (when status
+       (propertize status 'face 'eshell-extras-prompt-git-status))
+     " "
+     ;; Last command status
+     (propertize "λ" 'face (if (zerop eshell-last-command-status)
+                               'eshell-extras-prompt-success
+                             'eshell-extras-prompt-error))
+     " ")))
+
+(defun eshell-extras--setup-prompt ()
+  "Setup Eshell prompt."
+  (setf eshell-prompt-function #'eshell-extras--get-prompt
+        eshell-prompt-regexp "^.* λ "
+        ;; This makes Eshell prompt read-only, which I do not want
+        eshell-highlight-prompt nil))
+
+;;; Autosuggest
+
+(defvar-local eshell-extras--autosuggest-previous-input nil
+  "Previous input for offering autosuggest suggestions.")
+(defvar-local eshell-extras--autosuggest-suggestion-overlay nil
+  "Overlay used to display autosuggest suggestions.")
+
+(defvar eshell-extras-autosuggest-suggestion-map (make-sparse-keymap)
+  "Keymap used on autosuggest suggestion overlays.")
+
+(defun eshell-extras--get-input ()
+  "Get the current input for offering autosuggest suggestions."
+  (save-excursion
+    (goto-char (point-max))
+    (eshell-bol)
+    (and (/= (point) (point-max))
+         (buffer-substring-no-properties (point) (point-max)))))
+
+(defun eshell-extras--get-suggestion (input)
+  "Get the autosuggest suggestion for INPUT."
+  (catch 'done
+    (dolist (element (ring-elements eshell-history-ring))
+      (when (string-prefix-p input element)
+        (throw 'done (substring-no-properties element))))))
+
+(defun eshell-extras--show-suggestion (input)
+  "Show the autosuggest suggestion for INPUT.
+Return the overlay made."
+  (when-let* ((suggestion (eshell-extras--get-suggestion input))
+              (overlay (make-overlay (point-max) (point-max) nil nil t))
+              (string (propertize
+                       (substring suggestion (length input))
+                       'face 'eshell-extras-autosuggest-suggestion
+                       'cursor 0)))
+    (overlay-put overlay 'after-string string)
+    (overlay-put overlay 'window (selected-window))
+    (overlay-put overlay 'keymap eshell-extras-autosuggest-suggestion-map)
+    overlay))
+
+(defun eshell-extras--update-suggestion ()
+  "Update autosuggest suggestion after commands."
+  (let ((input (eshell-extras--get-input)))
+    (unless (equal input eshell-extras--autosuggest-previous-input)
+      (when eshell-extras--autosuggest-suggestion-overlay
+        (delete-overlay eshell-extras--autosuggest-suggestion-overlay)
+        (setf eshell-extras--autosuggest-suggestion-overlay nil))
+      (setf eshell-extras--autosuggest-previous-input input)
+      (when input
+        (setf eshell-extras--autosuggest-suggestion-overlay
+              (eshell-extras--show-suggestion input))))))
+
+(defun eshell-extras-accept-suggestion ()
+  "Insert the whole autosuggest suggestion."
+  (interactive "^")
+  (when-let* ((overlay eshell-extras--autosuggest-suggestion-overlay)
+              (suggestion (overlay-get overlay 'after-string)))
+    (let (deactivate-mark)
+      (insert (substring-no-properties suggestion)))))
+
+(defun eshell-extras-accept-suggestion-word (&optional arg)
+  "Insert ARG words of the autosuggest suggestion."
+  (interactive "^p")
+  (when-let* ((overlay eshell-extras--autosuggest-suggestion-overlay)
+              (suggestion (overlay-get overlay 'after-string)))
+    (let (deactivate-mark)
+      (save-excursion
+        (insert (substring-no-properties suggestion)))
+      (forward-word arg)
+      (delete-region (point) (line-end-position)))))
+
+(defun eshell-extras--turn-on-autosuggest ()
+  "Turn on Eshell autosuggest."
+  (add-hook 'post-command-hook #'eshell-extras--update-suggestion
+            nil t))
+
+;; HACK: Hide suggestion when using Ivy overlay display
+(declare-function ivy-overlay-show-after "ext:ivy-overlay")
+
+(defun eshell-extras--hide-suggestion-for-ivy-overlay (&rest _)
+  "Hide suggestion when using Ivy overlay display."
+  (when eshell-extras--autosuggest-suggestion-overlay
+    (delete-overlay eshell-extras--autosuggest-suggestion-overlay)
+    (setf eshell-extras--autosuggest-suggestion-overlay nil)
+    (setf eshell-extras--autosuggest-previous-input nil)))
+
+(defun eshell-extras--setup-autosuggest ()
+  "Setup Eshell autosuggest."
+  (add-hook 'eshell-mode-hook #'eshell-extras--turn-on-autosuggest)
+  (with-eval-after-load 'ivy-overlay
+    (advice-add #'ivy-overlay-show-after :before
+                #'eshell-extras--hide-suggestion-for-ivy-overlay)))
+
+;;; Setup
+
+(defun eshell-extras-setup ()
+  "Setup Eshell extensions."
+  (eshell-extras--setup-command)
+  (eshell-extras--setup-prompt)
+  (eshell-extras--setup-autosuggest))
+
+(provide 'eshell-extras)
+;;; eshell-extras.el ends here

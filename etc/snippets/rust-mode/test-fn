@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: function for test
+# key: tfn
+# --
+#[test]
+fn $1() {
+    $0
+}

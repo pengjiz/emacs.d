@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: article template
+# key: tmpla
+# --
+\documentclass[${1:11pt}]{scrartcl}
+
+\title{$2}
+\subtitle{$3}
+\author{$4}
+\date{$5}
+
+\begin{document}
+
+\maketitle
+
+$0
+\end{document}

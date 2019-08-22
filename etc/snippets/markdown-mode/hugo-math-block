@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: hugo block math
+# key: hmab
+# --
+{{< math >}}
+$1
+{{< /math >}}
+$0

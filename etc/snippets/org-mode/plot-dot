@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: dot plot
+# key: pld
+# --
+#+HEADER: :results file :exports results
+#+BEGIN_SRC dot :file $1
+$0
+#+END_SRC

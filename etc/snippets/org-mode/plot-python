@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: python plot
+# key: plp
+# --
+#+HEADER: :results file :exports both
+#+BEGIN_SRC python
+$0
+#+END_SRC

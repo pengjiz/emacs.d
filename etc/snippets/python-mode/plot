@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: plot
+# key: pl
+# --
+fig, ax${1:s} = plt.subplots(${2:$3, $4, }figsize=($5, $6)$7)
+$0
+fig.tight_layout()
