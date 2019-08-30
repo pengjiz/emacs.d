@@ -13,13 +13,6 @@
   (defvar my-default-gc-cons-threshold gc-cons-threshold)
   (setf gc-cons-threshold 100000000))
 
-;; Work around a bug in Emacs 26.2 (disable TLS 1.3)
-;; TODO: remove this when the bug is fixed (maybe in the next release?)
-(progn ; tls workaround
-  (defvar gnutls-algorithm-priority)
-  (with-eval-after-load 'gnutls
-    (setf gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")))
-
 (progn ; startup
   (setf load-prefer-newer t
         ad-redefinition-action 'accept)
