@@ -3066,7 +3066,7 @@ This is a replacement for `reftex--query-search-regexps'."
         org-html-htmlize-output-type 'css
         org-html-head-include-default-style nil
         org-html-head (format
-                       "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\" />"
+                       "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
                        (concat "file://"
                                (my-expand-etc-file-name "css/org.css")))))
 
