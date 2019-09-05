@@ -2830,7 +2830,7 @@ This is a replacement for `reftex--query-search-regexps'."
 
   (setf org-default-notes-file (expand-file-name "inbox.org" org-directory)
         org-agenda-files `(,org-directory))
-  (setf org-archive-location "::* ARCHIVED")
+  (setf org-archive-location "::* Archived")
 
   ;; General
   (setf org-adapt-indentation nil
@@ -2906,10 +2906,10 @@ This is a replacement for `reftex--query-search-regexps'."
   :bind ("C-c o c" . org-capture)
   :config
   (setf org-capture-templates
-        '(("t" "Todo" entry (file+headline "" "INBOX")
+        '(("t" "Task" entry (file+headline "" "Tasks")
            "* TODO %?\n:PROPERTIES:\n:CREATED: %u\n:END:\n%i"
            :empty-lines 1)
-          ("n" "Note" entry (file+headline "" "NOTES")
+          ("n" "Note" entry (file+headline "" "Notes")
            "* %?\n:PROPERTIES:\n:CREATED: %u\n:END:\n%i"
            :empty-lines 1))))
 
