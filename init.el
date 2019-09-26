@@ -1162,8 +1162,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package password-store
   :ensure t
-  :defer t
-  :config (setf password-store-password-length 20))
+  :defer t)
 
 (use-package auth-source-pass
   :after auth-source
