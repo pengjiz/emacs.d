@@ -1055,6 +1055,9 @@ This is a non-interactive version of `ignore'."
             eos))
   (put #'dired-find-alternate-file 'disabled nil)
 
+  (dolist (key '("c" "Z" "P"))
+    (unbind-key key dired-mode-map))
+
   (defun my-dired-up-directory ()
     "Go to the parent directory."
     (interactive)
@@ -1118,6 +1121,15 @@ This is a non-interactive version of `ignore'."
   :init
   (with-eval-after-load 'dired-x
     (bind-key "V" #'dired-rsync dired-mode-map)))
+
+(use-package dired-atool
+  :ensure t
+  :defer t
+  :after dired
+  :bind (;; -
+         :map dired-mode-map
+         ("Z" . dired-atool-do-unpack)
+         ("P" . dired-atool-do-pack)))
 
 (use-package dired-async
   :ensure async
