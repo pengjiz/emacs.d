@@ -1217,7 +1217,8 @@ This is a non-interactive version of `ignore'."
                         "*Org Src"
                         "*Edit Formulas*"
                         "*poporg:"
-                        "*edit-indirect"))
+                        "*edit-indirect"
+                        "*Ledger Schedule*"))
            (display-buffer-reuse-window
             display-buffer-below-selected)
            (window-height . 20)
@@ -1274,6 +1275,7 @@ This is a non-interactive version of `ignore'."
                         "*Warnings*"
                         "*Shell Command Output*"
                         "*Async Shell Command*"
+                        "*Ledger Report*"
                         "*Gnuplot Trail*"
                         "*skewer-error*"
                         "*cider-error*"
@@ -1291,6 +1293,7 @@ This is a non-interactive version of `ignore'."
            (reusable-frames . nil))
           ;; Information
           (,(rx bos (or "*Local Variables*"
+                        "*Reconcile*"
                         "*Fancy Diary Entries*"
                         "*Holidays*"
                         "*Phases of Moon*"
@@ -1505,7 +1508,8 @@ This is a non-interactive version of `ignore'."
           LaTeX-mode
           markdown-mode
           rst-mode
-          org-mode)
+          org-mode
+          ledger-mode)
          . my-enable-company)
   :init
   (setf company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
@@ -1520,7 +1524,8 @@ This is a non-interactive version of `ignore'."
                                                  'racket-mode
                                                  'rust-mode
                                                  'idris-mode
-                                                 'css-mode)
+                                                 'css-mode
+                                                 'ledger-mode)
                                  '(company-capf))
                                 ((derived-mode-p 'c-mode 'c++-mode)
                                  '(company-c-headers
@@ -1654,7 +1659,8 @@ This is a non-interactive version of `ignore'."
           typescript-tsx-mode
           python-mode
           LaTeX-mode
-          markdown-mode)
+          markdown-mode
+          ledger-mode)
          . flycheck-mode)
   :config (setf flycheck-check-syntax-automatically '(save mode-enabled)))
 
@@ -2825,6 +2831,25 @@ This is a replacement for `reftex--query-search-regexps'."
   (defun my-setup-bibtex-mode ()
     (run-hooks 'prog-mode-hook))
   (add-hook 'bibtex-mode-hook #'my-setup-bibtex-mode))
+
+;;; Ledger
+
+(use-package ledger-mode
+  :ensure t
+  :defer t
+  :config
+  (setf ledger-default-date-format ledger-iso-date-format
+        ledger-post-amount-alignment-at :decimal
+        ledger-copy-transaction-insert-blank-line-after t)
+  (setf ledger-report-resize-window nil
+        ledger-report-use-header-line t)
+  (setf ledger-schedule-file (my-expand-sync-file-name "ledger/schedule")))
+
+(use-package flycheck-ledger
+  :ensure t
+  :after flycheck
+  :config (setf flycheck-ledger-pedantic t
+                flycheck-ledger-explicit t))
 
 ;;; Org
 
