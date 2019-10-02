@@ -2842,9 +2842,19 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf ledger-default-date-format ledger-iso-date-format
         ledger-post-amount-alignment-at :decimal
         ledger-copy-transaction-insert-blank-line-after t)
+  (setf ledger-schedule-file (my-expand-sync-file-name "ledger/schedule"))
   (setf ledger-report-resize-window nil
         ledger-report-use-header-line t)
-  (setf ledger-schedule-file (my-expand-sync-file-name "ledger/schedule")))
+  (setf ledger-reports
+        (mapcar
+         (lambda (x)
+           (list (car x)
+                 (format "%s %s" "%(binary) -f %(ledger-file)" (cdr x))))
+         '(("On hand" . "balance Assets Liabilities")
+           ("Account" . "register %(account)")
+           ("Expenses (weekly)" . "register Expenses -W")
+           ("Expenses (monthly)" . "register Expenses -M")
+           ("Cash flow (this month)" . "balance Income Expenses --invert -p %(month)")))))
 
 (use-package flycheck-ledger
   :ensure t
