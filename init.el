@@ -1270,6 +1270,7 @@ This is a non-interactive version of `ignore'."
            (reusable-frames . nil))
           ;; Command
           (,(rx bos (or "*compilation"
+                        "*dired-atool"
                         "*Compile-Log*"
                         "*Backtrace*"
                         "*Warnings*"
