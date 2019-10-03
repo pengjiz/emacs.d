@@ -2820,8 +2820,8 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package bibtex
   :defer t
+  :init (setf bibtex-dialect 'biblatex)
   :config
-  (setf bibtex-dialect 'biblatex)
   (setf bibtex-align-at-equal-sign t)
   (setf bibtex-autokey-year-length 4
         bibtex-autokey-year-title-separator ""
@@ -2890,7 +2890,7 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf org-goto-interface 'outline-path-completion)
   (setf org-image-actual-width '(300))
   (setf org-tags-column 0)
-  (setf org-modules '(org-id org-bibtex org-docview org-eww org-habit))
+  (setf org-modules '(org-id org-docview org-eww org-habit))
   (setf org-export-backends '(ascii html latex))
   (setf org-file-apps '((auto-mode . emacs)
                         (directory . emacs)))
