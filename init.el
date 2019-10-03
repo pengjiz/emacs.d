@@ -1146,9 +1146,9 @@ This is a non-interactive version of `ignore'."
   :defer t
   :after dired
   :init
-  (setf image-dired-dir (my-expand-var-file-name "image-dired")
+  (setf image-dired-dir (my-expand-var-file-name "image-dired/")
         image-dired-db-file (my-expand-var-file-name "image-dired/db")
-        image-dired-gallery-dir (my-expand-var-file-name "image-dired/gallery")
+        image-dired-gallery-dir (my-expand-var-file-name "image-dired/gallery/")
         image-dired-temp-image-file (my-expand-var-file-name "image-dired/temp")
         image-dired-temp-rotate-image-file (my-expand-var-file-name "image-dired/rotate-temp")))
 
@@ -1617,7 +1617,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :init
   (setf yas-minor-mode-map (make-sparse-keymap))
-  (setf yas-snippet-dirs (list (my-expand-etc-file-name "snippets")))
+  (setf yas-snippet-dirs (list (my-expand-etc-file-name "snippets/")))
   (setf yas-alias-to-yas/prefix-p nil)
   :config
   (setf yas-prompt-functions '(yas-completing-prompt))
@@ -2050,7 +2050,7 @@ This is a non-interactive version of `ignore'."
 (use-package elfeed-show
   :defer t
   :after elfeed
-  :init (setf elfeed-enclosure-default-dir (expand-file-name "Downloads" "~")))
+  :init (setf elfeed-enclosure-default-dir (expand-file-name "Downloads/" "~")))
 
 ;;; Calendar
 
