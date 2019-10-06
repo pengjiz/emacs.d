@@ -1285,6 +1285,8 @@ This is a non-interactive version of `ignore'."
                         "*cider-error*"
                         "*cider-test-report*"
                         "*idris-notes*"
+                        "*blacken-error*"
+                        "*jq-format-json errors*"
                         "*Racket Logger*"
                         "*HsCompilation*"
                         (and (1+ nonl) " output*")))
@@ -2675,6 +2677,13 @@ This is a non-interactive version of `ignore'."
     (kill-local-variable 'comint-prompt-read-only))
   (add-hook 'inferior-python-mode-hook #'my-setup-inferior-python-mode))
 
+(use-package blacken
+  :ensure t
+  :defer t
+  :after python
+  :bind (:map python-mode-map ("C-c x f" . blacken-buffer))
+  :config (setf blacken-line-length 'fill))
+
 (use-package anaconda-mode
   :ensure t
   :defer t
@@ -3173,6 +3182,12 @@ This is a replacement for `reftex--query-search-regexps'."
 (use-package json-mode
   :ensure t
   :defer t)
+
+(use-package jq-format
+  :ensure t
+  :defer t
+  :after json-mode
+  :bind (:map json-mode-map ("C-c x f" . jq-format-json-buffer)))
 
 ;;; jq
 
