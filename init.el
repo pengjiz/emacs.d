@@ -2288,7 +2288,12 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t
   :after clojure-mode
-  :bind (:map clojure-mode-map ("C-c a a" . cider))
+  :bind (;; -
+         :map clojure-mode-map
+         ("C-c a a" . cider)
+         :map cider-mode-map
+         ("C-c x f" . cider-format-buffer)
+         ("C-c x F" . cider-format-edn-buffer))
   :config
   (setf cider-save-file-on-load nil)
   (setf cider-repl-pop-to-buffer-on-connect nil
@@ -2343,7 +2348,8 @@ This is a non-interactive version of `ignore'."
 
 (use-package rust-mode
   :ensure t
-  :defer t)
+  :defer t
+  :bind (:map rust-mode-map ("C-c x f" . rust-format-buffer)))
 
 (use-package racer
   :ensure t
@@ -2422,7 +2428,8 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind (;; -
          :map hindent-mode-map
-         ([remap prog-indent-sexp] . hindent-reformat-decl))
+         ([remap prog-indent-sexp] . hindent-reformat-decl)
+         ("C-c x f" . hindent-reformat-buffer))
   :hook (haskell-mode . hindent-mode))
 
 ;;; Idris
@@ -2609,6 +2616,7 @@ This is a non-interactive version of `ignore'."
 (use-package tide
   :ensure t
   :defer t
+  :bind (:map tide-mode-map ("C-c x f" . tide-format))
   :hook ((js2-mode typescript-mode typescript-tsx-mode) . tide-setup)
   :config
   (setf tide-completion-enable-autoimport-suggestions nil
@@ -2823,7 +2831,11 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package bibtex
   :defer t
-  :bind (:map bibtex-mode-map ("M-g L" . bibtex-validate))
+  :bind (;; -
+         :map bibtex-mode-map
+         ("M-g L" . bibtex-validate)
+         ("C-c x f" . bibtex-reformat)
+         ("C-c x F" . bibtex-convert-alien))
   :init (setf bibtex-dialect 'biblatex)
   :config
   (setf bibtex-align-at-equal-sign t)
