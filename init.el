@@ -227,7 +227,7 @@ This is a non-interactive version of `ignore'."
          ("C-c a l" . list-processes)
          ("M-g n" . hydra-errors/next-error)
          ("M-g p" . hydra-errors/previous-error))
-  :hook (text-mode . auto-fill-mode)
+  :hook ((text-mode bibtex-mode) . auto-fill-mode)
   :init
   (line-number-mode)
   (column-number-mode)
@@ -549,7 +549,7 @@ This is a non-interactive version of `ignore'."
   :bind (("C-c t w" . whitespace-mode)
          ("C-c t W" . whitespace-toggle-options)
          ("C-c x w" . whitespace-cleanup))
-  :hook (((prog-mode text-mode conf-mode) . my-enable-whitespace)
+  :hook (((prog-mode text-mode bibtex-mode conf-mode) . my-enable-whitespace)
          (TeX-update-style . whitespace-mode))
   :init
   (defun my-enable-whitespace ()
@@ -1261,6 +1261,7 @@ This is a non-interactive version of `ignore'."
                         "*Process List*"
                         "*Flycheck errors*"
                         "*TeX errors*"
+                        "*BibTeX validation errors*"
                         "*R dired*"
                         "*Racket Profile*"
                         "*Ibuffer*"
@@ -1611,7 +1612,7 @@ This is a non-interactive version of `ignore'."
 (use-package abbrev
   :defer t
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
-  :hook (text-mode . abbrev-mode))
+  :hook ((text-mode bibtex-mode) . abbrev-mode))
 
 ;; YASnippet
 (use-package yasnippet
@@ -1687,7 +1688,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind (("C-c t s" . flyspell-mode)
          ("C-c x s" . flyspell-region))
-  :hook ((text-mode . flyspell-mode)
+  :hook (((text-mode bibtex-mode) . flyspell-mode)
          (prog-mode . flyspell-prog-mode))
   :init
   (setf flyspell-issue-welcome-flag nil
@@ -2822,18 +2823,28 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package bibtex
   :defer t
+  :bind (:map bibtex-mode-map ("M-g L" . bibtex-validate))
   :init (setf bibtex-dialect 'biblatex)
   :config
   (setf bibtex-align-at-equal-sign t)
+  (setf bibtex-entry-format '(opts-or-alts
+                              required-fields
+                              numerical-fields
+                              whitespace
+                              realign
+                              last-comma
+                              delimiters
+                              unify-case
+                              braces
+                              strings
+                              sort-fields))
   (setf bibtex-autokey-year-length 4
         bibtex-autokey-year-title-separator ""
         bibtex-autokey-titleword-separator ""
         bibtex-autokey-titlewords 1
         bibtex-autokey-titleword-length 10)
 
-  (defun my-setup-bibtex-mode ()
-    (run-hooks 'prog-mode-hook))
-  (add-hook 'bibtex-mode-hook #'my-setup-bibtex-mode))
+  (unbind-key "C-c $" bibtex-mode-map))
 
 ;;; Ledger
 
