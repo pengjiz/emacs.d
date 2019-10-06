@@ -1253,6 +1253,8 @@ This is a non-interactive version of `ignore'."
                         "*Org Note*"
                         "*Org Export Dispatcher*"
                         "*Org Lint*"
+                        "*Org Clock*"
+                        "*Clock Task Select*"
                         "*Calendar*"
                         "*RefTeX Select*"
                         "*Proced*"
@@ -2997,31 +2999,11 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package org-clock
   :defer t
-  :bind (("C-c o o" . my-org-clock-out)
-         ("C-c o k" . my-org-clock-cancel))
   :init
   (setf org-clock-persist-file
         (my-expand-var-file-name "org/clock-save.el"))
   (with-eval-after-load 'org
     (org-clock-persistence-insinuate))
-
-  (defun my-org-clock-out ()
-    "Stop current Org clock and save the file."
-    (interactive)
-    (when (and (fboundp #'org-clocking-p)
-               (org-clocking-p))
-      (with-current-buffer (org-clocking-buffer)
-        (org-clock-out nil t)
-        (save-buffer))))
-
-  (defun my-org-clock-cancel ()
-    "Cancel current Org clock and save the file."
-    (interactive)
-    (when (and (fboundp #'org-clocking-p)
-               (org-clocking-p))
-      (with-current-buffer (org-clocking-buffer)
-        (org-clock-cancel)
-        (save-buffer))))
   :config
   (setf org-clock-out-remove-zero-time-clocks t)
   (setf org-clock-persist 'history)
@@ -3031,13 +3013,16 @@ This is a replacement for `reftex--query-search-regexps'."
   (defun my-confirm-quitting-when-clocking ()
     "Confirm quitting if clocking."
     (or (not (org-clocking-p))
-        (yes-or-no-p "There is a running clock. Still quit? ")))
+        (progn
+          (org-clock-goto)
+          (yes-or-no-p "There is a running clock. Still quit? "))))
   (add-hook 'kill-emacs-query-functions #'my-confirm-quitting-when-clocking))
 
 (use-package org-mru-clock
   :ensure t
   :defer t
-  :bind ("C-c o i" . org-mru-clock-in))
+  :bind (("C-c o i" . org-mru-clock-in)
+         ("C-c o u" . org-mru-clock-select-recent-task)))
 
 ;; Source and babel
 (use-package org-src
