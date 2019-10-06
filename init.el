@@ -2833,6 +2833,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :defer t
   :bind (;; -
          :map bibtex-mode-map
+         ("C-M-q" . bibtex-fill-entry)
          ("M-g L" . bibtex-validate)
          ("C-c x f" . bibtex-reformat)
          ("C-c x F" . bibtex-convert-alien))
@@ -2856,7 +2857,8 @@ This is a replacement for `reftex--query-search-regexps'."
         bibtex-autokey-titlewords 1
         bibtex-autokey-titleword-length 10)
 
-  (unbind-key "C-c $" bibtex-mode-map))
+  (dolist (key '("C-c C-q"  "C-c $"))
+    (unbind-key key bibtex-mode-map)))
 
 ;;; Ledger
 
