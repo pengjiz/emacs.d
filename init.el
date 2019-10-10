@@ -2619,7 +2619,11 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t
   :bind (:map tide-mode-map ("C-c x f" . tide-format))
-  :hook ((js2-mode typescript-mode typescript-tsx-mode) . tide-setup)
+  :hook ((js2-mode typescript-mode typescript-tsx-mode) . my-enable-tide)
+  :init
+  (defun my-enable-tide ()
+    (unless (file-remote-p default-directory)
+      (tide-setup)))
   :config
   (setf tide-completion-enable-autoimport-suggestions nil
         tide-completion-detailed t)
@@ -2693,11 +2697,15 @@ This is a non-interactive version of `ignore'."
          ([remap xref-find-references] . anaconda-mode-find-references)
          ("C-c C-t" . anaconda-mode-find-assignments)
          ("C-c C-d" . anaconda-mode-show-doc))
-  :hook ((python-mode . anaconda-mode)
-         (python-mode . anaconda-eldoc-mode))
+  :hook (python-mode . my-enable-anaconda)
   :init
   (setf anaconda-mode-map (make-sparse-keymap))
   (setf anaconda-mode-installation-directory (my-expand-var-file-name "anaconda-mode/"))
+
+  (defun my-enable-anaconda ()
+    (unless (file-remote-p default-directory)
+      (anaconda-mode)
+      (anaconda-eldoc-mode)))
   :config (setf anaconda-mode-eldoc-as-single-line t))
 
 (use-package company-anaconda
