@@ -517,6 +517,12 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind ("C-c a L" . proced))
 
+(use-package proced-narrow
+  :ensure t
+  :defer t
+  :after proced
+  :bind (:map proced-mode-map ("/" . proced-narrow)))
+
 ;;; Pairs
 
 (use-package elec-pair
