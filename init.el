@@ -2809,15 +2809,9 @@ This is a non-interactive version of `ignore'."
   (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode))
 
 (use-package auctex-latexmk
-  :ensure t
-  :defer t
+  :load-path "lisp"
   :after latex
-  :hook (LaTeX-mode . my-enable-auctex-latexmk)
-  :init
-  (auctex-latexmk-setup)
-  (defun my-enable-auctex-latexmk ()
-    (setf TeX-command-default "LatexMk"))
-  :config (setf auctex-latexmk-inherit-TeX-PDF-mode t))
+  :config (auctex-latexmk-setup))
 
 (use-package reftex
   :defer t
