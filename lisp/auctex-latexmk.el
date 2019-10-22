@@ -20,13 +20,12 @@
 
 ;;; Command sentinel
 
-(defconst auctex-latexmk--rule-header-regexp
+(defconst auctex-latexmk--rule-regexp
   (rx bol
       "Run number "
       (1+ digit)
       " of rule '"
-      (group (1+ alnum))
-      (0+ any)
+      (group (1+ (or alnum space)))
       "'"))
 
 (defun auctex-latexmk--sentinel (process name)
@@ -34,46 +33,33 @@
   (save-excursion
     (goto-char (point-max))
     (forward-line -1)
-    (let ((succeeded (re-search-forward
-                      "exited abnormally with code"
-                      nil t))
-          (updated (re-search-backward
-                    auctex-latexmk--rule-header-regexp
-                    nil t))
-          (command (TeX-match-buffer 1)))
+    (let ((succeeded (re-search-forward "finished at" nil t))
+          (updated (re-search-backward auctex-latexmk--rule-regexp nil t))
+          (rule-name (TeX-match-buffer 1)))
       (cond
        (updated
-        (forward-line 5)
-        (let ((start (point)))
-          (re-search-forward "^Latexmk:" nil t)
-          (beginning-of-line)
-          (save-restriction
-            (narrow-to-region start (point))
-            (goto-char (point-min))
-            ;; Dispatch appropriate sentinel function
-            (cond
-             ((member command '("lualatex" "xelatex" "pdflatex" "latex"))
-              (TeX-LaTeX-sentinel process name))
-             ((equal command "biber")
-              (TeX-Biber-sentinel process name))
-             ((equal command "bibtex")
-              (TeX-BibTeX-sentinel process name))
-             (t
-              (message "%s: %s unknown command `%s'"
-                       name
-                       (if succeeded
-                           "finished"
-                         "failed")
-                       command)))))
-        ;; NOTE: Latexmk will take care of necessary command execution, so
-        ;; unless the next command is to show the document, we set back to the
-        ;; default.
-        (unless (equal TeX-command-next TeX-command-Show)
-          (setf TeX-command-next TeX-command-default)))
+        (if (not (string-match-p "latex" rule-name))
+            (message "%s: rule `%s' %s"
+                     name rule-name
+                     (if succeeded "finished" "exited abnormally"))
+          (forward-line 5)
+          (let ((start (point)))
+            (re-search-forward "^Latexmk:" nil t)
+            (beginning-of-line)
+            (save-restriction
+              (narrow-to-region start (point))
+              (goto-char (point-min))
+              (TeX-LaTeX-sentinel process name)))))
        (succeeded
         (message "%s: document is up to date" name))
        (t
-        (message "%s: failed for unknown reasons" name))))))
+        (message "%s: exited abnormally" name)))
+      ;; NOTE: Latexmk will take care of executions of appropriate commands, so
+      ;; we will always use it as next command unless it successfully builds the
+      ;; document, in which case we should view the document.
+      (if succeeded
+          (setf TeX-command-next TeX-command-Show)
+        (setf TeX-command-next TeX-command-default)))))
 
 ;;; Expand options
 
