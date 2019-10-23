@@ -16,7 +16,7 @@
   :group 'languages)
 
 (defcustom pest-indent-offset
-  2
+  4
   "Number of spaces for each indentation level in `pest-mode'."
   :type 'integer
   :safe #'integerp
