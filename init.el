@@ -1129,7 +1129,7 @@ This is a non-interactive version of `ignore'."
     (bind-key "V" #'dired-rsync dired-mode-map)))
 
 (use-package dired-atool
-  :ensure t
+  :load-path "lisp"
   :defer t
   :after dired
   :bind (;; -
