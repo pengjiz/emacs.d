@@ -32,6 +32,8 @@ With non-nil ARG always prompt for the program."
   "Open the current file externally.
 With non-nil ARG always prompt for the program to use."
   (interactive "P")
+  (when (file-remote-p default-directory)
+    (user-error "Remote hosts not supported"))
   (unless buffer-file-name
     (user-error "Not visiting a file"))
   (unless (file-exists-p buffer-file-name)
@@ -45,6 +47,8 @@ With non-nil ARG always prompt for the program to use."
   "Open the file at point externally.
 With non-nil ARG always prompt for the program to use."
   (interactive "P")
+  (when (file-remote-p default-directory)
+    (user-error "Remote hosts not supported"))
   (let ((file (dired-get-file-for-visit)))
     (call-process (files-extras--get-open-program arg)
                   nil 0 nil

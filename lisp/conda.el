@@ -97,6 +97,8 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
                           (conda--get-environments)
                           nil t)
          (prefix-numeric-value current-prefix-arg)))
+  (when (file-remote-p default-directory)
+    (user-error "Remote hosts not supported"))
   (let* ((path (conda--get-environment-path environment))
          ;; NOTE: This may not work on Windows
          (bin-path (expand-file-name "bin" path)))
@@ -141,6 +143,9 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   "Deactivate the current environment.
 When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive "p")
+  (when (file-remote-p default-directory)
+    (user-error "Remote hosts not supported"))
+
   (setf conda-current-environment nil)
   (run-hooks 'conda-pre-deactivate-hook)
 

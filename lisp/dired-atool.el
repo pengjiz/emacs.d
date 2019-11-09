@@ -89,6 +89,9 @@ ARG is directly passed to `dired-get-marked-files'."
   (let* ((files (dired-get-marked-files nil arg))
          (destination (read-directory-name "Unpack to: "
                                            (dired-dwim-target-directory))))
+    (when (or (file-remote-p default-directory)
+              (file-remote-p destination))
+      (user-error "Remote hosts not supported"))
     (if (file-exists-p destination)
         ;; If the destination directory exists, we directly unpack to it and let
         ;; atool to decide if a new directory is needed.
@@ -114,6 +117,9 @@ ARG is directly passed to `dired-get-marked-files'."
   (let* ((files (dired-get-marked-files t arg))
          (destination (read-file-name "Pack to: "
                                       (dired-dwim-target-directory))))
+    (when (or (file-remote-p default-directory)
+              (file-remote-p destination))
+      (user-error "Remote hosts not supported"))
     (make-directory (file-name-directory destination) t)
     (when (and (file-exists-p destination)
                (yes-or-no-p (format "File %s exists. Remove it before packing? "
