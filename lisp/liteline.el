@@ -127,9 +127,8 @@
   "Face used for errors in Git."
   :group 'liteline)
 
-;;; Helpers for defining mode line format.
+;;; Helpers for defining mode line format (mostly copied from doom-emacs)
 
-;; Mostly copied from https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/doom-modeline/config.el
 (eval-and-compile
   (defvar liteline--segment-fn-alist nil))
 
@@ -179,7 +178,7 @@
         (rhs-forms (liteline--prepare-segments rhs)))
     (setf (symbol-function sym)
           (lambda ()
-            ;; TODO: find a better way to handle this
+            ;; TODO: Find a better way to handle this.
             (let ((rhs-string (liteline--escape
                                (format-mode-line (cons "" rhs-forms)))))
               (list lhs-forms
@@ -252,7 +251,7 @@ If DEFAULT is non-nil, set the default value."
   ;; After switching frame
   (advice-add #'handle-switch-frame :after #'liteline--set-active-window)
 
-  ;; Some functions do not play well with this.
+  ;; Some functions do not play well with this
   (with-eval-after-load 'lv
     (advice-add #'lv-message :around #'liteline--ignore-active-window))
   (with-eval-after-load 'transient
@@ -376,7 +375,7 @@ If DEFAULT is non-nil, set the default value."
   "Unset the local mode line."
   (kill-local-variable 'mode-line-format))
 
-;; NOTE: Suppress a warning
+;; NOTE: Suppress a compiler warning.
 (defun liteline--get-buffer-size (&optional _)
   "Keep the original `buffer-size' function."
   nil)
@@ -594,7 +593,7 @@ Fallback to workspace tag."
   (with-eval-after-load 'flycheck
     (add-hook 'flycheck-status-changed-functions
               #'liteline--update-flycheck)
-    ;; Reset `liteline--flycheck' to nil
+    ;; Reset status
     (add-hook 'flycheck-mode-hook
               #'liteline--update-flycheck)
     (liteline--update-flycheck flycheck-last-status-change)))

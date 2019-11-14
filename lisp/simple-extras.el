@@ -60,10 +60,10 @@ If ARG is not nil or 1, move forward ARG - 1 visual lines first."
     (when (= point-before (point))
       (beginning-of-visual-line 1))))
 
-;; NOTE: Workaround for ESS
-;; It might be better to just remap commands. However, for some unknown reason
-;; the ESS map takes higher priority than the visual line map, making it hard to
-;; remap command for visual line movement. Therefore here is this function.
+;; NOTE: A workaround for ESS. It might be better to just remap commands.
+;; However, for some unknown reason the ESS map takes higher priority than the
+;; visual line map, making it hard to remap command for visual line movement.
+;; Therefore here is this function.
 (declare-function ess-roxy-move-beginning-of-line "ext:ess-roxy")
 (declare-function ess-roxy-entry-p "ext:ess-roxy")
 

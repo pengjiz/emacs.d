@@ -28,7 +28,7 @@ In this file, each line should be a word."
   (unless word-complete--words
     (setf word-complete--words
           (split-string
-           ;; From f.el
+           ;; Copied from the f library
            (decode-coding-string
             (with-temp-buffer
               (set-buffer-multibyte nil)

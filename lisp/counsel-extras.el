@@ -41,7 +41,7 @@
 
 ;; Execute key
 
-;; NOTE: This does not work for calling, but this does work for repeating
+;; NOTE: This does not work for calling, but this does work for repeating.
 (defun counsel-extras-execute-keys (candidate)
   "Execute the keys of CANDIDATE."
   (when-let* ((keys (cadr candidate))

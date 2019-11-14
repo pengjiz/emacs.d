@@ -112,7 +112,6 @@ This is a non-interactive version of `ignore'."
   (setf custom-file (my-expand-var-file-name "custom.el"))
   (load custom-file t t t)
 
-  ;; Unbind some commands I do not use
   (dolist (key '(;; compose mail
                  "C-x m"
                  "C-x 4 m"
@@ -572,17 +571,15 @@ This is a non-interactive version of `ignore'."
         whitespace-line-column nil)
 
   (defun my-set-whitespaces-to-clean (fn &rest args)
-    "Apply FN `whitespace-cleanup' on ARGS but set what to clean."
+    "Apply FN on ARGS but explicitly set whitespaces to clean."
     (let ((whitespace-style '(empty
                               indentation
                               space-before-tab
                               space-after-tab
                               trailing)))
       (apply fn args)))
-  (advice-add #'whitespace-cleanup :around
-              #'my-set-whitespaces-to-clean)
-  (advice-add #'whitespace-cleanup-region :around
-              #'my-set-whitespaces-to-clean))
+  (advice-add #'whitespace-cleanup :around #'my-set-whitespaces-to-clean)
+  (advice-add #'whitespace-cleanup-region :around #'my-set-whitespaces-to-clean))
 
 ;;; Indentation
 
@@ -730,7 +727,7 @@ This is a non-interactive version of `ignore'."
          ([remap avy-goto-char] . avy-isearch)
          ([remap avy-goto-char-2] . avy-isearch))
   :config
-  ;; NOTE: Set this to nil will enable smart case search
+  ;; NOTE: Set this to nil will enable smart case search.
   (setf avy-case-fold-search nil)
   (setf avy-all-windows nil)
   (setf avy-dispatch-alist
@@ -832,8 +829,8 @@ This is a non-interactive version of `ignore'."
         anzu-replace-threshold 1000)
 
   ;; NOTE: Sometimes we may switch to another buffer while searching, making it
-  ;; impossible to clear `anzu--state', a buffer-local variable. So here we have
-  ;; these.
+  ;; impossible to clear the state saved in a buffer-local variable. So here we
+  ;; have these lines.
   (defvar my-anzu-last-buffer nil)
 
   (defun my-save-anzu-last-buffer (&rest _)
@@ -1010,7 +1007,6 @@ This is a non-interactive version of `ignore'."
         tramp-backup-directory-alist backup-directory-alist
         ;; Do not save tramp history
         tramp-histfile-override t)
-  ;; Use ssh by default
   (setf tramp-default-method "ssh"))
 
 ;; Recent files
@@ -1440,7 +1436,7 @@ This is a non-interactive version of `ignore'."
   (setf counsel-mode-override-describe-bindings t)
   (counsel-mode)
 
-  (defvar company-active-map) ;; suppress a warning
+  (defvar company-active-map)
   (with-eval-after-load 'company
     (bind-key [remap company-filter-candidates]
               #'counsel-company
@@ -1948,7 +1944,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :config
   (setf eldoc-echo-area-use-multiline-p nil)
-  ;; Set a sensible default for ElDoc: describe the unicode char at point
+  ;; Describe the unicode char at point by default
   (setf eldoc-documentation-function #'describe-char-eldoc))
 
 (use-package eldoc-lv
@@ -2078,7 +2074,7 @@ This is a non-interactive version of `ignore'."
         calendar-chinese-all-holidays-flag t)
   (setf calendar-date-display-form calendar-iso-date-display-form)
   (calendar-set-date-style 'iso)
-  ;; I do not like the calendar mode line
+  ;; Tweak the mode line
   (setf calendar-mode-line-format nil
         (symbol-function 'calendar-set-mode-line) #'my-ignore))
 
@@ -2106,14 +2102,14 @@ This is a non-interactive version of `ignore'."
   :bind (("C-c o n" . appt-add)
          ("C-c o d" . appt-delete))
   :init
-  ;; NOTE: It seems that those lines must be before `appt-activate', otherwise
-  ;; they may not take effects at the very beginning
+  ;; NOTE: It seems that those lines must be before the activation, otherwise
+  ;; they may not take effects at the very beginning.
   (setf appt-display-diary nil
         appt-audible nil
         appt-display-mode-line nil)
   (setf appt-display-interval 10
         appt-message-warning-time 20)
-  ;; Use `alert' if available
+
   (when (fboundp #'alert)
     (setf appt-display-format 'window
           appt-disp-window-function #'my-display-appt-message
@@ -2129,7 +2125,7 @@ This is a non-interactive version of `ignore'."
                :title "Appt"))))
 
   ;; NOTE: This is not a normal minor mode, the positive argument is
-  ;; essential to turn it on, not toggle
+  ;; essential to turn it on, not toggle.
   (appt-activate 1))
 
 ;;; Emacs-Lisp
@@ -2197,7 +2193,6 @@ This is a non-interactive version of `ignore'."
 
   ;; Workaround an Eshell bug
   (defun my-setup-eshell-mode ()
-    ;; Unbind commands I do not use
     (dolist (key '("M-s" "M-?" "<backtab>"))
       (unbind-key key eshell-mode-map))
 
@@ -2325,11 +2320,12 @@ This is a non-interactive version of `ignore'."
          ("C-c a a" . racket-repl-exit))
   :config
   (defun my-setup-racket-mode ()
-    ;; Racket mode does not support ElDoc well
+    ;; NOTE: Racket mode does not support ElDoc well, so it set this to nil.
+    ;; However, the default function may be still useful.
     (kill-local-variable 'eldoc-documentation-function))
   (add-hook 'racket-mode-hook #'my-setup-racket-mode)
 
-  ;; This is a bit annoying
+  ;; Do not display the buffer automatically
   (setf (symbol-function 'racket--repl-show-and-move-to-end) #'my-ignore)
 
   (defun my-setup-racket-repl-mode ()
@@ -2340,7 +2336,6 @@ This is a non-interactive version of `ignore'."
     (setf tab-always-indent 'complete))
   (add-hook 'racket-repl-mode-hook #'my-setup-racket-repl-mode)
 
-  ;; Avoid ido
   (defun my-avoid-ido-for-racket (fn &rest args)
     "Apply FN on ARGS, but force using `completing-read'."
     (cl-letf (((symbol-function 'ido-completing-read)
@@ -2384,7 +2379,6 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t)
 
-;; I do not use this actually, but just in case
 (use-package haskell
   :defer t
   :after haskell-mode
@@ -2523,7 +2517,7 @@ This is a non-interactive version of `ignore'."
   (setf web-mode-enable-html-entities-fontification t
         web-mode-enable-comment-annotation t)
   (setf web-mode-enable-auto-pairing nil)
-  ;; NOTE: This causes problems after yanking, so disable it
+  ;; NOTE: This causes problems after yanking, so disable it.
   (setf web-mode-enable-auto-indentation nil)
 
   (dolist (key '("C-c C-h" "C-c C-i" "C-c C-m" "C-c C-j" "C-c C-r"))
@@ -2554,7 +2548,7 @@ This is a non-interactive version of `ignore'."
     (httpd-start)
     (let ((url (format "http://%s:%d/"
                        (cl-case httpd-host
-                         ;; NOTE: nil may not be a valid value any more
+                         ;; NOTE: nil may not be a valid value any more.
                          ((nil) "0.0.0.0")
                          ((local) "localhost")
                          (otherwise httpd-host))
@@ -2817,7 +2811,7 @@ This is a non-interactive version of `ignore'."
   :hook (LaTeX-mode . reftex-mode)
   :config
   (setf reftex-plug-into-AUCTeX t)
-  ;; Offer a guess but ask for confirmation.
+  ;; Offer a guess but ask for confirmation
   (setf reftex-insert-label-flags '(t t))
   (setf reftex-cite-format 'biblatex))
 
@@ -3025,7 +3019,7 @@ This is a replacement for `reftex--query-search-regexps'."
     (add-hook 'window-configuration-change-hook #'org-agenda-align-tags nil t))
   (add-hook 'org-agenda-mode-hook #'my-realign-tags-in-org-agenda)
 
-  ;; Notify me on deadline and scheduled times
+  ;; Add tasks to appt
   ;; NOTE: The delay is important. Otherwise it will throw an error occasionally
   ;; when Org is loaded.
   ;; NOTE: Do not refresh. Otherwise the manually added entries and the diary

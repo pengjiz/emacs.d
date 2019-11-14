@@ -214,7 +214,7 @@ Return the overlay made."
   (add-hook 'post-command-hook #'eshell-extras--update-suggestion
             nil t))
 
-;; HACK: Hide suggestion when using Ivy overlay display
+;; HACK: Hide suggestion when using Ivy overlay display.
 (declare-function ivy-overlay-show-after "ext:ivy-overlay")
 
 (defun eshell-extras--hide-suggestion-for-ivy-overlay (&rest _)

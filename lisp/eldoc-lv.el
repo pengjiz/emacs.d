@@ -64,7 +64,6 @@ FORMAT-STRING and ARGS are passed to `eldoc-lv--message' or `message'."
         (if format-string
             (apply #'eldoc-lv--message format-string args)
           (eldoc-lv--cleanup)))
-    ;; Forward to `message'
     (apply #'message format-string args)))
 
 (defvar aw-ignored-buffers)
