@@ -2454,9 +2454,7 @@ This is a non-interactive version of `ignore'."
   :init
   (make-directory (my-expand-var-file-name "idris/") t)
   (setf idris-repl-history-file (my-expand-var-file-name "idris/history.eld"))
-  :config
-  (setf idris-stay-in-current-window-on-compiler-error t
-        idris-hole-show-on-load nil))
+  :config (setf idris-stay-in-current-window-on-compiler-error t))
 
 ;;; ESS (mainly R)
 
