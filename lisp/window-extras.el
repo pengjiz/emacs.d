@@ -89,7 +89,8 @@ Otherwise apply FN on BUFFER and ARGS."
 
 (defun window-extras--setup-calc ()
   "Setup Calc integration."
-  (advice-add #'calc :around #'window-extras--show-calc-at-bottom))
+  (with-eval-after-load 'calc
+    (advice-add #'calc :around #'window-extras--show-calc-at-bottom)))
 
 ;; Elfeed
 (declare-function elfeed "ext:elfeed")
@@ -105,7 +106,8 @@ Otherwise apply FN on BUFFER and ARGS."
 
 (defun window-extras--setup-elfeed ()
   "Setup Elfeed integration."
-  (advice-add #'elfeed :around #'window-extras--show-elfeed-fullframe))
+  (with-eval-after-load 'elfeed
+    (advice-add #'elfeed :around #'window-extras--show-elfeed-fullframe)))
 
 ;; Idris mode
 (defvar idris-hole-list-buffer-name)
