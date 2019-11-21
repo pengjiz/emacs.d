@@ -1561,9 +1561,10 @@ This is a non-interactive version of `ignore'."
       (dolist (backend (nreverse backends))
         (push backend company-backends)))
     (company-mode))
-  :config (setf company-selection-wrap-around t
-                company-show-numbers t
-                company-tooltip-align-annotations t))
+  :config
+  (setf company-selection-wrap-around t
+        company-show-numbers t
+        company-tooltip-align-annotations t))
 
 (use-package company-dabbrev
   :defer t

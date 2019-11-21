@@ -130,7 +130,7 @@
 ;;; Helpers for defining mode line format (mostly copied from doom-emacs)
 
 (eval-and-compile
-  (defvar liteline--segment-fn-alist nil))
+  (defvar liteline--segment-fns-alist nil))
 
 ;; NOTE: In general each segment should have a trailing whitespace as
 ;; the separator. There might be a better way to handle this.
@@ -141,11 +141,11 @@
         (docstring (if (stringp (car body))
                        (pop body)
                      (format "Liteline segment %s." name))))
-    (cl-pushnew (cons name sym) liteline--segment-fn-alist
+    (cl-pushnew (cons name sym) liteline--segment-fns-alist
                 :test #'equal)
     `(progn
        (setf (symbol-function ',sym) (lambda () ,docstring ,@body))
-       (cl-pushnew (cons ',name #',sym) liteline--segment-fn-alist
+       (cl-pushnew (cons ',name #',sym) liteline--segment-fns-alist
                    :test #'equal)
        ,(unless (bound-and-true-p byte-compile-current-file)
           `(let (byte-compile-warnings)
@@ -164,7 +164,7 @@
             ((consp segment)
              (push segment forms))
             ((symbolp segment)
-             (if (setf it (cdr (assq segment liteline--segment-fn-alist)))
+             (if (setf it (cdr (assq segment liteline--segment-fns-alist)))
                  (push `(:eval (,it)) forms)
                (push it forms)))
             (t

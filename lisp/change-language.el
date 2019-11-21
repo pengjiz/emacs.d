@@ -30,7 +30,7 @@
   :type 'hook
   :group 'change-language)
 
-(defcustom change-language-ispell-dictionary-alist
+(defcustom change-language-ispell-dictionaries-alist
   '(("English" . "en_US")
     ("German" . "de_DE"))
   "Ispell dictionaries for languages."
@@ -38,14 +38,14 @@
                 :value-type string)
   :group 'change-language)
 
-(defcustom change-language-input-method-alist
+(defcustom change-language-input-methods-alist
   '(("German" . "german-postfix"))
   "Input methods for languages."
   :type '(alist :keytype string
                 :value-type string)
   :group 'change-language)
 
-(defcustom change-language-typography-style-alist
+(defcustom change-language-typography-styles-alist
   '(("German" . "German")
     ("English" . "English"))
   "Typography styles for languages."
@@ -76,7 +76,7 @@ With non-nil ARG force changing to the language selected."
 (defun change-language-change-ispell-dictionary (language)
   "Change to the Ispell dictionary for LANGUAGE."
   (let ((dictionary (cdr (assoc language
-                                change-language-ispell-dictionary-alist))))
+                                change-language-ispell-dictionaries-alist))))
     (ispell-change-dictionary (or dictionary "default"))))
 
 ;;; Input method
@@ -84,7 +84,7 @@ With non-nil ARG force changing to the language selected."
 (defun change-language-change-input-method (language)
   "Change to the input method for LANGUAGE."
   (let ((input-method (cdr (assoc language
-                                  change-language-input-method-alist))))
+                                  change-language-input-methods-alist))))
     ;; NOTE: Do not use set-input-method because it changes the default input
     ;; method globally. Also this function accepts nil as input method and will
     ;; deactivate the current enabled input method in that case.
@@ -98,7 +98,7 @@ With non-nil ARG force changing to the language selected."
   "Change to the typography style for LANGUAGE."
   (when (fboundp #'typo-change-language)
     (let ((style (cdr (assoc language
-                             change-language-typography-style-alist))))
+                             change-language-typography-styles-alist))))
       (typo-change-language (or style (default-value 'typo-language))))))
 
 (provide 'change-language)
