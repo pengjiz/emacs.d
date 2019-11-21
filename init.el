@@ -1236,7 +1236,6 @@ This is a non-interactive version of `ignore'."
                         "*Anaconda*"
                         "*tide-documentation*"
                         "*Racer Help*"
-                        "*Intero-Help*"
                         "*idris-holes*"
                         "*idris-info*"
                         "*cider-doc*"
@@ -1550,6 +1549,8 @@ This is a non-interactive version of `ignore'."
                                  '(company-tide))
                                 ((derived-mode-p 'python-mode)
                                  '(company-anaconda))
+                                ((derived-mode-p 'haskell-mode)
+                                 '(dante-company))
                                 ((derived-mode-p 'latex-mode)
                                  '((company-auctex-macros
                                     company-auctex-symbols
@@ -1664,6 +1665,7 @@ This is a non-interactive version of `ignore'."
           c-mode
           c++-mode
           rust-mode
+          haskell-mode
           ess-r-mode
           css-mode
           js2-mode
@@ -2381,27 +2383,56 @@ This is a non-interactive version of `ignore'."
 
 (use-package haskell-mode
   :ensure t
-  :defer t)
+  :defer t
+  :config
+  (dolist (key '("C-c C-l" "C-c C-b" "C-c C-v" "C-c C-t" "C-c C-i"))
+    (unbind-key key haskell-mode-map)))
 
 (use-package haskell
   :defer t
   :after haskell-mode
+  :bind (;; -
+         :map interactive-haskell-mode-map
+         ("C-c a a" . haskell-interactive-bring)
+         ("C-c C-l" . haskell-process-load-file)
+         ("C-c C-r" . haskell-process-reload))
+  :hook (haskell-mode . interactive-haskell-mode)
+  :init (setf interactive-haskell-mode-map (make-sparse-keymap))
   :config
-  (setf haskell-process-type 'stack-ghci)
   (setf haskell-interactive-popup-errors nil
-        haskell-process-auto-import-loaded-modules t
+        haskell-interactive-mode-read-only nil
+        haskell-interactive-prompt-read-only nil)
+  (setf haskell-process-auto-import-loaded-modules t
         haskell-process-suggest-remove-import-lines t
         haskell-process-show-overlays nil))
+
+(use-package haskell-interactive-mode
+  :defer t
+  :after haskell-mode
+  :bind (;; -
+         :map haskell-interactive-mode-map
+         ("C-c a a" . haskell-interactive-kill)
+         ("C-c M-o" . haskell-interactive-mode-clear)))
 
 (use-package haskell-compile
   :defer t
   :after haskell-mode
   :config (setf (default-value 'haskell-compile-ignore-cabal) t))
 
+(use-package haskell-indentation
+  :defer t
+  :after haskell-mode
+  :hook (haskell-mode . haskell-indentation-mode))
+
 (use-package haskell-collapse
   :defer t
   :after haskell-mode
-  :hook (haskell-mode . haskell-collapse-mode))
+  :bind (;; -
+         :map haskell-collapse-mode-map
+         ("C-c @ t" . haskell-hide-toggle)
+         ("C-c @ T" . haskell-hide-toggle-all))
+  :hook (haskell-mode . haskell-collapse-mode)
+  :init (setf haskell-collapse-mode-map (make-sparse-keymap)))
 
 (use-package haskell-hoogle
   :defer t
@@ -2409,25 +2440,28 @@ This is a non-interactive version of `ignore'."
   :bind (:map haskell-mode-map ("M-s b m" . haskell-hoogle))
   :config (setf haskell-hoogle-command nil))
 
-(use-package intero
+(use-package haskell-extras
+  :load-path "lisp"
+  :after haskell-mode
+  :config (haskell-extras-setup))
+
+(use-package dante
   :ensure t
   :defer t
-  :after haskell-mode
   :bind (;; -
-         :map intero-mode-map
-         ("C-c a a" . intero-repl)
-         ("C-c a m" . intero-targets))
-  :init (intero-global-mode)
+         :map dante-mode-map
+         ("C-c C-c" . dante-eval-block)
+         ("C-c C-t" . dante-type-at)
+         ("C-c TAB" . dante-info))
+  :hook (haskell-mode . dante-mode)
+  :init
+  (setf dante-mode-map (make-sparse-keymap))
+  (setf dante-methods-alist `((stack "stack.yaml" ("stack" "repl" dante-target))
+                              (ghci ,(lambda (_) t) ("ghci"))))
   :config
-  (defun my-tweak-intero-mode ()
-    (when intero-mode
-      (kill-local-variable 'company-minimum-prefix-length)))
-  (add-hook 'intero-mode-hook #'my-tweak-intero-mode)
-
-  (defun my-setup-intero-repl-mode ()
-    (kill-local-variable 'comint-prompt-read-only)
-    (company-mode 0))
-  (add-hook 'intero-repl-mode-hook #'my-setup-intero-repl-mode))
+  (with-eval-after-load 'company
+    (setf (default-value 'company-backends)
+          (delq #'dante-company (default-value 'company-backends)))))
 
 (use-package hindent
   :ensure t
