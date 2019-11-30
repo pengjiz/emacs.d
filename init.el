@@ -385,7 +385,8 @@ This is a non-interactive version of `ignore'."
 (use-package tildify
   :defer t
   :bind (("C-c t ~" . tildify-mode)
-         ("C-c x ~" . tildify-region)))
+         ("C-c x ~" . tildify-region))
+  :hook (text-mode . tildify-mode))
 
 (use-package expand-region
   :ensure t
