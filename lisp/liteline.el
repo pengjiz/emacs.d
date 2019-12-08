@@ -31,8 +31,7 @@
   :group 'liteline)
 
 (defcustom liteline-important-minor-modes-alist
-  '((tildify-mode . "~")
-    (typo-mode . "t")
+  '((typo-mode . "t")
     (auto-fill-function . "f")
     (visual-line-mode . "v")
     (whitespace-mode . "w")

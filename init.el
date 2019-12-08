@@ -382,12 +382,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind ("C-c t m" . change-language))
 
-(use-package tildify
-  :defer t
-  :bind (("C-c t ~" . tildify-mode)
-         ("C-c x ~" . tildify-region))
-  :hook (text-mode . tildify-mode))
-
 (use-package expand-region
   :ensure t
   :defer t
@@ -2835,8 +2829,6 @@ This is a non-interactive version of `ignore'."
   (setf LaTeX-babel-hyphen nil)
 
   (defun my-setup-LaTeX-mode ()
-    (make-local-variable 'tildify-space-string)
-    (setf tildify-space-string "~")
     (make-local-variable 'TeX-electric-math)
     (setf TeX-electric-math '("\\(" . "\\)")))
   (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode))
