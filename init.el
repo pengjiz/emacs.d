@@ -1912,7 +1912,10 @@ This is a non-interactive version of `ignore'."
          ([remap projectile-switch-project] . counsel-projectile-switch-project)
          :map projectile-command-map
          ("s" . counsel-projectile-rg)
-         ("SPC" . counsel-projectile)))
+         ("SPC" . counsel-projectile)
+         :map counsel-projectile-switch-to-buffer-map
+         ("C-k" . ivy-switch-buffer-kill))
+  :init (setf counsel-projectile-switch-to-buffer-map (make-sparse-keymap)))
 
 (use-package editorconfig
   :ensure t
