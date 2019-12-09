@@ -1838,7 +1838,7 @@ This is a non-interactive version of `ignore'."
   (setf projectile-completion-system (if (fboundp #'ivy-read) 'ivy 'default))
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (dolist (key '("s" "x t" "x s"))
+  (dolist (key '("s" "x t" "x s" "x v"))
     (unbind-key key projectile-command-map))
 
   (defun my-set-projectile-commander-bindings ()
