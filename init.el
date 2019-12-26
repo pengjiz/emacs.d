@@ -1173,10 +1173,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :config (setf auth-source-cache-expiry 3600))
 
-(use-package password-store
-  :ensure t
-  :defer t)
-
 (use-package auth-source-pass
   :after auth-source
   :config (auth-source-pass-enable))
