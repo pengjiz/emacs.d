@@ -1468,6 +1468,7 @@ This is a non-interactive version of `ignore'."
 (use-package counsel-extras
   :load-path "lisp"
   :after counsel
+  :bind ("C-c f f" . counsel-extras-fd)
   :config (counsel-extras-setup))
 
 (use-package amx
