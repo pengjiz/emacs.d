@@ -1415,6 +1415,13 @@ This is a non-interactive version of `ignore'."
   (setf ivy-use-virtual-buffers t
         ivy-virtual-abbreviate 'abbreviate))
 
+(use-package ivy-hydra
+  :ensure t
+  :defer t
+  :after ivy
+  :init (setf ivy-read-action-function #'ivy-hydra-read-action)
+  :config (setf ivy-dispatching-done-hydra-exit-keys '(("C-g" nil nil))))
+
 (use-package counsel
   :ensure t
   :defer t
