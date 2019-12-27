@@ -73,25 +73,36 @@ Otherwise `ivy-display-style' will be set to nil temporarily."
 
 ;;; Commands
 
-;; Find files with fd
-(defvar counsel-extras--fd-command
+(defun counsel-extras--display-filename (filename)
+  "Return the formatted string of FILENAME for display."
+  (if-let* ((directory (file-name-directory filename)))
+      (concat (propertize directory 'face 'ivy-subdir)
+              (file-name-nondirectory filename))
+    filename))
+
+;; Find file with fd
+(defvar counsel-extras--fd-command-template
   (format "%s --type f --color never %%s '%%s'" counsel-extras-fd-program))
 (defvar counsel-extras--fd-history nil)
 
-(defun counsel-extras--fd-get-files (input)
-  "Return a list of files based on INPUT."
+(defun counsel-extras--get-fd-command (input &optional occur)
+  "Return a command to get files based on INPUT.
+If OCCUR is non-nil return a command for `ivy-occur'."
+  (let ((pattern (funcall ivy--regex-function input))
+        (case-switch (if (ivy--case-fold-p input)
+                         "--ignore-case"
+                       "--case-sensitive")))
+    (unless occur
+      (setf ivy--old-re pattern))
+    (format counsel-extras--fd-command-template
+            (concat case-switch (and occur " --print0"))
+            (counsel--elisp-to-pcre pattern))))
+
+(defun counsel-extras--get-fd-files (input)
+  "Get a list of files based on INPUT asynchronously."
   (or (ivy-more-chars)
-      (let* ((pattern (counsel--elisp-to-pcre
-                       (setf ivy--old-re
-                             (funcall ivy--regex-function input))))
-             (case-switch (if (ivy--case-fold-p input)
-                              "--ignore-case"
-                            "--case-sensitive"))
-             (command (format counsel-extras--fd-command
-                              case-switch
-                              pattern)))
-        (counsel--async-command command)
-        nil)))
+      (ignore
+       (counsel--async-command (counsel-extras--get-fd-command input)))))
 
 (defun counsel-extras-fd (&optional initial-input directory)
   "Find a file under a directory with fd.
@@ -102,12 +113,14 @@ directory is used."
    (list nil
          (when current-prefix-arg
            (counsel-read-directory-name "From directory: "))))
-  (counsel-require-program counsel-extras-fd-program)
   (let ((default-directory (or directory default-directory))
         (ivy-display-style (and counsel-extras-fd-using-display-style
                                 ivy-display-style)))
+    (when (file-remote-p default-directory)
+      (user-error "Remote hosts not supported"))
+    (counsel-require-program counsel-extras-fd-program)
     (ivy-read "Find file: "
-              #'counsel-extras--fd-get-files
+              #'counsel-extras--get-fd-files
               :initial-input initial-input
               :dynamic-collection t
               :action #'find-file
@@ -115,16 +128,20 @@ directory is used."
               :history 'counsel-extras--fd-history
               :caller 'counsel-extras-fd)))
 
-(defun counsel-extras--fd-display-filename (filename)
-  "Return the formatted string of FILENAME for display."
-  (if-let* ((directory (file-name-directory filename)))
-      (concat (propertize directory 'face 'ivy-subdir)
-              (file-name-nondirectory filename))
-    filename))
+(defun counsel-extras--occur-fd-files (&optional _)
+  "Generate occur buffer for `counsel-extras-fd'."
+  (setf default-directory (ivy-state-directory ivy-last))
+  (when (file-remote-p default-directory)
+    (user-error "Remote hosts not supported"))
+  (counsel-cmd-to-dired
+   (counsel--expand-ls
+    (concat (counsel-extras--get-fd-command ivy-text t)
+            " | xargs --null ls"))))
 
 (ivy-configure 'counsel-extras-fd
+  :occur #'counsel-extras--occur-fd-files
   :unwind-fn #'counsel-delete-process
-  :display-transformer-fn #'counsel-extras--fd-display-filename)
+  :display-transformer-fn #'counsel-extras--display-filename)
 
 (ivy-set-actions
  'counsel-extras-fd
