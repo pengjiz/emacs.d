@@ -13,7 +13,6 @@
 ;;; Display transformers
 
 ;; Show the first line of the docstring for commands
-
 (defun counsel-extras--display-command (command)
   "Return the formatted string of COMMAND for display."
   (let* ((symbol (intern command))
@@ -39,7 +38,6 @@
 ;;; Extra actions
 
 ;; Execute key
-
 ;; NOTE: This does not work for calling, but this does work for repeating.
 (defun counsel-extras-execute-keys (candidate)
   "Execute the keys of CANDIDATE."

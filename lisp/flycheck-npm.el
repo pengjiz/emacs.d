@@ -14,7 +14,6 @@
 ;; directory as package.json, and it must be under the home directory of the
 ;; current user. Otherwise we just return nil. That is why we need the following
 ;; two helpers.
-
 (defun flycheck-npm--expand-file-name (file root)
   "Expand name of FILE under ROOT.
 Return nil if FILE does not exist."
