@@ -766,6 +766,10 @@ This is a non-interactive version of `ignore'."
   (with-eval-after-load 'compile
     (bind-key "M-g a" #'ace-link-compilation compilation-mode-map))
 
+  (defvar cider-inspector-mode-map)
+  (with-eval-after-load 'cider-inspector
+    (bind-key "M-g a" #'ace-link-cider-inspector cider-inspector-mode-map))
+
   (defvar eww-mode-map)
   (with-eval-after-load 'eww
     (bind-key "M-g a" #'ace-link-eww eww-mode-map))
