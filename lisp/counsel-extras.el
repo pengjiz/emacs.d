@@ -33,9 +33,8 @@
 
 (defun counsel-extras--setup-display-transformers ()
   "Setup extra display transformers for commands."
-  (ivy-set-display-transformer
-   'counsel-M-x
-   #'counsel-extras--display-command))
+  (ivy-configure 'counsel-M-x
+    :display-transformer-fn #'counsel-extras--display-command))
 
 ;;; Extra actions
 
