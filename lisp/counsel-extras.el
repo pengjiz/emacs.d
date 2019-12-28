@@ -20,14 +20,6 @@
   :type 'string
   :group 'counsel-extras)
 
-(defcustom counsel-extras-fd-using-display-style
-  nil
-  "Whether to use `ivy-display-style'.
-Non-nil means the value of `ivy-display-style' will be used.
-Otherwise `ivy-display-style' will be set to nil temporarily."
-  :type 'boolean
-  :group 'counsel-extras)
-
 ;;; Display transformers
 
 ;; Show the first line of the docstring for commands
@@ -82,7 +74,8 @@ Otherwise `ivy-display-style' will be set to nil temporarily."
 
 ;; Find file with fd
 (defvar counsel-extras--fd-command-template
-  (format "%s --type f --color never %%s '%%s'" counsel-extras-fd-program))
+  (format "%s --type f --full-path --color never %%s '%%s'"
+          counsel-extras-fd-program))
 (defvar counsel-extras--fd-history nil)
 
 (defun counsel-extras--get-fd-command (input &optional occur)
@@ -113,9 +106,7 @@ directory is used."
    (list nil
          (when current-prefix-arg
            (counsel-read-directory-name "From directory: "))))
-  (let ((default-directory (or directory default-directory))
-        (ivy-display-style (and counsel-extras-fd-using-display-style
-                                ivy-display-style)))
+  (let ((default-directory (or directory default-directory)))
     (when (file-remote-p default-directory)
       (user-error "Remote hosts not supported"))
     (counsel-require-program counsel-extras-fd-program)
