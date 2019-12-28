@@ -3080,8 +3080,10 @@ This is a replacement for `reftex--query-search-regexps'."
   (add-hook 'org-agenda-mode-hook #'my-realign-tags-in-org-agenda)
 
   ;; Add tasks to appt
+  ;;
   ;; NOTE: The delay is important. Otherwise it will throw an error occasionally
   ;; when Org is loaded.
+  ;;
   ;; NOTE: Do not refresh. Otherwise the manually added entries and the diary
   ;; entries will be cleaned as well. Wrong notifications seem to be better than
   ;; losing notifications.

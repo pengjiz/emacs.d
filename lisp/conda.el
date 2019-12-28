@@ -126,8 +126,8 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
     (setenv "CONDA_PREFIX" path)
 
     ;; Eshell
-    ;; NOTE: This will update all Eshell instances, which is what I usually
-    ;; want.
+    ;;
+    ;; NOTE: This will update all Eshell buffers, which is what I usually want.
     (setf (default-value 'eshell-path-env) (getenv "PATH"))
     (dolist (buffer (buffer-list))
       (with-current-buffer buffer
@@ -167,7 +167,9 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (setenv "CONDA_PREFIX" nil)
 
   ;; Eshell
-  ;; NOTE: This will update all Eshell instances, which is what I usually want.
+  ;;
+  ;; NOTE: This will update all Eshell buffers, which is what I usually
+  ;; want.
   (setf (default-value 'eshell-path-env) (getenv "PATH"))
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
