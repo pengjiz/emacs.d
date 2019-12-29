@@ -92,18 +92,9 @@ ARG is directly passed to `dired-get-marked-files'."
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
-    (if (file-exists-p destination)
-        ;; If the destination directory exists, we directly unpack to it and let
-        ;; atool to decide if a new directory is needed.
-        (let ((default-directory (expand-file-name destination)))
-          (dired-atool--run dired-atool-aunpack-program
-                            "--each"
-                            dired-atool-aunpack-extra-options
-                            files))
-      ;; If the destination does not exist, we make it and extract files to it.
-      (make-directory destination t)
+    (make-directory destination t)
+    (let ((default-directory (expand-file-name destination)))
       (dired-atool--run dired-atool-aunpack-program
-                        (concat "--extract-to=" destination)
                         "--each"
                         dired-atool-aunpack-extra-options
                         files))))
