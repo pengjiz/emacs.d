@@ -103,5 +103,14 @@ lines first."
     (backward-kill-sexp)
     (insert (format "%S" value))))
 
+;;; Copy email address
+
+(defun simple-extras-copy-mail-address (&optional to &rest _)
+  "Copy email address TO if given."
+  (interactive)
+  (when to
+    (kill-new to)
+    (message "Email address `%s' saved to kill ring" to)))
+
 (provide 'simple-extras)
 ;;; simple-extras.el ends here

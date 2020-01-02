@@ -250,7 +250,8 @@ This is a non-interactive version of `ignore'."
   :commands (simple-extras-move-beginning-of-line
              simple-extras-move-beginning-of-visual-line
              simple-extras-move-beginning-of-ess-line
-             simple-extras-back-to-indentation-of-visual-line)
+             simple-extras-back-to-indentation-of-visual-line
+             simple-extras-copy-mail-address)
   :bind (("C-c e r" . simple-extras-eval-last-sexp-and-replace)
          ([remap move-beginning-of-line] . simple-extras-move-beginning-of-line))
   :hook (prog-mode . simple-extras-auto-fill-comments-mode)
@@ -258,7 +259,9 @@ This is a non-interactive version of `ignore'."
   (with-eval-after-load 'simple
     (bind-key [remap move-beginning-of-line]
               #'simple-extras-move-beginning-of-visual-line
-              visual-line-mode-map))
+              visual-line-mode-map)
+
+    (setf (symbol-function 'compose-mail) #'simple-extras-copy-mail-address))
 
   (defvar ess-roxy-mode-map)
   (with-eval-after-load 'ess-roxy
@@ -306,15 +309,6 @@ This is a non-interactive version of `ignore'."
          :map goto-address-highlight-keymap
          ("C-c C-o" . goto-address-at-point))
   :config
-  (defun my-copy-email-for-goto-addr (fn &rest args)
-    "Apply FN on ARGS, but do not send an email."
-    (cl-letf (((symbol-function 'compose-mail)
-               (lambda (to &rest _)
-                 (kill-new to)
-                 (message "Email address `%s' saved to kill ring" to))))
-      (apply fn args)))
-  (advice-add #'goto-address-at-point :around #'my-copy-email-for-goto-addr)
-
   ;; Add the missing key map
   (defvar goto-address-mode-map (make-sparse-keymap))
   (dolist (mode '(goto-address-mode
