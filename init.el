@@ -724,7 +724,8 @@ This is a non-interactive version of `ignore'."
   :config
   ;; NOTE: Set this to nil will enable smart case search.
   (setf avy-case-fold-search nil)
-  (setf avy-all-windows nil)
+  (setf avy-all-windows nil
+        avy-all-windows-alt t)
   (setf avy-dispatch-alist
         '((?x . avy-action-kill-move)
           (?X . avy-action-kill-stay)
