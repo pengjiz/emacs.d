@@ -101,12 +101,12 @@ This is a customized version of `org-clock-update-mode-line'."
 (defconst rich-title--base-format
   '(""
     invocation-name
-    " -- "
+    "  "
     (:eval (rich-title--get-file-name))
     rich-title--project-name))
 
 (defconst rich-title--format-with-clock
-  `(,@rich-title--base-format " -- " org-mode-line-string))
+  `(,@rich-title--base-format "  " org-mode-line-string))
 
 (defun rich-title-setup ()
   "Setup frame title."
