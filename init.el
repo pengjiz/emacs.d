@@ -735,12 +735,6 @@ This is a non-interactive version of `ignore'."
           (?y . avy-action-yank)
           (?z . avy-action-zap-to-char))))
 
-(use-package link-hint
-  :ensure t
-  :defer t
-  :bind (("M-g a" . link-hint-open-link)
-         ("M-g A" . link-hint-copy-link)))
-
 (use-package imenu
   :defer t
   :bind ("M-g i" . imenu)
