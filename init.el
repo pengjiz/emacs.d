@@ -735,60 +735,11 @@ This is a non-interactive version of `ignore'."
           (?y . avy-action-yank)
           (?z . avy-action-zap-to-char))))
 
-(use-package ace-link
+(use-package link-hint
   :ensure t
   :defer t
-  :init
-  (defvar org-mode-map)
-  (with-eval-after-load 'org
-    (bind-key "M-g a" #'ace-link-org org-mode-map))
-
-  (defvar org-agenda-mode-map)
-  (with-eval-after-load 'org-agenda
-    (bind-key "M-g a" #'ace-link-org-agenda org-agenda-mode-map))
-
-  (defvar goto-address-mode-map)
-  (with-eval-after-load 'goto-addr
-    (bind-key "M-g a" #'ace-link-addr goto-address-mode-map))
-
-  (defvar bug-reference-mode-map)
-  (with-eval-after-load 'bug-reference
-    (bind-key "M-g a" #'ace-link-addr bug-reference-mode-map))
-
-  (with-eval-after-load 'help-mode
-    (bind-key "M-g a" #'ace-link-help help-mode-map))
-
-  (with-eval-after-load 'info
-    (bind-key "M-g a" #'ace-link-info Info-mode-map))
-
-  (with-eval-after-load 'man
-    (bind-key "M-g a" #'ace-link-man Man-mode-map))
-
-  (with-eval-after-load 'compile
-    (bind-key "M-g a" #'ace-link-compilation compilation-mode-map))
-
-  (defvar cider-inspector-mode-map)
-  (with-eval-after-load 'cider-inspector
-    (bind-key "M-g a" #'ace-link-cider-inspector cider-inspector-mode-map))
-
-  (defvar eww-mode-map)
-  (with-eval-after-load 'eww
-    (bind-key "M-g a" #'ace-link-eww eww-mode-map))
-  :config
-  (dolist (style '((ace-link-org . pre)
-                   (ace-link-org-agenda . pre)
-                   (ace-link-addr . pre)
-                   (ace-link-help . post)
-                   (ace-link-info . at)
-                   (ace-link-man . post)
-                   (ace-link-compilation . post)
-                   (ace-link-eww . post)))
-    (cl-pushnew style avy-styles-alist :test #'eq :key #'car)))
-
-(use-package ace-link-extras
-  :load-path "lisp"
-  :after ace-link
-  :config (ace-link-extras-setup))
+  :bind (("M-g a" . link-hint-open-link)
+         ("M-g A" . link-hint-copy-link)))
 
 (use-package imenu
   :defer t
