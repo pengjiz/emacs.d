@@ -2939,10 +2939,11 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf org-file-apps '((auto-mode . emacs)
                         (directory . emacs)))
 
-  ;; LaTeX snippets
+  ;; LaTeX fragments and entities
   (setf org-preview-latex-default-process 'imagemagick)
-  (setf org-highlight-latex-and-related '(latex entities)
-        org-use-sub-superscripts '{})
+  (setf org-pretty-entities t
+        org-highlight-latex-and-related '(latex entities))
+  (setf org-use-sub-superscripts '{})
 
   ;; Refile
   (setf org-refile-targets '((nil :maxlevel . 3)
