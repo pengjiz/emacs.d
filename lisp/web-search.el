@@ -1,8 +1,8 @@
-;;; web-search.el --- Searching on the web in Emacs  -*- lexical-binding: t; -*-
+;;; web-search.el --- Define and query search engines  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
-;; A set of functions for searching something using the external browser.
+;; Easily define and query search engines.
 
 ;;; Code:
 
@@ -10,7 +10,7 @@
   (require 'subr-x))
 
 (defmacro web-search-def-engine (name url-template prompt)
-  "Define a function with NAME to use a search engine.
+  "Define a command with NAME to use a search engine.
 
 The search engine address is formed with URL-TEMPLATE and the user input
 read with `read-string' and PROMPT."
