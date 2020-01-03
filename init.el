@@ -2098,6 +2098,13 @@ This is a non-interactive version of `ignore'."
   ;; essential to turn it on, not toggle.
   (appt-activate 1))
 
+;;; Generic programming
+
+(use-package prog-mode
+  :config
+  (setf prettify-symbols-unprettify-at-point 'right-edge)
+  (global-prettify-symbols-mode))
+
 ;;; Emacs-Lisp
 
 (use-package elisp-mode
