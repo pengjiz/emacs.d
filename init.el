@@ -3158,6 +3158,7 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf markdown-hide-markup t)
   (setf markdown-enable-math t)
   (setf markdown-fontify-code-blocks-natively t)
+  (setf markdown-max-image-size '(300 . nil))
   (let ((css-url (concat "file://"
                          (my-expand-etc-file-name "css/pandoc.css"))))
     (setf markdown-command
