@@ -246,28 +246,21 @@ This is a non-interactive version of `ignore'."
 
 (use-package simple-extras
   :load-path "lisp"
-  :defer t
-  :commands (simple-extras-move-beginning-of-line
-             simple-extras-move-beginning-of-visual-line
-             simple-extras-move-beginning-of-ess-line
-             simple-extras-back-to-indentation-of-visual-line
-             simple-extras-copy-mail-address)
-  :bind (("C-c e r" . simple-extras-eval-last-sexp-and-replace)
-         ([remap move-beginning-of-line] . simple-extras-move-beginning-of-line))
-  :hook (prog-mode . simple-extras-auto-fill-comments-mode)
-  :init
-  (with-eval-after-load 'simple
-    (bind-key [remap move-beginning-of-line]
-              #'simple-extras-move-beginning-of-visual-line
-              visual-line-mode-map)
+  :config
+  (add-hook 'prog-mode-hook #'simple-extras-auto-fill-comments-mode)
 
-    (setf (symbol-function 'compose-mail) #'simple-extras-copy-mail-address))
+  (bind-keys ("C-c e r" . simple-extras-eval-last-sexp-and-replace)
+             ([remap move-beginning-of-line] . simple-extras-move-beginning-of-line)
+             :map visual-line-mode-map
+             ([remap move-beginning-of-line] . simple-extras-move-beginning-of-visual-line))
 
   (defvar ess-roxy-mode-map)
   (with-eval-after-load 'ess-roxy
     (bind-key [remap move-beginning-of-line]
               #'simple-extras-move-beginning-of-ess-line
-              ess-roxy-mode-map)))
+              ess-roxy-mode-map))
+
+  (simple-extras-setup))
 
 (use-package undo-propose
   :ensure t

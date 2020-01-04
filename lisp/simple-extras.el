@@ -105,12 +105,18 @@ lines first."
 
 ;;; Copy email address
 
-(defun simple-extras-copy-mail-address (&optional to &rest _)
+(defun simple-extras--copy-mail-address (&optional to &rest _)
   "Copy email address TO if given."
   (interactive)
   (when to
     (kill-new to)
     (message "Email address `%s' saved to kill ring" to)))
+
+;;; Setup
+
+(defun simple-extras-setup ()
+  "Setup simple extensions."
+  (setf (symbol-function 'compose-mail) #'simple-extras--copy-mail-address))
 
 (provide 'simple-extras)
 ;;; simple-extras.el ends here
