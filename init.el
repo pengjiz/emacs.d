@@ -1212,6 +1212,7 @@ This is a non-interactive version of `ignore'."
                         "*Warnings*"
                         "*Shell Command Output*"
                         "*Async Shell Command*"
+                        "*firestarter*"
                         "*Ledger Report*"
                         "*Gnuplot Trail*"
                         "*skewer-error*"
@@ -1900,6 +1901,12 @@ This is a non-interactive version of `ignore'."
       (let ((inhibit-read-only t))
         (ansi-color-apply-on-region compilation-filter-start (point-max)))))
   (add-hook 'compilation-filter-hook #'my-apply-ansi-colors-for-compilation))
+
+(use-package firestarter
+  :ensure t
+  :config
+  (setf firestarter-default-type t)
+  (firestarter-mode))
 
 ;;; ElDoc
 
