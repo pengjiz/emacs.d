@@ -2101,9 +2101,8 @@ This is a non-interactive version of `ignore'."
 ;;; Generic programming
 
 (use-package prog-mode
-  :config
-  (setf prettify-symbols-unprettify-at-point 'right-edge)
-  (global-prettify-symbols-mode))
+  :defer t
+  :hook (TeX-mode . prettify-symbols-mode))
 
 ;;; Emacs-Lisp
 
