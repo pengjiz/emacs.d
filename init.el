@@ -1413,7 +1413,8 @@ This is a non-interactive version of `ignore'."
 (use-package counsel-extras
   :load-path "lisp"
   :after counsel
-  :bind ("C-c f j" . counsel-extras-fd)
+  :bind (("C-c f f" . counsel-extras-fd)
+         ("C-c f j" . counsel-extras-fd))
   :config (counsel-extras-setup))
 
 (use-package amx
@@ -1904,6 +1905,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package firestarter
   :ensure t
+  :bind ("C-c c f" . firestarter-mode)
   :config
   (setf firestarter-default-type t)
   (firestarter-mode))
