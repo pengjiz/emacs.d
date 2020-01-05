@@ -3245,6 +3245,12 @@ This is a replacement for `reftex--query-search-regexps'."
   :ensure t
   :defer t)
 
+(use-package ob-graphql
+  :ensure t
+  :defer t
+  :after org
+  :init (cl-pushnew '(graphql . t) org-babel-load-languages :test #'eq :key #'car))
+
 ;;; BNF
 
 (use-package bnf-mode
