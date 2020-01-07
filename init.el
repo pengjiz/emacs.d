@@ -311,18 +311,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package subword
   :defer t
-  :hook ((c-mode
-          c++-mode
-          web-mode
-          js2-mode
-          typescript-mode
-          haskell-mode
-          idris-mode
-          idris-prover-script-mode
-          rust-mode
-          clojure-mode
-          python-mode)
-         . subword-mode)
+  :hook (prog-mode . subword-mode)
   :bind ("C-c t b" . subword-mode))
 
 (use-package align
@@ -578,29 +567,17 @@ This is a non-interactive version of `ignore'."
 (use-package hideshow
   :defer t
   :bind (:map hs-minor-mode-map ("C-c @ t" . hs-toggle-hiding))
-  :hook ((emacs-lisp-mode
-          clojure-mode
-          racket-mode
-          c-mode
-          c++-mode
-          awk-mode
-          rust-mode
-          pest-mode
-          ess-r-mode
-          css-mode
-          js2-mode
-          typescript-mode
-          typescript-tsx-mode
-          sh-mode
-          graphql-mode
-          graphviz-dot-mode
-          json-mode
-          protobuf-mode
-          python-mode
-          lua-mode
-          bibtex-mode)
-         . hs-minor-mode)
-  :init (setf hs-minor-mode-map (make-sparse-keymap)))
+  :hook ((prog-mode bibtex-mode) . my-enable-hideshow)
+  :init
+  (setf hs-minor-mode-map (make-sparse-keymap))
+
+  ;; NOTE: Workaround an issue with Idris prover. I do not actually use the
+  ;; prover but the script mode is anyway activated when quitting the process
+  ;; and because it has no comment start and end so hideshow activation will
+  ;; fail and terminate the quitting process.
+  (defun my-enable-hideshow ()
+    (unless (eq major-mode 'idris-prover-script-mode)
+      (hs-minor-mode))))
 
 (use-package outline
   :defer t
