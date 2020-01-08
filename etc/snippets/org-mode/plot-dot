@@ -2,7 +2,7 @@
 # name: dot plot
 # key: pld
 # --
-#+HEADER: :results file :exports results
-#+BEGIN_SRC dot :file $1
+#+header: :results file :exports results
+#+begin_src dot :file $1
 $0
-#+END_SRC
+#+end_src

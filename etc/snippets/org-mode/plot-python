@@ -2,7 +2,7 @@
 # name: python plot
 # key: plp
 # --
-#+HEADER: :results file :exports both
-#+BEGIN_SRC python
+#+header: :results file :exports both
+#+begin_src python
 $0
-#+END_SRC
+#+end_src
