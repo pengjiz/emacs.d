@@ -2974,10 +2974,10 @@ This is a replacement for `reftex--query-search-regexps'."
   :config
   (setf org-capture-templates
         '(("t" "Task" entry (file+headline "" "Tasks")
-           "* TODO %?\n:PROPERTIES:\n:Created: %u\n:END:\n%i"
+           "* TODO %?\n:PROPERTIES:\n:Created: %U\n:END:\n%i"
            :empty-lines 1)
           ("n" "Note" entry (file+headline "" "Notes")
-           "* %?\n:PROPERTIES:\n:Created: %u\n:END:\n%i"
+           "* %?\n:PROPERTIES:\n:Created: %U\n:END:\n%i"
            :empty-lines 1))))
 
 ;; Agenda
