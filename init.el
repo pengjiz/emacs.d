@@ -2962,12 +2962,6 @@ This is a replacement for `reftex--query-search-regexps'."
   :after org
   :bind (:map org-mode-map ("M-g L" . org-lint)))
 
-(use-package toc-org
-  :ensure t
-  :defer t
-  :hook (org-mode . toc-org-mode)
-  :config (setf toc-org-hrefify-default "org"))
-
 (use-package org-radiobutton
   :ensure t
   :defer t
