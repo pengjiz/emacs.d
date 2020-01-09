@@ -276,14 +276,7 @@ This is a non-interactive version of `ignore'."
   :bind (("C-c t u" . bug-reference-mode)
          ("C-c t U" . bug-reference-prog-mode)
          :map bug-reference-map
-         ("C-c C-o" . bug-reference-push-button))
-  :config
-  ;; Add the missing key map
-  (defvar bug-reference-mode-map (make-sparse-keymap))
-  (dolist (mode '(bug-reference-mode
-                  bug-reference-prog-mode))
-    (cl-pushnew (cons mode bug-reference-mode-map) minor-mode-map-alist
-                :test #'eq :key #'car)))
+         ("C-c C-o" . bug-reference-push-button)))
 
 (use-package goto-addr
   :defer t
@@ -300,14 +293,7 @@ This is a non-interactive version of `ignore'."
   :bind (("C-c t a" . goto-address-mode)
          ("C-c t A" . goto-address-prog-mode)
          :map goto-address-highlight-keymap
-         ("C-c C-o" . goto-address-at-point))
-  :config
-  ;; Add the missing key map
-  (defvar goto-address-mode-map (make-sparse-keymap))
-  (dolist (mode '(goto-address-mode
-                  goto-address-prog-mode))
-    (cl-pushnew (cons mode goto-address-mode-map) minor-mode-map-alist
-                :test #'eq :key #'car)))
+         ("C-c C-o" . goto-address-at-point)))
 
 (use-package subword
   :defer t
