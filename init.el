@@ -2929,11 +2929,7 @@ This is a replacement for `reftex--query-search-regexps'."
         org-log-done 'time)
 
   ;; Tags
-  (setf org-tag-persistent-alist '(("notes" . ?n)
-                                   (:startgroup . nil)
-                                   ("@work" . ?w)
-                                   ("@home" . ?h)
-                                   (:endgroup . nil))))
+  (setf org-tag-persistent-alist '(("note" . ?n))))
 
 (use-package org-id
   :defer t
