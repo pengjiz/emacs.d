@@ -205,12 +205,17 @@ This is a non-interactive version of `ignore'."
 
 ;;; General Editing helpers
 
-;; Do not disable some useful commands
 (progn ; disabled commands
   (put #'narrow-to-defun 'disabled nil)
   (put #'narrow-to-region 'disabled nil)
   (put #'narrow-to-page 'disabled nil)
-  (put #'erase-buffer 'disabled nil))
+  (put #'erase-buffer 'disabled nil)
+
+  ;; A less intrusive way to handle invocation of disabled commands
+  (defun my-show-disabled-command (&optional command _)
+    "Show a message for disabled COMMAND without invoking it."
+    (message "Disabled command %s invoked" (or command this-command)))
+  (setf disabled-command-function #'my-show-disabled-command))
 
 (use-package simple
   :defer t
