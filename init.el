@@ -927,8 +927,8 @@ This is a non-interactive version of `ignore'."
 
 ;; Bookmarks
 (use-package bookmark
-  :init (setf bookmark-default-file (my-expand-var-file-name "bookmarks"))
-  :config (setf bookmark-save-flag 1))
+  :defer t
+  :init (setf bookmark-default-file (my-expand-var-file-name "bookmarks")))
 
 ;; Dired
 (use-package dired
@@ -1158,6 +1158,7 @@ This is a non-interactive version of `ignore'."
                         "*Clock Task Select*"
                         "*Calendar*"
                         "*RefTeX Select*"
+                        "*Bookmark List*"
                         "*Proced*"
                         "*Process List*"
                         "*Flycheck errors*"
