@@ -666,6 +666,14 @@ Fallback to workspace tag."
   (when (liteline--active-p)
     (concat " " (liteline--get-org-timer) " ")))
 
+;; Two-column
+(defvar 2C-mode-line-format)
+
+(defun litelite--setup-two-column ()
+  "Setup two-column."
+  (with-eval-after-load 'two-column
+    (setf 2C-mode-line-format (default-value 'mode-line-format))))
+
 ;;; Mode lines
 
 ;; Main
@@ -685,6 +693,7 @@ Fallback to workspace tag."
   (liteline--setup-anzu)
   (liteline--setup-flycheck)
   (liteline--setup-git)
+  (litelite--setup-two-column)
 
   ;; Default mode line
   (liteline-set-mode-line 'main t))
