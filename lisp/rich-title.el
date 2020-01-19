@@ -82,7 +82,8 @@ This is a customized version of `org-clock-update-mode-line'."
   (if org-clock-effort
       (org-clock-notify-once-if-expired)
     (setf org-clock-task-overrun nil))
-  (when refresh (setf org-clock-heading (org-clock--mode-line-heading)))
+  (when refresh
+    (setf org-clock-heading (org-clock--mode-line-heading)))
   (setf org-mode-line-string (org-clock-get-clock-string))
   (force-mode-line-update))
 
