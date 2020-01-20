@@ -630,7 +630,11 @@ This is a non-interactive version of `ignore'."
 (use-package hl-todo
   :ensure t
   :defer t
-  :hook ((prog-mode TeX-update-style) . hl-todo-mode))
+  :hook ((prog-mode
+          TeX-update-style
+          conf-mode
+          yaml-mode)
+         . hl-todo-mode))
 
 (use-package visual-fill-column
   :ensure t
