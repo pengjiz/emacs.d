@@ -553,6 +553,11 @@ This is a non-interactive version of `ignore'."
 (use-package electric
   :config (electric-indent-mode))
 
+(use-package highlight-indent-guides
+  :ensure t
+  :defer t
+  :bind ("C-c t g" . highlight-indent-guides-mode))
+
 ;;; Editing visuals
 
 (use-package hideshow
