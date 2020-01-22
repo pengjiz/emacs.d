@@ -2929,7 +2929,6 @@ This is a replacement for `reftex--query-search-regexps'."
                         (directory . emacs)))
 
   ;; LaTeX fragments and entities
-  (setf org-preview-latex-default-process 'imagemagick)
   (setf org-highlight-latex-and-related '(latex entities))
   (setf org-use-sub-superscripts '{})
 
