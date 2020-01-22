@@ -2931,6 +2931,8 @@ This is a replacement for `reftex--query-search-regexps'."
   ;; LaTeX fragments and entities
   (setf org-highlight-latex-and-related '(latex entities))
   (setf org-use-sub-superscripts '{})
+  (setf org-format-latex-options (plist-put org-format-latex-options
+                                            :scale 1.2))
 
   ;; Refile
   (setf org-refile-targets '((nil :maxlevel . 3)
