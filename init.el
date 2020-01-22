@@ -2910,7 +2910,6 @@ This is a replacement for `reftex--query-search-regexps'."
   ;; General
   (setf org-adapt-indentation nil
         org-startup-indented t)
-  (setf org-hide-emphasis-markers t)
   (setf org-fontify-done-headline t
         org-fontify-quote-and-verse-blocks t
         org-fontify-whole-heading-line t)
@@ -3128,7 +3127,6 @@ This is a replacement for `reftex--query-search-regexps'."
   :defer t
   :mode "\\.Rmd\\'"
   :config
-  (setf markdown-hide-markup t)
   (setf markdown-enable-math t)
   (setf markdown-fontify-code-blocks-natively t)
   (setf markdown-max-image-size '(300 . nil))
