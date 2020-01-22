@@ -3127,7 +3127,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :defer t
   :mode "\\.Rmd\\'"
   :config
-  (setf markdown-enable-math t)
+  (setf (default-value 'markdown-enable-math) t)
   (setf markdown-fontify-code-blocks-natively t)
   (setf markdown-max-image-size '(300 . nil))
   (let ((css-url (concat "file://"
