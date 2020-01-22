@@ -2086,12 +2086,6 @@ This is a non-interactive version of `ignore'."
   ;; essential to turn it on, not toggle.
   (appt-activate 1))
 
-;;; Generic programming
-
-(use-package prog-mode
-  :defer t
-  :hook (TeX-mode . prettify-symbols-mode))
-
 ;;; Emacs-Lisp
 
 (use-package elisp-mode
@@ -2773,6 +2767,7 @@ This is a non-interactive version of `ignore'."
 (use-package tex-fold
   :defer t
   :after tex-site
+  :bind (:map TeX-fold-keymap ("\\" . prettify-symbols-mode))
   :hook (TeX-mode . TeX-fold-mode))
 
 (use-package tex-style
@@ -2931,8 +2926,7 @@ This is a replacement for `reftex--query-search-regexps'."
 
   ;; LaTeX fragments and entities
   (setf org-preview-latex-default-process 'imagemagick)
-  (setf org-pretty-entities t
-        org-highlight-latex-and-related '(latex entities))
+  (setf org-highlight-latex-and-related '(latex entities))
   (setf org-use-sub-superscripts '{})
 
   ;; Refile
