@@ -2792,6 +2792,11 @@ This is a non-interactive version of `ignore'."
     (setf TeX-electric-math '("\\(" . "\\)")))
   (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode))
 
+(use-package preview
+  :defer t
+  :after tex-site
+  :config (setf preview-auto-cache-preamble nil))
+
 (use-package auctex-latexmk
   :load-path "lisp"
   :after latex
