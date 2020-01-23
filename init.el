@@ -648,25 +648,7 @@ This is a non-interactive version of `ignore'."
   :config
   (setf (default-value 'visual-fill-column-center-text) t
         (default-value 'visual-fill-column-fringes-outside-margins) nil)
-  (setf split-window-preferred-function #'visual-fill-column-split-window-sensibly)
-
-  (defun my-disable-visual-line-once-for-visual-fill-column ()
-    "Disable `visual-line-mode' once for `visual-fill-column-mode'."
-    (unless visual-fill-column-mode
-      (visual-line-mode 0)
-      (remove-hook 'visual-fill-column-mode-hook
-                   #'my-disable-visual-line-once-for-visual-fill-column t)))
-
-  (defun my-enable-visual-line-for-visual-fill-column ()
-    (when (and visual-fill-column-mode
-               (not visual-line-mode))
-      (visual-line-mode)
-      (add-hook 'visual-fill-column-mode-hook
-                #'my-disable-visual-line-once-for-visual-fill-column
-                nil t)))
-
-  (add-hook 'visual-fill-column-mode-hook
-            #'my-enable-visual-line-for-visual-fill-column))
+  (setf split-window-preferred-function #'visual-fill-column-split-window-sensibly))
 
 ;;; Move point
 
