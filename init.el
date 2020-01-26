@@ -647,7 +647,8 @@ This is a non-interactive version of `ignore'."
   :config
   (setf (default-value 'visual-fill-column-center-text) t
         (default-value 'visual-fill-column-fringes-outside-margins) nil)
-  (setf split-window-preferred-function #'visual-fill-column-split-window-sensibly))
+  (setf split-window-preferred-function #'visual-fill-column-split-window-sensibly)
+  (advice-add #'text-scale-adjust :after #'visual-fill-column-adjust))
 
 (use-package page-turner
   :load-path "lisp"
