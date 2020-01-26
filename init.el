@@ -1278,26 +1278,6 @@ This is a non-interactive version of `ignore'."
                     arg))))
   (advice-add #'aw-set-mode-line :around #'my-replace-text-for-ace-window))
 
-(use-package eyebrowse
-  :ensure t
-  :defer t
-  :bind (;; -
-         :map eyebrowse-mode-map
-         ("C-c s c" . eyebrowse-create-window-config)
-         ("C-c s k" . eyebrowse-close-window-config)
-         ("C-c s j" . eyebrowse-switch-to-window-config)
-         ("C-c s s" . eyebrowse-last-window-config)
-         ("C-c s n" . eyebrowse-next-window-config)
-         ("C-c s p" . eyebrowse-prev-window-config)
-         ("C-c s m" . eyebrowse-rename-window-config))
-  :init
-  (setf eyebrowse-mode-map (make-sparse-keymap))
-  (eyebrowse-mode)
-  :config
-  (setf eyebrowse-wrap-around t
-        eyebrowse-switch-back-and-forth t)
-  (setf eyebrowse-new-workspace t))
-
 ;;; Completion
 
 ;; Minibuffer

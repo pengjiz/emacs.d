@@ -441,23 +441,6 @@ If DEFAULT is non-nil, set the default value."
 
 ;;; Additional segments & third-party integration
 
-;; Eyebrowse
-(declare-function eyebrowse--get "ext:eyebrowse")
-
-(defun liteline--get-eyebrowse-tag ()
-  "Return the eyebrowse workspace tag."
-  (when (bound-and-true-p eyebrowse-mode)
-    (let* ((workspace-num (eyebrowse--get 'current-slot))
-           (workspace-tag
-            (when workspace-num
-              (nth 2 (assoc workspace-num
-                            (eyebrowse--get 'window-configs))))))
-      (format "%d%s"
-              workspace-num
-              (if (string-empty-p workspace-tag)
-                  ""
-                (concat "[" workspace-tag "]"))))))
-
 ;; Ace window
 (defvar ace-window-mode)
 
@@ -541,13 +524,8 @@ Fallback to workspace tag."
                       '(liteline--get-macro-indicator
                         liteline--get-anzu-position
                         liteline--get-selection-info)
-                      nil)))
-           (string (if (string-empty-p action)
-                       (let ((workspace-tag (liteline--get-eyebrowse-tag)))
-                         (and workspace-tag
-                              (concat workspace-tag " ")))
-                     action)))
-      (propertize (concat " " string) 'face 'liteline-action))))
+                      nil))))
+      (propertize (concat " " action) 'face 'liteline-action))))
 
 ;; Flycheck
 (defvar-local liteline--flycheck nil)
