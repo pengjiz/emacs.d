@@ -417,7 +417,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind ("C-c m k" . man)
   :config
-  (setf Man-width 80)
   ;; Select man buffers after it is displayed
   (setf Man-notify-method 'aggressive))
 
@@ -649,6 +648,13 @@ This is a non-interactive version of `ignore'."
   (setf (default-value 'visual-fill-column-center-text) t
         (default-value 'visual-fill-column-fringes-outside-margins) nil)
   (setf split-window-preferred-function #'visual-fill-column-split-window-sensibly))
+
+(use-package page-turner
+  :load-path "lisp"
+  :ensure visual-fill-column
+  :config
+  (setf page-turner-prose-family "DejaVu Serif")
+  (page-turner-setup))
 
 ;;; Move point
 
@@ -1935,23 +1941,6 @@ This is a non-interactive version of `ignore'."
   :bind ("C-c c r" . rmsbolt-mode))
 
 ;;; HTML rendering & web browsing
-
-(use-package shr
-  :defer t
-  :config
-  (setf shr-use-fonts nil
-        shr-max-image-proportion 0.7)
-
-  (defun my-set-shr-width (fn &rest args)
-    "Apply FN on ARGS, but force a text width."
-    (let ((shr-width 80))
-      (apply fn args)))
-  (with-eval-after-load 'eww
-    (advice-add #'eww-readable :around #'my-set-shr-width))
-  (with-eval-after-load 'elfeed-show
-    (advice-add #'elfeed-insert-html :around #'my-set-shr-width))
-  (with-eval-after-load 'racket-complete
-    (advice-add #'racket-describe :around #'my-set-shr-width)))
 
 (use-package shr-color
   :defer t
@@ -3296,10 +3285,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :ensure t
   :defer t
   :mode ("\\.epub\\'" . nov-mode)
-  :init (setf nov-save-place-file (my-expand-var-file-name "nov-places"))
-  :config
-  (setf nov-variable-pitch nil
-        nov-text-width 80))
+  :init (setf nov-save-place-file (my-expand-var-file-name "nov-places")))
 
 ;;; Mode line & frame title
 
