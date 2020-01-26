@@ -103,14 +103,14 @@ If nil use value of `fill-column'."
 
 ;; NOTE: EWW readable do not create new buffer, instead it reuses the current
 ;; buffer but replaces contents. That would cause problems when we want to leave
-;; readable mode. So here we clear styles before rendering a document which is
-;; not for readable mode.
+;; readable mode. So here we clear styles before displaying documents. This
+;; applies for EWW readable as well because otherwise running readable in
+;; readable mode will not use visual line for some reason.
 (defun page-turner--reset-eww-styles (&rest args)
   "Reset styles in buffer from ARGS."
   (let ((buffer (nth 4 args)))
     (when (and (buffer-live-p buffer)
-               (buffer-local-value 'page-turner--in-prose-styles buffer)
-               (not (eq this-command 'eww-readable)))
+               (buffer-local-value 'page-turner--in-prose-styles buffer))
       (with-current-buffer buffer
         (kill-local-variable 'line-spacing)
         (page-turner--reset-font)
