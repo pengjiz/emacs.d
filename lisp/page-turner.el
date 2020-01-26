@@ -52,6 +52,10 @@ If nil use value of `fill-column'."
 (defvar visual-fill-column-center-text)
 
 (defvar-local page-turner--face-remapping-cookies nil)
+;; NOTE: This is a marker for whether prose styles have been applied. Here we do
+;; not use minor mode because we do not want an interactive command and instead
+;; we want a flexible function that can be used for advising or hooks. Also,
+;; with this marker we can avoid some unnecessary works.
 (defvar-local page-turner--in-prose-styles nil)
 
 (defun page-turner--disable-shr-filling (fn &rest args)
@@ -97,6 +101,10 @@ If nil use value of `fill-column'."
 (declare-function eww-readable "eww")
 (declare-function eww-display-html "eww")
 
+;; NOTE: EWW readable do not create new buffer, instead it reuses the current
+;; buffer but replaces contents. That would cause problems when we want to leave
+;; readable mode. So here we clear styles before rendering a document which is
+;; not for readable mode.
 (defun page-turner--reset-eww-styles (&rest args)
   "Reset styles in buffer from ARGS."
   (let ((buffer (nth 4 args)))
@@ -143,8 +151,10 @@ If nil use value of `fill-column'."
 
 ;; Markdown mode
 ;;
-;; TODO: For some reason visual fill column and visual line does not work well
+;; NOTE: For some reason visual fill column and visual line does not work well
 ;; with live previewing, so here we only set font and text width.
+;;
+;; TODO: Find a way to enable all prose styles.
 (declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 (defvar markdown-live-preview-window-function)
 (defvar shr-width)
