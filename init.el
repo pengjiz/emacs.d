@@ -1969,6 +1969,54 @@ This is a non-interactive version of `ignore'."
   :after elfeed
   :init (setf elfeed-enclosure-default-dir (expand-file-name "Downloads/" "~")))
 
+;;; Chatting
+
+(use-package erc
+  :defer t
+  :bind ("C-c m e" . erc-tls)
+  :init
+  (setf erc-modules '(autojoin
+                      button
+                      completion
+                      fill
+                      irccontrols
+                      list
+                      match
+                      menu
+                      move-to-prompt
+                      netsplit
+                      networks
+                      noncommands
+                      notifications
+                      readonly
+                      ring
+                      services
+                      stamp
+                      spelling))
+  (setf erc-header-line-format "%n %aon %t (%m,%l)"
+        erc-header-line-uses-help-echo-p nil)
+  :config
+  (setf erc-nick "pengjiz"
+        erc-try-new-nick-p nil)
+  (setf erc-prompt-for-password nil)
+  (setf erc-hide-list '("353")
+        erc-lurker-hide-list '("JOIN" "PART" "QUIT"))
+  (setf erc-kill-queries-on-quit t
+        erc-kill-server-buffer-on-quit t))
+
+(use-package erc-join
+  :defer t
+  :config
+  (setf erc-autojoin-channels-alist
+        '(("freenode.net" "#emacs" "#archlinux" "#haskell")))
+  ;; Join channels only after identifying
+  (setf erc-autojoin-timing 'ident
+        erc-autojoin-delay 0))
+
+(use-package erc-services
+  :defer t
+  :init (setf erc-nickserv-identify-mode 'autodetect))
+
 ;;; Calendar
 
 (use-package calendar
