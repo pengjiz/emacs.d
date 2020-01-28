@@ -1082,7 +1082,10 @@ This is a non-interactive version of `ignore'."
 
 (use-package auth-source
   :defer t
-  :config (setf auth-source-cache-expiry 3600))
+  :config
+  (setf auth-sources nil)
+  (setf auth-source-cache-expiry 3600)
+  (setf auth-source-debug t))
 
 (use-package auth-source-pass
   :after auth-source
