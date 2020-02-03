@@ -13,6 +13,8 @@
 
 ;;; NickServ identification
 
+(defvar erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password)
+
 (defun erc-extras--search-nickserv-auth-source-password (nickname)
   "Search NickServ password for NICKNAME with auth-source."
   (when-let* ((entry (car (auth-source-search :max 1
@@ -33,7 +35,7 @@
 
 (defun erc-extras--call-nickserv-identify-function (nickname)
   "Call function to identify NICKNAME to NickServ."
-  (let ((password (and erc-prompt-for-nickserv-password
+  (let ((password (and erc-extras--nickserv-asking-password
                        (read-passwd (format "NickServ password for %s on %s: "
                                             nickname
                                             (or (erc-network)
@@ -45,12 +47,27 @@
                 (erc-extras--search-nickserv-auth-source-password nickname))))
     (erc-nickserv-identify password)))
 
+;; NOTE: A hack to force identification. By default ERC will not identify
+;; nickname if both variables for prompting password and nickserv passwords are
+;; nil. Here we locally bind it to t to force identification.
+(defun erc-extras--force-nickserv-identification (fn &rest args)
+  "Apply FN on ARGS, but force NickServ identification."
+  (let ((erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password)
+        (erc-prompt-for-nickserv-password t))
+    (apply fn args)))
+
 ;;; Setup
 
 (defun erc-extras-setup ()
   "Setup ERC extensions."
   (setf (symbol-function 'erc-nickserv-call-identify-function)
-        #'erc-extras--call-nickserv-identify-function))
+        #'erc-extras--call-nickserv-identify-function)
+  (advice-add #'erc-nickserv-identify-autodetect
+              :around #'erc-extras--force-nickserv-identification)
+  (advice-add #'erc-nickserv-identify-on-connect
+              :around #'erc-extras--force-nickserv-identification)
+  (advice-add #'erc-nickserv-identify-on-nick-change
+              :around #'erc-extras--force-nickserv-identification))
 
 (provide 'erc-extras)
 ;;; erc-extras.el ends here
