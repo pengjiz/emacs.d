@@ -1991,6 +1991,7 @@ This is a non-interactive version of `ignore'."
   :config
   (setf erc-nick "pengjiz"
         erc-try-new-nick-p nil)
+  (setf erc-user-full-name "Pengji Zhang")
   (setf erc-prompt-for-password nil)
   (setf erc-hide-list '("353")
         erc-lurker-hide-list '("JOIN" "PART" "QUIT"))
@@ -2008,7 +2009,14 @@ This is a non-interactive version of `ignore'."
 
 (use-package erc-services
   :defer t
-  :init (setf erc-nickserv-identify-mode 'autodetect))
+  :init
+  (setf erc-nickserv-identify-mode 'autodetect)
+  (setf erc-prompt-for-nickserv-password nil))
+
+(use-package erc-extras
+  :load-path "lisp"
+  :after erc
+  :config (erc-extras-setup))
 
 ;;; Calendar
 
