@@ -1975,9 +1975,9 @@ This is a non-interactive version of `ignore'."
                       completion
                       fill
                       irccontrols
+                      keep-place
                       list
                       match
-                      menu
                       move-to-prompt
                       netsplit
                       networks
@@ -2014,6 +2014,21 @@ This is a non-interactive version of `ignore'."
   :init
   (setf erc-nickserv-identify-mode 'autodetect)
   (setf erc-prompt-for-nickserv-password nil))
+
+(use-package erc-button
+  :defer t
+  :config
+  (setf erc-button-alist
+        '(('nicknames 0 erc-button-buttonize-nicks erc-nick-popup 0)
+          (erc-button-url-regexp 0 t browse-url 0)
+          ("<URL: *\\([^<> ]+\\) *>" 0 t browse-url 1)
+          ("\\s-\\(@\\([0-9][0-9][0-9]\\)\\)" 1 t erc-button-beats-to-time 2))))
+
+(use-package erc-match
+  :defer t
+  :config
+  (setf erc-fools '("rudybot")
+        erc-fool-highlight-type 'all))
 
 (use-package erc-extras
   :load-path "lisp"
