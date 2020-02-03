@@ -1073,13 +1073,9 @@ This is a non-interactive version of `ignore'."
 (use-package auth-source
   :defer t
   :config
-  (setf auth-sources nil)
-  (setf auth-source-cache-expiry 3600)
-  (setf auth-source-debug t))
+  (setf auth-sources (list (my-expand-sync-file-name "misc/authinfo.gpg")))
+  (setf auth-source-cache-expiry 3600))
 
-(use-package auth-source-pass
-  :after auth-source
-  :config (auth-source-pass-enable))
 
 ;;; Window & frame
 
