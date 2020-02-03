@@ -312,11 +312,6 @@ This is a non-interactive version of `ignore'."
          ("C-c x z" . align-current)
          ("C-c x Z" . align-entire)))
 
-(use-package rainbow-mode
-  :ensure t
-  :defer t
-  :bind ("C-c t r" . rainbow-mode))
-
 (use-package unfill
   :ensure t
   :defer t
@@ -551,11 +546,6 @@ This is a non-interactive version of `ignore'."
 
 (use-package electric
   :config (electric-indent-mode))
-
-(use-package highlight-indent-guides
-  :ensure t
-  :defer t
-  :bind ("C-c t g" . highlight-indent-guides-mode))
 
 ;;; Editing visuals
 
