@@ -1076,6 +1076,9 @@ This is a non-interactive version of `ignore'."
   (setf auth-sources (list (my-expand-sync-file-name "misc/authinfo.gpg")))
   (setf auth-source-cache-expiry 3600))
 
+(use-package epa
+  :defer t
+  :config (setf epa-popup-info-window nil))
 
 ;;; Window & frame
 
@@ -1154,6 +1157,8 @@ This is a non-interactive version of `ignore'."
                         "*Calendar*"
                         "*RefTeX Select*"
                         "*Bookmark List*"
+                        "*Key*"
+                        "*Keys*"
                         "*Proced*"
                         "*Process List*"
                         "*Flycheck errors*"
@@ -1174,6 +1179,7 @@ This is a non-interactive version of `ignore'."
                         "*Compile-Log*"
                         "*Backtrace*"
                         "*Warnings*"
+                        "*Error*"
                         "*Shell Command Output*"
                         "*Async Shell Command*"
                         "*firestarter*"
