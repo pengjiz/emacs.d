@@ -40,8 +40,7 @@
                                             nickname
                                             (or (erc-network)
                                                 "unknown network"))))))
-    (unless (and password
-                 (not (equal password "")))
+    (when (or (not password) (string-empty-p password))
       (setf password
             (or (erc-extras--search-nickserv-variable-password nickname)
                 (erc-extras--search-nickserv-auth-source-password nickname))))
