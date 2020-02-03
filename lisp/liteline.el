@@ -154,6 +154,12 @@
   "Escape special characters in STRING for mode line."
   (replace-regexp-in-string "%" "%%" string))
 
+(defsubst liteline--clean-text-properties (string)
+  "Remove text properties for mouse in STRING."
+  (remove-list-of-text-properties 0 (length string)
+                                  '(mouse-face help-echo keymap local-map)
+                                  string))
+
 (defun liteline--prepare-segments (segments)
   "Prepare SEGMENTS for defining a mode line."
   (let (forms it)
@@ -177,16 +183,21 @@
         (rhs-forms (liteline--prepare-segments rhs)))
     (setf (symbol-function sym)
           (lambda ()
-            ;; TODO: Find a better way to handle this.
-            (let ((rhs-string (liteline--escape
-                               (format-mode-line (cons "" rhs-forms)))))
+            (let* ((rhs-string (format-mode-line (cons "" rhs-forms)))
+                   (rhs-width (string-width rhs-string)))
+              ;; NOTE: Generally those segments with mouse interaction are in
+              ;; the right half, so here we only clean it. Also note that this
+              ;; function modify the object in place.
+              (liteline--clean-text-properties rhs-string)
               (list lhs-forms
                     (propertize
                      " "
                      'display
                      `((space :align-to (- (+ right right-fringe right-margin)
-                                           ,(string-width rhs-string)))))
-                    rhs-string))))))
+                                           ,rhs-width))))
+                    ;; NOTE: The % character in the string will cause problems
+                    ;; so here we remove them.
+                    (liteline--escape rhs-string)))))))
 
 (defun liteline--get-mode-line (name)
   "Return the `mode-line-format' of NAME."
