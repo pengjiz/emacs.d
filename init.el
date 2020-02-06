@@ -1714,8 +1714,11 @@ This is a non-interactive version of `ignore'."
   (setf projectile-completion-system (if (fboundp #'ivy-read) 'ivy 'default))
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (dolist (key '("s" "x t" "x s" "x v"))
+  (dolist (key '("s" "x"))
     (unbind-key key projectile-command-map))
+  (bind-keys :map projectile-command-map
+             ("x e" . projectile-run-eshell)
+             ("x i" . projectile-run-ielm))
 
   (defun my-set-projectile-commander-bindings ()
     "Set the key bindings for the Projectile Commander."
@@ -2131,7 +2134,8 @@ This is a non-interactive version of `ignore'."
 
 (use-package eshell
   :defer t
-  :bind ("C-x m" . eshell)
+  :bind (("C-x m" . eshell)
+         ("C-c a e" . eshell))
   :init (setf eshell-directory-name (my-expand-var-file-name "eshell/"))
   :config
   (setf eshell-buffer-maximum-lines 20000)
