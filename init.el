@@ -1897,7 +1897,8 @@ This is a non-interactive version of `ignore'."
 (use-package rmsbolt
   :ensure t
   :defer t
-  :bind ("C-c c r" . rmsbolt-mode))
+  :bind ("C-c c r" . rmsbolt-mode)
+  :config (setf rmsbolt-automatic-recompile nil))
 
 ;;; HTML rendering & web browsing
 
