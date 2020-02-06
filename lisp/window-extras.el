@@ -92,6 +92,21 @@ Otherwise apply FN on BUFFER and ARGS."
   (with-eval-after-load 'calc
     (advice-add #'calc :around #'window-extras--show-calc-at-bottom)))
 
+;; IELM
+(declare-function ielm "ielm")
+
+(defun window-extras--pop-to-ielm-buffer (fn &rest args)
+  "Apply FN on ARGS but force using `pop-to-buffer'."
+  (cl-letf (((symbol-function 'pop-to-buffer-same-window)
+             (lambda (buffer &rest norecord)
+               (pop-to-buffer buffer nil norecord))))
+    (apply fn args)))
+
+(defun window-extras--setup-ielm ()
+  "Setup IELM integration."
+  (with-eval-after-load 'ielm
+    (advice-add #'ielm :around #'window-extras--pop-to-ielm-buffer)))
+
 ;; Elfeed
 (declare-function elfeed "ext:elfeed")
 
@@ -131,6 +146,7 @@ Otherwise apply FN on BUFFER and ARGS."
   (window-extras--setup-org)
   (window-extras--setup-racket)
   (window-extras--setup-calc)
+  (window-extras--setup-ielm)
   (window-extras--setup-elfeed)
   (window-extras--setup-idris))
 
