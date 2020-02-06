@@ -1239,10 +1239,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind* ("M-o" . ace-window)
   :bind (([remap other-window] . ace-window)
-         ("C-c w w" . ace-window)
-         ("C-c w K" . ace-delete-window)
-         ("C-c w O" . ace-delete-other-windows)
-         ("C-c w m" . ace-swap-window))
+         ("C-c w w" . ace-window))
   :config
   (setf aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
         aw-make-frame-char nil
@@ -1258,21 +1255,7 @@ This is a non-interactive version of `ignore'."
                             (?o delete-other-windows "only")
                             (?x aw-execute-command-other-window "execute")
                             (?n aw-flip-window)
-                            (?? aw-show-dispatch-help)))
-
-  ;; Replace the help text
-  (defun my-replace-text-for-ace-window (fn arg)
-    "Call FN on a string based on ARG."
-    (let ((string (cdr (assoc
-                        arg
-                        '((" Ace - Window" . "select")
-                          (" Ace - Delete Window" . "delete")
-                          (" Ace - Swap Window" . "swap")
-                          (" Ace - Delete Other Windows" . "only"))))))
-      (funcall fn (if string
-                      (concat " Ace - " string)
-                    arg))))
-  (advice-add #'aw-set-mode-line :around #'my-replace-text-for-ace-window))
+                            (?? aw-show-dispatch-help))))
 
 ;;; Completion
 

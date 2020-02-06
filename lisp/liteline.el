@@ -536,7 +536,8 @@ Fallback to workspace tag."
                         liteline--get-anzu-position
                         liteline--get-selection-info)
                       nil))))
-      (propertize (concat " " action) 'face 'liteline-action))))
+      (unless (string-empty-p action)
+        (propertize (concat " " action) 'face 'liteline-action)))))
 
 ;; Flycheck
 (defvar-local liteline--flycheck nil)
