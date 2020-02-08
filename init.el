@@ -1538,6 +1538,8 @@ This is a non-interactive version of `ignore'."
           typescript-mode
           typescript-tsx-mode
           python-mode
+          sh-mode
+          lua-mode
           LaTeX-mode
           markdown-mode
           ledger-mode)
