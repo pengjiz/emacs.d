@@ -1280,14 +1280,8 @@ This is a non-interactive version of `ignore'."
   (setf ivy-use-selectable-prompt t
         ivy-wrap t)
   (setf ivy-use-virtual-buffers t
-        ivy-virtual-abbreviate 'abbreviate))
-
-(use-package ivy-hydra
-  :ensure t
-  :defer t
-  :after ivy
-  :init (setf ivy-read-action-function #'ivy-hydra-read-action)
-  :config (setf ivy-dispatching-done-hydra-exit-keys '(("C-g" nil nil))))
+        ivy-virtual-abbreviate 'abbreviate)
+  (setf ivy-read-action-format-function #'ivy-read-action-format-columns))
 
 (use-package counsel
   :ensure t
