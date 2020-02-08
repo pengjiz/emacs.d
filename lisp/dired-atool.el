@@ -18,34 +18,29 @@
 (defcustom dired-atool-aunpack-program
   "aunpack"
   "The program name for aunpack."
-  :type 'string
-  :group 'dired-atool)
+  :type 'string)
 
 (defcustom dired-atool-aunpack-extra-options
   '("--explain")
   "Extra options passing to aunpack."
-  :type '(repeat string)
-  :group 'dired-atool)
+  :type '(repeat string))
 
 (defcustom dired-atool-apack-program
   "apack"
   "The program name for apack."
-  :type 'string
-  :group 'dired-atool)
+  :type 'string)
 
 (defcustom dired-atool-apack-extra-options
   '("--explain")
   "Extra options passing to apack."
-  :type '(repeat string)
-  :group 'dired-atool)
+  :type '(repeat string))
 
 (defcustom dired-atool-using-trash
   t
   "Whether to use trash.
 Non-nil means following `delete-by-moving-to-trash' when deleting
 files or directories."
-  :type 'boolean
-  :group 'dired-atool)
+  :type 'boolean)
 
 ;;; Run program
 

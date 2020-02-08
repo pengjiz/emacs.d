@@ -19,8 +19,7 @@
   4
   "Number of spaces for each indentation level in `pest-mode'."
   :type 'integer
-  :safe #'integerp
-  :group 'pest)
+  :safe #'integerp)
 
 ;;; Keywords
 

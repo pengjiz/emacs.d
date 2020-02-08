@@ -20,15 +20,13 @@
 (defcustom liteline-word-count-modes
   '(text-mode)
   "Major modes in which showing word count is meanningful."
-  :type '(repeat symbol)
-  :group 'liteline)
+  :type '(repeat symbol))
 
 (defcustom liteline-input-method-names-alist
   '(("chinese-b5-tsangchi" . "TWc"))
   "Alternative names of input methods."
   :type '(alist :key-type string
-                :value-type string)
-  :group 'liteline)
+                :value-type string))
 
 (defcustom liteline-important-minor-modes-alist
   '((typo-mode . "t")
@@ -38,93 +36,75 @@
     (flyspell-mode . "s"))
   "Minor modes that should be shown in the mode line."
   :type '(alist :key-type symbol
-                :value-type string)
-  :group 'liteline)
+                :value-type string))
 
 (defface liteline-buffer-modified
   '((t (:inherit (bold warning))))
-  "Face used for indicating buffer is modified."
-  :group 'liteline)
+  "Face used for indicating buffer is modified.")
 
 (defface liteline-buffer-read-only
   '((t (:inherit (bold error))))
-  "Face used for indicating buffer is read-only."
-  :group 'liteline)
+  "Face used for indicating buffer is read-only.")
 
 (defface liteline-buffer-narrowed
   '((t (:inherit warning)))
-  "Face used for indicating buffer is narrowed."
-  :group 'liteline)
+  "Face used for indicating buffer is narrowed.")
 
 (defface liteline-buffer-name
   '((t (:inherit mode-line-buffer-id)))
-  "Face used by normal buffer name."
-  :group 'liteline)
+  "Face used by normal buffer name.")
 
 (defface liteline-buffer-file-non-existent
   '((t (:inherit (bold error))))
-  "Face used for name of a buffer backed by a non-existent file."
-  :group 'liteline)
+  "Face used for name of a buffer backed by a non-existent file.")
 
 (defface liteline-action
   '((t (:inherit match)))
-  "Face used by general action information."
-  :group 'liteline)
+  "Face used by general action information.")
 
 (defface liteline-flycheck-message
   '((t (:inherit warning)))
-  "Face used to show general Flycheck messages."
-  :group 'liteline)
+  "Face used to show general Flycheck messages.")
 
 (defface liteline-flycheck-message-urgent
   '((t (:inherit (bold error))))
-  "Face used to show urgent Flycheck messages."
-  :group 'liteline)
+  "Face used to show urgent Flycheck messages.")
 
 (defface liteline-flycheck-error-info
   '((t (:inherit flycheck-fringe-info)))
-  "Face used by Flycheck errors of the information level."
-  :group 'liteline)
+  "Face used by Flycheck errors of the information level.")
 
 (defface liteline-flycheck-error-warning
   '((t (:inherit flycheck-fringe-warning)))
-  "Face used by Flycheck errors of the warning level."
-  :group 'liteline)
+  "Face used by Flycheck errors of the warning level.")
 
 (defface liteline-flycheck-error-error
   '((t (:inherit flycheck-fringe-error)))
-  "Face used by Flycheck errors of the error level."
-  :group 'liteline)
+  "Face used by Flycheck errors of the error level.")
 
 (defface liteline-flycheck-error-clean
   '((t (:inherit success)))
-  "Face used to show there are no Flycheck errors."
-  :group 'liteline)
+  "Face used to show there are no Flycheck errors.")
 
 (defface liteline-git-branch
   '((t (:inherit mode-line-buffer-id)))
-  "Face used for Git branch."
-  :group 'liteline)
+  "Face used for Git branch.")
 
 (defface liteline-git-new
   '((t (:inherit success)))
-  "Face used for new files in Git."
-  :group 'liteline)
+  "Face used for new files in Git.")
 
 (defface liteline-git-edited
   '((t (:inherit warning)))
-  "Face used for edited files in Git."
-  :group 'liteline)
+  "Face used for edited files in Git.")
 
 (defface liteline-git-warning
   '((t (:inherit (bold warning))))
-  "Face used for warnings in Git."
-  :group 'liteline)
+  "Face used for warnings in Git.")
 
 (defface liteline-git-error
   '((t (:inherit (bold error))))
-  "Face used for errors in Git."
-  :group 'liteline)
+  "Face used for errors in Git.")
 
 ;;; Helpers for defining mode line format (mostly copied from doom-emacs)
 

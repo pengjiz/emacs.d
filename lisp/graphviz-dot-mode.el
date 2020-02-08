@@ -20,8 +20,7 @@
   2
   "Number of spaces for each indentation level in `graphviz-dot-mode'."
   :type 'integer
-  :safe #'integerp
-  :group 'graphviz-dot)
+  :safe #'integerp)
 
 ;;; Keywords
 

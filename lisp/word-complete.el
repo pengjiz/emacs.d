@@ -18,8 +18,7 @@
   "A plain word-list dictionary to use for completion.
 In this file, each line should be a word."
   :type '(choice file
-                 (const :tag "None" nil))
-  :group 'word-complete)
+                 (const :tag "None" nil)))
 
 (defvar word-complete--words nil)
 

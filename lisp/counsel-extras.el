@@ -17,8 +17,7 @@
 (defcustom counsel-extras-fd-program
   "fd"
   "The program name for fd."
-  :type 'string
-  :group 'counsel-extras)
+  :type 'string)
 
 ;;; Display transformers
 

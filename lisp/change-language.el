@@ -19,39 +19,34 @@
   '("German"
     "Default")
   "List of languages to be considered."
-  :type '(repeat string)
-  :group 'change-language)
+  :type '(repeat string))
 
 (defcustom change-language-functions
   '(change-language-change-ispell-dictionary
     change-language-change-input-method
     change-language-change-typography-style)
   "Hook to be run when changing language."
-  :type 'hook
-  :group 'change-language)
+  :type 'hook)
 
 (defcustom change-language-ispell-dictionaries-alist
   '(("English" . "en_US")
     ("German" . "de_DE"))
   "Ispell dictionaries for languages."
   :type '(alist :keytype string
-                :value-type string)
-  :group 'change-language)
+                :value-type string))
 
 (defcustom change-language-input-methods-alist
   '(("German" . "german-postfix"))
   "Input methods for languages."
   :type '(alist :keytype string
-                :value-type string)
-  :group 'change-language)
+                :value-type string))
 
 (defcustom change-language-typography-styles-alist
   '(("German" . "German")
     ("English" . "English"))
   "Typography styles for languages."
   :type '(alist :keytype string
-                :value-type string)
-  :group 'change-language)
+                :value-type string))
 
 ;;; Core
 

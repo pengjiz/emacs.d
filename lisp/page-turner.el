@@ -20,29 +20,25 @@
   "Width of text.
 If nil use value of `fill-column'."
   :type '(choice integer
-                 (const :tag "Fill column" nil))
-  :group 'page-turner)
+                 (const :tag "Fill column" nil)))
 
 (defcustom page-turner-prose-family
   nil
   "Variable width font family for prose."
   :type '(choice string
-                 (const :tag "Default" nil))
-  :group 'page-turner)
+                 (const :tag "Default" nil)))
 
 (defcustom page-turner-prose-height
   nil
   "Font size for prose."
   :type '(choice string
-                 (const :tag "Default" nil))
-  :group 'page-turner)
+                 (const :tag "Default" nil)))
 
 (defcustom page-turner-prose-line-spacing
   0.2
   "Additional spacing between lines."
   :type '(choice number
-                 (const :tag "None" nil))
-  :group 'page-turner)
+                 (const :tag "None" nil)))
 
 ;;; Prose
 

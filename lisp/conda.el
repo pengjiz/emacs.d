@@ -20,40 +20,34 @@
   (list
    (expand-file-name (convert-standard-filename ".conda/envs/") "~"))
   "A list of directories of the Conda environments."
-  :type '(repeat directory)
-  :group 'conda)
+  :type '(repeat directory))
 
 (defcustom conda-default-environment
   nil
   "The default environment for a project."
   :type 'string
-  :safe #'stringp
-  :group 'conda)
+  :safe #'stringp)
 (make-variable-buffer-local 'conda-default-environment)
 
 (defcustom conda-pre-activate-hook
   nil
   "The hook run before activating an environment."
-  :type 'hook
-  :group 'conda)
+  :type 'hook)
 
 (defcustom conda-post-activate-hook
   nil
   "The hook run after activating an environment."
-  :type 'hook
-  :group 'conda)
+  :type 'hook)
 
 (defcustom conda-pre-deactivate-hook
   nil
   "The hook run before deactivating an environment."
-  :type 'hook
-  :group 'conda)
+  :type 'hook)
 
 (defcustom conda-post-deactivate-hook
   nil
   "The hook run after deactivating an environment."
-  :type 'hook
-  :group 'conda)
+  :type 'hook)
 
 ;;; Find environments
 
