@@ -1958,7 +1958,6 @@ This is a non-interactive version of `ignore'."
                       completion
                       fill
                       irccontrols
-                      keep-place
                       list
                       match
                       move-to-prompt
@@ -1970,7 +1969,8 @@ This is a non-interactive version of `ignore'."
                       ring
                       services
                       stamp
-                      spelling))
+                      spelling
+                      truncate))
   (setf erc-header-line-format "%n %aon %t (%m,%l)"
         erc-header-line-uses-help-echo-p nil)
   :config
@@ -2012,6 +2012,10 @@ This is a non-interactive version of `ignore'."
   :config
   (setf erc-fools '("rudybot")
         erc-fool-highlight-type 'all))
+
+(use-package erc-truncate
+  :defer t
+  :config (setf erc-max-buffer-size 100000))
 
 (use-package erc-extras
   :load-path "lisp"
