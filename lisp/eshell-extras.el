@@ -80,6 +80,13 @@
   "Clear `mode-line-process' when end a command is finished."
   (setf mode-line-process nil))
 
+;; Contents
+(defun eshell-extras-clear-buffer ()
+  "Clear Eshell buffer."
+  (interactive)
+  (let ((eshell-buffer-maximum-lines 0))
+    (eshell-truncate-buffer)))
+
 (defun eshell-extras--setup-command ()
   "Setup command related extensions."
   (advice-add #'eshell-command-started :before #'eshell-extras--set-process)

@@ -2138,7 +2138,6 @@ This is a non-interactive version of `ignore'."
          ("C-c a e" . eshell))
   :init (setf eshell-directory-name (my-expand-var-file-name "eshell/"))
   :config
-  (setf eshell-buffer-maximum-lines 20000)
   (setf eshell-scroll-to-bottom-on-input 'this)
   (setf eshell-modify-global-environment t)
   (setf eshell-modules-list '(eshell-alias
@@ -2183,8 +2182,8 @@ This is a non-interactive version of `ignore'."
 (use-package em-hist
   :defer t
   :config
-  (setf eshell-history-size 1024
-        eshell-hist-ignoredups t))
+  (setf eshell-history-size 2000
+        eshell-input-filter #'eshell-input-filter-initial-space))
 
 (use-package em-script
   :defer t
@@ -2202,6 +2201,9 @@ This is a non-interactive version of `ignore'."
   :after eshell
   :config
   (eshell-extras-setup)
+
+  ;; NOTE: Due to an Eshell bug we cannot bind key in the mode map.
+  (bind-key [remap eshell-truncate-buffer] #'eshell-extras-clear-buffer)
 
   (bind-keys :map eshell-extras-autosuggest-suggestion-map
              ([remap forward-char] . eshell-extras-accept-suggestion)
