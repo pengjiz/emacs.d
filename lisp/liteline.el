@@ -432,14 +432,6 @@ If DEFAULT is non-nil, set the default value."
 
 ;;; Additional segments & third-party integration
 
-;; Ace window
-(defvar ace-window-mode)
-
-(defun liteline--get-ace-window-action ()
-  "Return the current action for ace window."
-  (when (bound-and-true-p ace-window-mode)
-    (format "Ace[%s]" (substring-no-properties ace-window-mode 7))))
-
 ;; Keyboard macro
 (defun liteline--get-macro-indicator ()
   "Return an indicator when recording keyboard macros."
@@ -475,17 +467,12 @@ If DEFAULT is non-nil, set the default value."
   "Show information on the current actions.
 Fallback to workspace tag."
   (when (liteline--active-p)
-    (let* ((ace-window-action (liteline--get-ace-window-action))
-           (action (if ace-window-action
-                       (concat ace-window-action " ")
-                     (mapconcat
-                      (lambda (fn)
-                        (when-let* ((string (funcall fn)))
-                          (concat string " ")))
-                      '(liteline--get-macro-indicator
-                        liteline--get-selection-info)
-                      nil))))
-      (unless (string-empty-p action)
+    (let (action)
+      (dolist (fn '(liteline--get-macro-indicator
+                    liteline--get-selection-info))
+        (when-let* ((string (funcall fn)))
+          (setf action (concat action string " "))))
+      (when action
         (propertize (concat " " action) 'face 'liteline-action)))))
 
 ;; Flycheck

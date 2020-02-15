@@ -1209,22 +1209,21 @@ This is a non-interactive version of `ignore'."
   :bind* ("M-o" . ace-window)
   :bind (([remap other-window] . ace-window)
          ("C-c w w" . ace-window))
+  :init
+  (setf aw-dispatch-alist
+        '((?c aw-split-window-fair "Split Fair Window")
+          (?v aw-split-window-vert "Split Vert Window")
+          (?b aw-split-window-horz "Split Horz Window")
+          (?m delete-other-windows "Delete Other Windows")
+          (?y aw-copy-window "Copy Window")
+          (?t aw-move-window "Move Window")
+          (?x aw-execute-command-other-window "Execute Command Other Window")
+          (?o aw-flip-window)
+          (?? aw-show-dispatch-help)))
+  (setf aw-make-frame-char nil)
   :config
-  (setf aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-        aw-make-frame-char nil
-        aw-dispatch-alist '((?e aw-swap-window "swap")
-                            (?m aw-move-window "move")
-                            (?p aw-copy-window "copy")
-                            (?i aw-switch-buffer-in-window "switch")
-                            (?u aw-switch-buffer-other-window "show")
-                            (?c aw-split-window-fair "split")
-                            (?b aw-split-window-vert "below")
-                            (?v aw-split-window-horz "right")
-                            (?q aw-delete-window "delete")
-                            (?o delete-other-windows "only")
-                            (?x aw-execute-command-other-window "execute")
-                            (?n aw-flip-window)
-                            (?? aw-show-dispatch-help))))
+  (setf aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (setf aw-minibuffer-flag t))
 
 ;;; Completion
 
