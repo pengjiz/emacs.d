@@ -24,7 +24,8 @@ Each element should be a valid value for the variable
 
 (defvar haskell-extras--process-type-indicators-alist
   '((stack-ghci "stack.yaml" "stack")
-    (ghci nil "ghc")))
+    (ghci nil "ghc"))
+  "Indicators for process types.")
 
 (defun haskell-extras--get-root-directory (filename)
   "Return the root directory of project based on FILENAME."

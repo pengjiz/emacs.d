@@ -10,8 +10,8 @@
 (eval-when-compile
   (require 'cl-lib))
 
-(defvar eldoc-lv--buffer nil "The LV buffer for ElDoc.")
-(defvar eldoc-lv--window nil "The window for ElDoc.")
+(defvar eldoc-lv--buffer nil "Buffer for ElDoc.")
+(defvar eldoc-lv--window nil "Window for ElDoc.")
 
 (defun eldoc-lv--get-buffer ()
   "Ensure the ElDoc buffer is live and return it."

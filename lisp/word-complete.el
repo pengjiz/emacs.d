@@ -20,7 +20,7 @@ In this file, each line should be a word."
   :type '(choice file
                  (const :tag "None" nil)))
 
-(defvar word-complete--words nil)
+(defvar word-complete--words nil "Words from the dictionary.")
 
 (defun word-complete--get-words (dictionary)
   "Return all the words from the DICTIONARY file."

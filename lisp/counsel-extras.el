@@ -80,8 +80,9 @@
 ;; Find file with fd
 (defvar counsel-extras--fd-command-template
   (format "%s --type f --full-path --color never %%s '%%s'"
-          counsel-extras-fd-program))
-(defvar counsel-extras--fd-history nil)
+          counsel-extras-fd-program)
+  "Command template for running fd.")
+(defvar counsel-extras--fd-history nil "Input history for fd.")
 
 (defun counsel-extras--get-fd-command (input &optional occur)
   "Return a command to get files based on INPUT.

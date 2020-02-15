@@ -1604,26 +1604,14 @@ This is a non-interactive version of `ignore'."
          ("S-SPC" . scroll-down-command)
          ("DEL" . scroll-down-command))
   :config
-  (defun my-show-git-timemachine-details-in-header-line (revision)
-    "Show details for REVISION in header line."
-    (let* ((date-relative (nth 3 revision))
-           (date-full (nth 4 revision))
-           (author (if git-timemachine-show-author
-                       (concat (nth 6 revision) ": ")
-                     ""))
-           (sha-or-subject (if (eq git-timemachine-minibuffer-detail 'commit)
-                               (car revision)
-                             (nth 5 revision))))
-      (setf header-line-format
-            (format "%s%s [%s (%s)]"
-                    (propertize author
-                                'face 'git-timemachine-minibuffer-author-face)
-                    (propertize sha-or-subject
-                                'face 'git-timemachine-minibuffer-detail-face)
-                    date-full date-relative))))
-
-  (setf (symbol-function 'git-timemachine--show-minibuffer-details)
-        #'my-show-git-timemachine-details-in-header-line))
+  (defun my-show-git-timemachine-details-in-header-line (fn &rest args)
+    "Apply FN on ARGS but use header line to display details."
+    (cl-letf (((symbol-function 'message)
+               (lambda (string &rest objects)
+                 (setf header-line-format (apply #'format string objects)))))
+      (apply fn args)))
+  (advice-add #'git-timemachine--show-minibuffer-details :around
+              #'my-show-git-timemachine-details-in-header-line))
 
 ;; Show edits in the left fringe
 (use-package diff-hl
@@ -1914,7 +1902,9 @@ This is a non-interactive version of `ignore'."
 (use-package elfeed-show
   :defer t
   :after elfeed
-  :init (setf elfeed-enclosure-default-dir (expand-file-name "Downloads/" "~")))
+  :init
+  (setf elfeed-enclosure-default-dir
+        (expand-file-name (convert-standard-filename "Downloads/") "~")))
 
 ;;; Chatting
 

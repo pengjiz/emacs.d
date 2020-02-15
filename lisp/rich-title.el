@@ -17,7 +17,7 @@
 (declare-function projectile-project-name "ext:projectile")
 (declare-function projectile-project-type "ext:projectile")
 
-(defvar-local rich-title--project-name nil)
+(defvar-local rich-title--project-name nil "Current project name.")
 
 (defun rich-title--get-project-name ()
   "Return the project name."

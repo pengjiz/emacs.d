@@ -13,7 +13,8 @@
 
 ;;; NickServ identification
 
-(defvar erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password)
+(defvar erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password
+  "Whether to ask for NickServ password.")
 
 (defun erc-extras--search-nickserv-auth-source-password (nickname)
   "Search NickServ password for NICKNAME with auth-source."

@@ -109,7 +109,7 @@
 ;;; Helpers for defining mode line format (mostly copied from doom-emacs)
 
 (eval-and-compile
-  (defvar liteline--segment-fns-alist nil))
+  (defvar liteline--segment-fns-alist nil "Functions for segments."))
 
 ;; NOTE: In general each segment should have a trailing whitespace as
 ;; the separator. There might be a better way to handle this.
@@ -196,7 +196,7 @@ If DEFAULT is non-nil, set the default value."
 
 ;;; Active window
 
-(defvar liteline--active-window nil)
+(defvar liteline--active-window nil "Current active window.")
 
 (declare-function lv-message "ext:lv")
 (declare-function transient--show "ext:transient")
@@ -464,19 +464,19 @@ If DEFAULT is non-nil, set the default value."
                  (format " %dW" (count-words start end))))))))
 
 (liteline-def-segment action
-  "Show information on the current actions.
-Fallback to workspace tag."
+  "Show action status."
   (when (liteline--active-p)
     (let (action)
-      (dolist (fn '(liteline--get-macro-indicator
-                    liteline--get-selection-info))
+      (dolist (fn '(liteline--get-selection-info
+                    liteline--get-macro-indicator))
         (when-let* ((string (funcall fn)))
-          (setf action (concat action string " "))))
+          (push " " action)
+          (push string action)))
       (when action
-        (propertize (concat " " action) 'face 'liteline-action)))))
+        (propertize (apply #'concat " " action) 'face 'liteline-action)))))
 
 ;; Flycheck
-(defvar-local liteline--flycheck nil)
+(defvar-local liteline--flycheck nil "Current Flycheck status string.")
 (put 'liteline--flycheck 'risky-local-variable t)
 
 (defvar flycheck-current-errors)
@@ -530,7 +530,7 @@ Fallback to workspace tag."
        (concat " " liteline--flycheck " ")))
 
 ;; Git
-(defvar-local liteline--git nil)
+(defvar-local liteline--git nil "Current Git status string.")
 (put 'liteline--git 'risky-local-variable t)
 
 (defun liteline--update-git ()
@@ -569,17 +569,15 @@ Fallback to workspace tag."
 ;; Minor modes
 (liteline-def-segment minor-modes
   "Show some important minor modes."
-  (when-let* ((string
-               (and (liteline--active-p)
-                    (mapconcat
-                     (lambda (x)
-                       (and (boundp (car x))
-                            (symbol-value (car x))
-                            (cdr x)))
-                     liteline-important-minor-modes-alist
-                     nil))))
-    (unless (string-empty-p string)
-      (concat " " string " "))))
+  (when (liteline--active-p)
+    (let (modes)
+      (dolist (mode liteline-important-minor-modes-alist)
+        (let ((symbol (car mode)))
+          (when (and (boundp symbol) (symbol-value symbol))
+            (push (cdr mode) modes))))
+      (when modes
+        (push " " modes)
+        (apply #'concat " " (nreverse modes))))))
 
 ;; Misc information
 (defun liteline--get-org-timer ()

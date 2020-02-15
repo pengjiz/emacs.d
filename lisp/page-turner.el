@@ -47,12 +47,14 @@ If nil use value of `fill-column'."
 (defvar visual-fill-column-width)
 (defvar visual-fill-column-center-text)
 
-(defvar-local page-turner--face-remapping-cookies nil)
+(defvar-local page-turner--face-remapping-cookies nil
+  "Face remapping cookies added.")
 ;; NOTE: This is a marker for whether prose styles have been applied. Here we do
 ;; not use minor mode because we do not want an interactive command and instead
 ;; we want a flexible function that can be used for advising or hooks. Also,
 ;; with this marker we can avoid some unnecessary works.
-(defvar-local page-turner--in-prose-styles nil)
+(defvar-local page-turner--in-prose-styles nil
+  "Whether the current buffer is in prose styles.")
 
 (defun page-turner--disable-shr-filling (fn &rest args)
   "Apply FN on ARGS, but disable `shr-fill-line'."
