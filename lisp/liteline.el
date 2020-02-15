@@ -440,36 +440,6 @@ If DEFAULT is non-nil, set the default value."
   (when (bound-and-true-p ace-window-mode)
     (format "Ace[%s]" (substring-no-properties ace-window-mode 7))))
 
-;; Anzu
-(defvar anzu--state)
-(defvar anzu--overflow-p)
-(defvar anzu-cons-mode-line-p)
-(defvar anzu-mode-line-update-function)
-(declare-function anzu--update-mode-line "ext:anzu")
-
-(defun liteline--update-anzu-mode-line (here total)
-  "Format anzu HERE and TOTAL for mode line display."
-  (when anzu--state
-    (cond ((eq anzu--state 'replace-query)
-           (format "%d replace" total))
-          ((eq anzu--state 'replace)
-           (format "%d/%d" here total))
-          (anzu--overflow-p
-           (format "%s+" total))
-          (t
-           (format "%s/%d" here total)))))
-
-(defun liteline--setup-anzu ()
-  "Setup anzu."
-  (with-eval-after-load 'anzu
-    (setf anzu-cons-mode-line-p nil
-          anzu-mode-line-update-function #'liteline--update-anzu-mode-line)))
-
-(defun liteline--get-anzu-position ()
-  "Return the current anzu position."
-  (when (bound-and-true-p anzu--state)
-    (anzu--update-mode-line)))
-
 ;; Keyboard macro
 (defun liteline--get-macro-indicator ()
   "Return an indicator when recording keyboard macros."
@@ -513,7 +483,6 @@ Fallback to workspace tag."
                         (when-let* ((string (funcall fn)))
                           (concat string " ")))
                       '(liteline--get-macro-indicator
-                        liteline--get-anzu-position
                         liteline--get-selection-info)
                       nil))))
       (unless (string-empty-p action)
@@ -660,7 +629,6 @@ Fallback to workspace tag."
   (liteline--setup-active-window)
   (liteline--setup-conda)
   (liteline--setup-reftex)
-  (liteline--setup-anzu)
   (liteline--setup-flycheck)
   (liteline--setup-git)
   (litelite--setup-two-column)

@@ -706,37 +706,6 @@ This is a non-interactive version of `ignore'."
   :no-require t
   :config (setf isearch-allow-scroll t))
 
-;; Anzu
-(use-package anzu
-  :ensure t
-  :defer t
-  :bind (([remap query-replace] . anzu-query-replace)
-         ([remap query-replace-regexp] . anzu-query-replace-regexp)
-         :map isearch-mode-map
-         ([remap isearch-query-replace] . anzu-isearch-query-replace)
-         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
-  :init (global-anzu-mode)
-  :config
-  (setf anzu-search-threshold 1000
-        anzu-replace-threshold 1000)
-
-  ;; NOTE: Sometimes we may switch to another buffer while searching, making it
-  ;; impossible to clear the state saved in a buffer-local variable. So here we
-  ;; have these lines.
-  (defvar my-anzu-last-buffer nil)
-
-  (defun my-save-anzu-last-buffer (&rest _)
-    "Save the buffer when searching starts."
-    (setf my-anzu-last-buffer (current-buffer)))
-  (advice-add #'anzu--cons-mode-line :after #'my-save-anzu-last-buffer)
-
-  (defun my-reset-anzu-state (&rest _)
-    "Reset `anzu--state' when searching ends."
-    (when (buffer-live-p my-anzu-last-buffer)
-      (setf (buffer-local-value 'anzu--state my-anzu-last-buffer) nil
-            my-anzu-last-buffer nil)))
-  (advice-add #'anzu--reset-mode-line :after #'my-reset-anzu-state))
-
 ;; Swiper
 (use-package swiper
   :ensure t
