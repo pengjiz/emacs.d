@@ -115,9 +115,10 @@ This is a non-interactive version of `ignore'."
   (dolist (key '(;; compose mail
                  "C-x m"
                  "C-x 4 m"
-                 "C-x 5 m"
                  ;; tmm
                  "M-`"
+                 ;; frame commands
+                 "C-x 5"
                  ;; suspend frame
                  "C-z"
                  "C-x C-z"
@@ -1678,7 +1679,7 @@ This is a non-interactive version of `ignore'."
   (setf projectile-completion-system (if (fboundp #'ivy-read) 'ivy 'default))
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (dolist (key '("s" "x"))
+  (dolist (key '("s" "x" "5"))
     (unbind-key key projectile-command-map))
   (bind-keys :map projectile-command-map
              ("x e" . projectile-run-eshell)
