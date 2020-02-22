@@ -1053,8 +1053,8 @@ This is a non-interactive version of `ignore'."
 ;;; Window & frame
 
 (progn ; scroll
-  (setf scroll-conservatively 1000
-        scroll-preserve-screen-position t))
+  (setf scroll-conservatively 101
+        scroll-preserve-screen-position 'always))
 
 (use-package mwheel
   :defer t
