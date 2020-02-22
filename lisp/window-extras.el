@@ -107,23 +107,6 @@ Otherwise apply FN on BUFFER and ARGS."
   (with-eval-after-load 'ielm
     (advice-add #'ielm :around #'window-extras--pop-to-ielm-buffer)))
 
-;; Elfeed
-(declare-function elfeed "ext:elfeed")
-
-(defun window-extras--show-elfeed-fullframe (fn &rest args)
-  "Apply FN on ARGS but force using the full frame."
-  (cl-letf (((symbol-function 'switch-to-buffer)
-             (lambda (buffer &optional norecord &rest _)
-               (when-let* ((window (display-buffer buffer)))
-                 (select-window window norecord)
-                 (delete-other-windows window)))))
-    (apply fn args)))
-
-(defun window-extras--setup-elfeed ()
-  "Setup Elfeed integration."
-  (with-eval-after-load 'elfeed
-    (advice-add #'elfeed :around #'window-extras--show-elfeed-fullframe)))
-
 ;; Idris mode
 (defvar idris-hole-list-buffer-name)
 (declare-function idris-hole-list-quit "ext:idris-hole-list")
@@ -147,7 +130,6 @@ Otherwise apply FN on BUFFER and ARGS."
   (window-extras--setup-racket)
   (window-extras--setup-calc)
   (window-extras--setup-ielm)
-  (window-extras--setup-elfeed)
   (window-extras--setup-idris))
 
 (provide 'window-extras)
