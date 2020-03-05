@@ -1904,7 +1904,10 @@ This is a non-interactive version of `ignore'."
   :after elfeed
   :init
   (setf elfeed-enclosure-default-dir
-        (expand-file-name (convert-standard-filename "Downloads/") "~")))
+        (expand-file-name (convert-standard-filename "Downloads/") "~"))
+  ;; NOTE: This fixes the weird issue that cursor is not at the beginning of
+  ;; buffer after switching when there are tables in the entry.
+  (setf elfeed-show-entry-switch #'pop-to-buffer-same-window))
 
 ;;; Chatting
 
