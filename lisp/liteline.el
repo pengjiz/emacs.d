@@ -375,10 +375,10 @@ If DEFAULT is non-nil, set the default value."
 ;; HACK: A big hack on preventing the mode line from being modified.
 (defun liteline--avoid-reftex-mode-line (fn &rest args)
   "Apply FN on ARGS with protection on the mode line."
-  (cl-letf* (((symbol-function 'buffer-size)
-              (lambda (&optional buffer)
-                (liteline--clear-local-mode-line)
-                (liteline--get-buffer-size buffer))))
+  (cl-letf (((symbol-function 'buffer-size)
+             (lambda (&optional buffer)
+               (liteline--clear-local-mode-line)
+               (liteline--get-buffer-size buffer))))
     (apply fn args)))
 
 (defun liteline--setup-reftex ()
