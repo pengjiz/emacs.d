@@ -44,6 +44,10 @@ If nil use value of `fill-column'."
 
 (declare-function shr-fill-line "shr")
 (declare-function face-remap-remove-relative "face-remap")
+(defvar shr-width)
+(defvar shr-use-fonts)
+(defvar shr-internal-width)
+(defvar shr-table-separator-pixel-width)
 (defvar visual-fill-column-width)
 (defvar visual-fill-column-center-text)
 
@@ -59,6 +63,51 @@ If nil use value of `fill-column'."
 (defun page-turner--disable-shr-filling (fn &rest args)
   "Apply FN on ARGS, but disable `shr-fill-line'."
   (cl-letf (((symbol-function 'shr-fill-line) #'ignore))
+    (apply fn args)))
+
+;; NOTE: Even if text filling is disabled this variable is still used when
+;; rendering some elements. So here we set it properly.
+(defun page-turner--set-shr-width (fn &rest args)
+  "Apply FN on ARGS, but force using `page-turner-text-width'."
+  (let ((shr-width (or page-turner-text-width fill-column)))
+    (apply fn args)))
+
+;; HACK: For some reason the hr line will be one character longer than expected,
+;; so here we use a hack to adjust the width.
+(defun page-turner--tag-shr-hr (_)
+  "Keep the original `shr-tag-hr' function."
+  nil)
+(with-eval-after-load 'shr
+  (setf (symbol-function 'page-turner--tag-shr-hr)
+        (symbol-function 'shr-tag-hr)))
+
+(defun page-turner--adjust-shr-hr-width (fn &rest args)
+  "Apply FN on ARGS, but adjust hr line width."
+  (cl-letf (((symbol-function 'shr-tag-hr)
+             (lambda (dom)
+               (let ((shr-internal-width (if shr-use-fonts
+                                             (- shr-internal-width
+                                                shr-table-separator-pixel-width)
+                                           shr-internal-width)))
+                 (page-turner--tag-shr-hr dom)))))
+    (apply fn args)))
+
+;; HACK: When rendering tables sometimes line truncating will be turned on,
+;; which is not desired in prose styles. So here we use a hack to avoid that
+;; behavior.
+(defun page-turner--tag-shr-table (_)
+  "Keep the original `shr-tag-table' function."
+  nil)
+(with-eval-after-load 'shr
+  (setf (symbol-function 'page-turner--tag-shr-table)
+        (symbol-function 'shr-tag-table)))
+
+(defun page-turner--avoid-shr-truncating (fn &rest args)
+  "Apply FN on ARGS, but avoid line truncating."
+  (cl-letf (((symbol-function 'shr-tag-table)
+             (lambda (dom)
+               (let (truncate-lines)
+                 (page-turner--tag-shr-table dom)))))
     (apply fn args)))
 
 (defun page-turner--reset-font ()
@@ -124,7 +173,10 @@ If nil use value of `fill-column'."
   "Setup EWW integration."
   (with-eval-after-load 'eww
     (advice-add #'eww-readable :around #'page-turner--disable-shr-filling)
+    (advice-add #'eww-readable :around #'page-turner--set-shr-width)
     (advice-add #'eww-readable :after #'page-turner--set-prose-styles)
+    (advice-add #'eww-readable :around #'page-turner--adjust-shr-hr-width)
+    (advice-add #'eww-readable :around #'page-turner--avoid-shr-truncating)
     (advice-add #'eww-display-html :before #'page-turner--reset-eww-styles)))
 
 ;; Nov mode
@@ -139,12 +191,17 @@ If nil use value of `fill-column'."
     (add-hook 'nov-mode-hook #'page-turner--set-prose-styles)))
 
 ;; Elfeed
-(declare-function elfeed-insert-html "ext:elfeed")
+(declare-function elfeed-insert-html "ext:elfeed-show")
+(declare-function elfeed-insert-link "ext:elfeed-show")
 
 (defun page-turner--setup-elfeed ()
   "Setup Elfeed integration."
   (with-eval-after-load 'elfeed-show
     (advice-add #'elfeed-insert-html :around #'page-turner--disable-shr-filling)
+    (advice-add #'elfeed-insert-html :around #'page-turner--set-shr-width)
+    (advice-add #'elfeed-insert-link :around #'page-turner--set-shr-width)
+    (advice-add #'elfeed-insert-html :around #'page-turner--adjust-shr-hr-width)
+    (advice-add #'elfeed-insert-html :around #'page-turner--avoid-shr-truncating)
     (add-hook 'elfeed-show-mode-hook #'page-turner--set-prose-styles)))
 
 ;; Markdown mode
@@ -155,7 +212,6 @@ If nil use value of `fill-column'."
 ;; TODO: Find a way to enable all prose styles.
 (declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 (defvar markdown-live-preview-window-function)
-(defvar shr-width)
 
 (defun page-turner--get-preview-buffer (file)
   "Get a buffer showing FILE with EWW."
@@ -172,11 +228,6 @@ If nil use value of `fill-column'."
           #'page-turner--get-preview-buffer)))
 
 ;;; Documentation
-
-(defun page-turner--set-shr-width (fn &rest args)
-  "Apply FN on ARGS, but force using `page-turner-text-width'."
-  (let ((shr-width (or page-turner-text-width fill-column)))
-    (apply fn args)))
 
 ;; Racket mode
 (declare-function racket--do-describe "ext:racket-complete")
