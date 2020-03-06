@@ -1794,10 +1794,9 @@ This is a non-interactive version of `ignore'."
 
 (use-package firestarter
   :ensure t
+  :defer t
   :bind ("C-c c f" . firestarter-mode)
-  :config
-  (setf firestarter-default-type t)
-  (firestarter-mode))
+  :config (setf firestarter-default-type t))
 
 ;;; ElDoc
 
