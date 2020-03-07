@@ -313,6 +313,12 @@ This is a non-interactive version of `ignore'."
          ("C-c x z" . align-current)
          ("C-c x Z" . align-entire)))
 
+(use-package sort
+  :defer t
+  :bind (("C-c x r" . sort-lines)
+         ("C-c x R" . sort-columns)
+         ("C-c x d" . delete-duplicate-lines)))
+
 (use-package unfill
   :ensure t
   :defer t
