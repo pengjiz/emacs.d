@@ -332,6 +332,11 @@ This is a non-interactive version of `ignore'."
          ("C-M-<up>" . md-duplicate-up)
          ("C-M-<down>" . md-duplicate-down)))
 
+(use-package swap-regions
+  :ensure t
+  :defer t
+  :bind ("C-c x t" . swap-regions))
+
 (use-package typo
   :ensure t
   :defer t
