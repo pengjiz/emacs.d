@@ -322,9 +322,7 @@ This is a non-interactive version of `ignore'."
 (use-package unfill
   :ensure t
   :defer t
-  :bind (([remap fill-paragraph] . unfill-toggle)
-         ("C-c x q" . fill-region)
-         ("C-c x l" . unfill-region)))
+  :bind ([remap fill-paragraph] . unfill-toggle))
 
 (use-package move-dup
   :ensure t
