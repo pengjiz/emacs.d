@@ -1486,12 +1486,6 @@ This is a non-interactive version of `ignore'."
   :bind ("C-c e e" . ivy-yasnippet)
   :config (setf ivy-yasnippet-create-snippet-if-not-matched nil))
 
-;; Tiny
-(use-package tiny
-  :ensure t
-  :defer t
-  :bind ("C-c e t" . tiny-expand))
-
 ;;; Lint
 
 (use-package flycheck
