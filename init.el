@@ -1943,9 +1943,7 @@ This is a non-interactive version of `ignore'."
   (setf erc-user-full-name "Pengji Zhang")
   (setf erc-prompt-for-password nil)
   (setf erc-hide-list '("353")
-        erc-lurker-hide-list '("JOIN" "PART" "QUIT"))
-  (setf erc-kill-queries-on-quit t
-        erc-kill-server-buffer-on-quit t))
+        erc-lurker-hide-list '("JOIN" "PART" "QUIT")))
 
 (use-package erc-join
   :defer t
