@@ -228,7 +228,7 @@ This is a non-interactive version of `ignore'."
          ("C-c b c" . clone-indirect-buffer-other-window)
          ("C-c t v" . visual-line-mode)
          ("C-c t l" . toggle-truncate-lines)
-         ("C-c t f" . auto-fill-mode)
+         ("C-c t q" . auto-fill-mode)
          ("C-c a l" . list-processes)
          ("M-g n" . hydra-errors/next-error)
          ("M-g p" . hydra-errors/previous-error))

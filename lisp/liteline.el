@@ -30,7 +30,7 @@
 
 (defcustom liteline-important-minor-modes-alist
   '((typo-mode . "t")
-    (auto-fill-function . "f")
+    (auto-fill-function . "q")
     (visual-line-mode . "v")
     (whitespace-mode . "w")
     (flyspell-mode . "s"))
