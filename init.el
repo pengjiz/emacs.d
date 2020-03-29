@@ -1063,7 +1063,9 @@ This is a non-interactive version of `ignore'."
 
 (progn ; scroll
   (setf scroll-conservatively 101
-        scroll-preserve-screen-position 'always))
+        scroll-preserve-screen-position 'always
+        hscroll-margin 0
+        hscroll-step 1))
 
 (use-package mwheel
   :defer t
