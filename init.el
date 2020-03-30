@@ -2243,29 +2243,32 @@ This is a non-interactive version of `ignore'."
 (use-package racket-mode
   :ensure t
   :defer t
+  :config
+  (defun my-setup-racket-mode ()
+    (kill-local-variable 'eldoc-documentation-function))
+  (add-hook 'racket-mode-hook #'my-setup-racket-mode))
+
+(use-package racket-repl
+  :defer t
+  :after racket-mode
   :bind (;; -
          :map racket-mode-map
-         ("C-c a a" . racket-run)
+         ("C-c a a" . racket-repl)
          :map racket-repl-mode-map
          ("C-c a a" . racket-repl-exit))
   :config
-  (defun my-setup-racket-mode ()
-    ;; NOTE: Racket mode does not support ElDoc well, so it set this to nil.
-    ;; However, the default function may be still useful.
-    (kill-local-variable 'eldoc-documentation-function))
-  (add-hook 'racket-mode-hook #'my-setup-racket-mode)
-
-  ;; Do not display the buffer automatically
-  (setf (symbol-function 'racket--repl-show-and-move-to-end) #'my-ignore)
-
   (defun my-setup-racket-repl-mode ()
     (kill-local-variable 'eldoc-documentation-function)
     (kill-local-variable 'comint-prompt-read-only)
     (kill-local-variable 'comint-scroll-show-maximum-output)
     (make-local-variable 'tab-always-indent)
     (setf tab-always-indent 'complete))
-  (add-hook 'racket-repl-mode-hook #'my-setup-racket-repl-mode)
+  (add-hook 'racket-repl-mode-hook #'my-setup-racket-repl-mode))
 
+(use-package racket-logger
+  :defer t
+  :after racket-mode
+  :config
   (defun my-avoid-ido-for-racket (fn &rest args)
     "Apply FN on ARGS, but force using `completing-read'."
     (cl-letf (((symbol-function 'ido-completing-read)

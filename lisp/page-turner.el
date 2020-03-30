@@ -230,11 +230,11 @@ If nil use value of `fill-column'."
 ;;; Documentation
 
 ;; Racket mode
-(declare-function racket--do-describe "ext:racket-complete")
+(declare-function racket--do-describe "ext:racket-describe")
 
 (defun page-turner--setup-racket ()
   "Setup Racket mode integration."
-  (with-eval-after-load 'racket-complete
+  (with-eval-after-load 'racket-describe
     (advice-add #'racket--do-describe :around #'page-turner--set-shr-width)))
 
 ;; Man
