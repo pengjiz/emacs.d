@@ -3248,7 +3248,10 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package sh-script
   :defer t
+  :bind (:map sh-mode-map ("C-c a a" . sh-show-shell))
   :init
+  (setf sh-shell-file "/bin/bash")
+
   (with-eval-after-load 'org
     (cl-pushnew '(shell . t) org-babel-load-languages :test #'eq :key #'car))
   :config (setf sh-basic-offset 2))
