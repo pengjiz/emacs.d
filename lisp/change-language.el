@@ -9,7 +9,7 @@
 (require 'ispell)
 (require 'typo nil t)
 
-;;; Options
+;;; Option
 
 (defgroup change-language nil
   "Easily change language."

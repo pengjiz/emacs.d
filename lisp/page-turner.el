@@ -9,7 +9,7 @@
 (eval-when-compile
   (require 'cl-lib))
 
-;;; Options
+;;; Option
 
 (defgroup page-turner nil
   "Improve reading experience."

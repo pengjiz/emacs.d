@@ -61,7 +61,7 @@
           (setf TeX-command-next TeX-command-Show)
         (setf TeX-command-next TeX-command-default)))))
 
-;;; Expand options
+;;; Expand arguments
 
 (defun auctex-latexmk--expand-output-mode ()
   "Get Latexmk output mode."

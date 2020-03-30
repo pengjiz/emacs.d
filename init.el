@@ -164,14 +164,12 @@ This is a non-interactive version of `ignore'."
     (run-with-timer (* min 60) nil #'alert msg :title "Reminder"))
   :config (setf alert-fade-time 15))
 
-;; Theme
 (use-package color-theme-sanityinc-tomorrow
   :ensure t
   :config
   (load-theme 'sanityinc-tomorrow-night t)
   (push '(font . "Source Code Pro-12") default-frame-alist))
 
-;; Net
 (use-package url
   :defer t
   :init (setf url-configuration-directory (my-expand-var-file-name "url/")))
@@ -185,7 +183,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :init (setf request-storage-directory (my-expand-var-file-name "request/")))
 
-;; Start server
 (use-package server
   :when (display-graphic-p)
   :config
@@ -204,7 +201,7 @@ This is a non-interactive version of `ignore'."
 
   (shell-command-with-editor-mode))
 
-;;; General Editing helpers
+;;; General Editing helper
 
 (progn ; disabled commands
   (put #'narrow-to-defun 'disabled nil)
@@ -377,8 +374,7 @@ This is a non-interactive version of `ignore'."
 (use-package savehist
   :init (setf savehist-file (my-expand-var-file-name "savehist"))
   :config
-  (setf savehist-additional-variables
-        '(search-ring regexp-search-ring))
+  (setf savehist-additional-variables '(search-ring regexp-search-ring))
   (setf savehist-autosave-interval 60)
   (savehist-mode))
 
@@ -488,7 +484,7 @@ This is a non-interactive version of `ignore'."
   :after proced
   :bind (:map proced-mode-map ("/" . proced-narrow)))
 
-;;; Pairs
+;;; Pair
 
 (use-package elec-pair
   :config (electric-pair-mode))
@@ -557,7 +553,7 @@ This is a non-interactive version of `ignore'."
 (use-package electric
   :config (electric-indent-mode))
 
-;;; Editing visuals
+;;; Editing visual
 
 (use-package hideshow
   :defer t
@@ -710,13 +706,11 @@ This is a non-interactive version of `ignore'."
 
 ;;; Search & replace
 
-;; Isearch
 (use-package isearch
   :defer t
   :no-require t
   :config (setf isearch-allow-scroll t))
 
-;; Swiper
 (use-package swiper
   :ensure t
   :defer t
@@ -727,7 +721,6 @@ This is a non-interactive version of `ignore'."
          :map isearch-mode-map
          ([remap swiper] . swiper-from-isearch)))
 
-;; Web
 (use-package web-search
   :load-path "lisp"
   :defer t
@@ -736,7 +729,7 @@ This is a non-interactive version of `ignore'."
          ("M-s b d" . web-search-wiktionary)
          ("M-s b h" . web-search-github)))
 
-;;; Buffers
+;;; Buffer
 
 ;; Protect a few special buffers
 (progn ; special buffers
@@ -747,18 +740,16 @@ This is a non-interactive version of `ignore'."
         (ignore (bury-buffer))))
   (add-hook 'kill-buffer-query-functions #'my-protect-special-buffers))
 
-;; Unique buffer names
+;; Unique buffer name
 (use-package uniquify
   :config
   (setf uniquify-buffer-name-style 'forward)
   (setf uniquify-after-kill-buffer-p t))
 
-;; Minibuffer
 (progn ; recursive minibuffers
   (setf enable-recursive-minibuffers t)
   (minibuffer-depth-indicate-mode))
 
-;; Ibuffer
 (use-package ibuffer
   :defer t
   :bind (([remap list-buffers] . ibuffer)
@@ -806,7 +797,7 @@ This is a non-interactive version of `ignore'."
                 (mode 16 16 :left :elide) " "
                 process))))
 
-;;; Files
+;;; File
 
 (use-package files
   :bind (("C-c f g" . revert-buffer)
@@ -869,7 +860,6 @@ This is a non-interactive version of `ignore'."
   :hook (before-save . time-stamp)
   :config (setf time-stamp-format "%:y-%02m-%02d %02H:%02M:%02S %Z"))
 
-;; Tramp
 (use-package tramp
   :defer t
   :init
@@ -880,7 +870,6 @@ This is a non-interactive version of `ignore'."
         tramp-histfile-override t)
   (setf tramp-default-method "ssh"))
 
-;; Recent files
 (use-package recentf
   :init
   (setf recentf-save-file (my-expand-var-file-name "recentf"))
@@ -892,7 +881,6 @@ This is a non-interactive version of `ignore'."
                           "/\\.git/"))
   (recentf-mode))
 
-;; Bookmarks
 (use-package bookmark
   :defer t
   :init (setf bookmark-default-file (my-expand-var-file-name "bookmarks"))
@@ -905,7 +893,6 @@ This is a non-interactive version of `ignore'."
           (cl-pushnew `(,(car item) . ((filename . ,filename))) bookmark-alist
                       :test #'equal :key #'car))))))
 
-;; Dired
 (use-package dired
   :defer t
   :bind (([remap list-directory] . dired)
@@ -953,12 +940,10 @@ This is a non-interactive version of `ignore'."
   :defer t
   :config (setf wdired-allow-to-change-permissions t))
 
-;; Dired-Aux
 (use-package dired-aux
   :defer t
   :config (setf dired-isearch-filenames 'dwim))
 
-;; Dired-X
 (use-package dired-x
   :defer t
   :bind* (("C-x C-j" . dired-jump)
@@ -1033,7 +1018,6 @@ This is a non-interactive version of `ignore'."
         image-dired-temp-image-file (my-expand-var-file-name "image-dired/temp")
         image-dired-temp-rotate-image-file (my-expand-var-file-name "image-dired/rotate-temp")))
 
-;; Disk usage
 (use-package disk-usage
   :ensure t
   :defer t
@@ -1239,8 +1223,6 @@ This is a non-interactive version of `ignore'."
 
 ;;; Completion
 
-;; Minibuffer
-
 (use-package minibuffer
   :defer t
   :bind ([remap complete-symbol] . completion-at-point))
@@ -1334,8 +1316,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :after ivy
   :init (setf xref-show-xrefs-function #'ivy-xref-show-xrefs))
-
-;; In-buffer
 
 (use-package company
   :ensure t
@@ -1463,13 +1443,11 @@ This is a non-interactive version of `ignore'."
 
 ;;; Expansion
 
-;; Abbrev
 (use-package abbrev
   :defer t
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
 
-;; YASnippet
 (use-package yasnippet
   :ensure t
   :defer t
@@ -1563,14 +1541,12 @@ This is a non-interactive version of `ignore'."
 
 ;;; VCS
 
-;; VC
 (use-package vc-hooks
   :defer t
   :config
   (setf vc-handled-backends '(Git))
   (setf vc-follow-symlinks t))
 
-;; Magit
 (use-package magit
   :ensure t
   :defer t
@@ -1644,7 +1620,6 @@ This is a non-interactive version of `ignore'."
     ("p" diff-hl-previous-hunk "previous")
     ("n" diff-hl-next-hunk "next")))
 
-;; Git modes
 (use-package gitignore-mode
   :ensure t
   :defer t)
@@ -2132,7 +2107,6 @@ This is a non-interactive version of `ignore'."
 
   (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
 
-;; Modules
 (use-package em-alias
   :defer t
   :init (setf eshell-aliases-file (my-expand-etc-file-name "eshell/aliases")))
@@ -2155,7 +2129,6 @@ This is a non-interactive version of `ignore'."
   (setf eshell-rc-script (my-expand-etc-file-name "eshell/profile")
         eshell-login-script (my-expand-etc-file-name "eshell/login")))
 
-;; Extensions
 (use-package eshell-z
   :ensure t
   :after eshell)
@@ -2879,7 +2852,7 @@ This is a replacement for `reftex--query-search-regexps'."
   (make-directory (my-expand-var-file-name "org/") t)
   (setf org-babel-load-languages nil)
   :config
-  ;; Files
+  ;; File
   (setf org-directory (my-expand-sync-file-name "org/"))
   (make-directory org-directory t)
 
@@ -2903,7 +2876,7 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf org-file-apps '((auto-mode . emacs)
                         (directory . emacs)))
 
-  ;; LaTeX fragments and entities
+  ;; LaTeX fragment and entity
   (setf org-highlight-latex-and-related '(latex entities))
   (setf org-use-sub-superscripts '{})
   (setf org-format-latex-options (plist-put org-format-latex-options
@@ -2925,7 +2898,7 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf org-log-into-drawer t
         org-log-done 'time)
 
-  ;; Tags
+  ;; Tag
   (setf org-tag-persistent-alist '(("note" . ?n))))
 
 (use-package org-id
@@ -3072,12 +3045,12 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf org-latex-compiler "lualatex"
         org-latex-pdf-process '("latexmk %f"))
 
-  ;; Source code blocks
+  ;; Source code
   (setf org-latex-listings t)
   (push '("" "listings") org-latex-packages-alist)
   (push '("" "color") org-latex-packages-alist)
 
-  ;; Koma
+  ;; KOMA-Script
   (push '("koma-article"
           "\\documentclass[11pt]{scrartcl}"
           ("\\section{%s}" . "\\section*{%s}")

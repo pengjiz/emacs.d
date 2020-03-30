@@ -17,7 +17,7 @@
 (eval-when-compile
   (require 'subr-x))
 
-;;; Faces and options
+;;; Face and option
 
 (defcustom eshell-extras-prompt-git-dirty-label
   "*"
@@ -63,7 +63,7 @@
   "Face used by autosuggest suggestions."
   :group 'eshell-hist)
 
-;;; Commands
+;;; Command
 
 ;; Common
 (defun eshell/take (directory)
@@ -80,7 +80,7 @@
   "Clear `mode-line-process' when end a command is finished."
   (setf mode-line-process nil))
 
-;; Contents
+;; Buffer content
 (defun eshell-extras-clear-buffer ()
   "Clear Eshell buffer."
   (interactive)
@@ -238,7 +238,7 @@ Return the overlay made."
     (advice-add #'ivy-overlay-show-after :before
                 #'eshell-extras--hide-suggestion-for-ivy-overlay)))
 
-;;; Setup
+;;; Entry point
 
 (defun eshell-extras-setup ()
   "Setup Eshell extensions."

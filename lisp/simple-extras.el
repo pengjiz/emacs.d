@@ -112,7 +112,7 @@ lines first."
     (kill-new to)
     (message "Email address `%s' saved to kill ring" to)))
 
-;;; Setup
+;;; Entry point
 
 (defun simple-extras-setup ()
   "Setup simple extensions."

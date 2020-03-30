@@ -31,7 +31,7 @@ read with `read-string' and PROMPT."
         (list input)))
      (browse-url (format ,url-template (url-hexify-string query)))))
 
-;;; Search engines
+;;; Search engine
 
 ;; Google
 (web-search-def-engine "google"

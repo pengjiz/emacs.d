@@ -70,7 +70,7 @@ FORMAT-STRING and ARGS are passed to `eldoc-lv--message' or `message'."
 (with-eval-after-load 'ace-window
   (cl-pushnew " *ElDoc*" aw-ignored-buffers :test #'equal))
 
-;;; Setup
+;;; Entry point
 
 (defun eldoc-lv-setup ()
   "Setup ElDoc to use `eldoc-lv-message'."

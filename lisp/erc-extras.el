@@ -56,7 +56,7 @@
         (erc-prompt-for-nickserv-password t))
     (apply fn args)))
 
-;;; Setup
+;;; Entry point
 
 (defun erc-extras-setup ()
   "Setup ERC extensions."

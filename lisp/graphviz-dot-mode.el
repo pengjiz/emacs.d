@@ -10,7 +10,7 @@
   (require 'cl-lib)
   (require 'rx))
 
-;;; Options
+;;; Option
 
 (defgroup graphviz-dot nil
   "Major mode for the Graphviz DOT language."
@@ -22,7 +22,7 @@
   :type 'integer
   :safe #'integerp)
 
-;;; Keywords
+;;; Keyword
 
 (defconst graphviz-dot-terminal-keywords
   '("graph" "digraph" "subgraph" "node" "edge")

@@ -19,7 +19,7 @@
   "The program name for fd."
   :type 'string)
 
-;;; Display transformers
+;;; Display transformer
 
 ;; Show the first line of the docstring for commands
 (defun counsel-extras--display-command (command)
@@ -44,7 +44,7 @@
   (ivy-configure 'counsel-M-x
     :display-transformer-fn #'counsel-extras--display-command))
 
-;;; Extra actions
+;;; Extra action
 
 ;; Execute key when listing key bindings
 ;;
@@ -68,7 +68,7 @@
    'counsel-descbinds
    '(("x" counsel-extras-execute-keys "execute"))))
 
-;;; Commands
+;;; Command
 
 (defun counsel-extras--display-filename (filename)
   "Return the formatted string of FILENAME for display."

@@ -41,7 +41,7 @@ not found locally."
                (executable-find executable))))
       (flycheck-default-executable-find executable)))
 
-;;; Setup
+;;; Entry point
 
 (defun flycheck-npm-setup ()
   "Setup Flycheck for NPM."

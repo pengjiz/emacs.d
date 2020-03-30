@@ -8,7 +8,7 @@
 
 (require 'haskell-customize)
 
-;;; Options
+;;; Option
 
 (defcustom haskell-extras-process-types
   '(stack-ghci

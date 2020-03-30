@@ -15,7 +15,7 @@ body {
   padding: 2em 1em;
 }
 
-/* Headings */
+/* Heading */
 
 .title {
   font-size: 2.16em;
@@ -87,7 +87,7 @@ ul {
   list-style-type: disc;
 }
 
-/* Anchors */
+/* Anchor */
 
 a {
   color: #111;

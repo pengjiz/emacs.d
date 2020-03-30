@@ -10,7 +10,7 @@
   (require 'cl-lib)
   (require 'subr-x))
 
-;;; Integration with window display management
+;;; Window display management integration
 
 ;; Org mode
 (defvar org-src-window-setup)
@@ -76,7 +76,7 @@ Otherwise apply FN on BUFFER and ARGS."
     (advice-add #'racket-logger :around
                 #'window-extras--pop-to-racket-logger-buffer)))
 
-;;; Hacks for changing how buffers are displayed
+;;; Buffer display hack
 
 ;; Calc
 (declare-function calc "calc")

@@ -9,7 +9,7 @@
 (eval-when-compile
   (require 'rx))
 
-;;; Options
+;;; Option
 
 (defgroup pest nil
   "Major mode for pest PEG."
@@ -21,7 +21,7 @@
   :type 'integer
   :safe #'integerp)
 
-;;; Keywords
+;;; Keyword
 
 (defconst pest-special-rule-keywords
   '("WHITESPACE" "COMMENT" "ANY" "SOI" "EOI" "POP" "POP_ALL" "PEEK" "PEEK_ALL"

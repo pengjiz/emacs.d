@@ -12,7 +12,7 @@
   "TypeScript-TSX"
   "Major mode for the TypeScript TSX language.")
 
-;; Integration with Flycheck
+;; Flycheck integration
 (declare-function flycheck-add-mode "ext:flycheck")
 
 (with-eval-after-load 'flycheck

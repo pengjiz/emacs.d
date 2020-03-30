@@ -11,7 +11,7 @@
   (require 'subr-x)
   (require 'let-alist))
 
-;;; Faces and options
+;;; Face and option
 
 (defgroup liteline nil
   "A light-weight mode line."
@@ -106,7 +106,7 @@
   '((t (:inherit (bold error))))
   "Face used for errors in Git.")
 
-;;; Helpers for defining mode line format (mostly copied from doom-emacs)
+;;; Mode line helper (mostly copied from doom-emacs)
 
 (eval-and-compile
   (defvar liteline--segment-fns-alist nil "Functions for segments."))
@@ -247,7 +247,7 @@ If DEFAULT is non-nil, set the default value."
   (with-eval-after-load 'transient
     (advice-add #'transient--show :around #'liteline--ignore-active-window)))
 
-;;; Basic segments
+;;; Basic segment
 
 ;; Buffer information
 (defun liteline--get-buffer-modification ()
@@ -430,7 +430,7 @@ If DEFAULT is non-nil, set the default value."
     mode-line-process
     " "))
 
-;;; Additional segments & third-party integration
+;;; Additional segment & third-party integration
 
 ;; Keyboard macro
 (defun liteline--get-macro-indicator ()
@@ -566,7 +566,7 @@ If DEFAULT is non-nil, set the default value."
        liteline--git
        (concat " " liteline--git " ")))
 
-;; Minor modes
+;; Minor mode
 (liteline-def-segment minor-modes
   "Show some important minor modes."
   (when (liteline--active-p)
@@ -598,7 +598,7 @@ If DEFAULT is non-nil, set the default value."
   (with-eval-after-load 'two-column
     (setf 2C-mode-line-format (default-value 'mode-line-format))))
 
-;;; Mode lines
+;;; Mode line
 
 ;; Main
 (liteline-def-mode-line

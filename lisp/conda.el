@@ -10,7 +10,7 @@
   (require 'cl-lib)
   (require 'subr-x))
 
-;;; Options
+;;; Option
 
 (defgroup conda nil
   "Integration with Conda."
