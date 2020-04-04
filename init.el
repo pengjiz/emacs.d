@@ -15,7 +15,8 @@
 
 (progn ; startup
   (setf load-prefer-newer t
-        ad-redefinition-action 'accept)
+        ad-redefinition-action 'accept
+        debugger-stack-frame-as-list t)
   (setf create-lockfiles nil
         delete-by-moving-to-trash t)
   (setf (default-value 'mode-line-format) nil
@@ -35,15 +36,14 @@
   (tooltip-mode 0)
   (blink-cursor-mode 0)
   (setf ring-bell-function #'my-ignore
+        echo-keystrokes 0.25
+        use-dialog-box nil
+        (symbol-function 'yes-or-no-p) #'y-or-n-p
+        mode-line-default-help-echo nil
         frame-resize-pixelwise t
         window-resize-pixelwise t
-        debugger-stack-frame-as-list t
-        use-dialog-box nil
-        echo-keystrokes 0.25
-        mode-line-default-help-echo nil
         (default-value 'indicate-empty-lines) t
         (default-value 'cursor-in-non-selected-windows) nil
-        (symbol-function 'yes-or-no-p) #'y-or-n-p
         visible-cursor nil
         x-stretch-cursor t))
 
