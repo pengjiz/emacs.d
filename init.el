@@ -44,6 +44,7 @@
         (default-value 'indicate-empty-lines) t
         (default-value 'cursor-in-non-selected-windows) nil
         (symbol-function 'yes-or-no-p) #'y-or-n-p
+        visible-cursor nil
         x-stretch-cursor t))
 
 (progn ; package
