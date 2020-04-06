@@ -1610,6 +1610,7 @@ This is a non-interactive version of `ignore'."
   :config
   ;; Magit integration
   (with-eval-after-load 'magit
+    (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
   ;; In terminal there is no fringe
