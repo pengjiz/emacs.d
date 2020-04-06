@@ -1605,7 +1605,7 @@ This is a non-interactive version of `ignore'."
          ("C-c g n" . hydra-hunks/diff-hl-next-hunk)
          :map diff-hl-command-map
          ("SPC" . diff-hl-mark-hunk))
-  :hook (dired-mode . diff-hl-dired-mode-unless-remote)
+  :hook (dired-mode . diff-hl-dired-mode)
   :init (global-diff-hl-mode)
   :config
   ;; Magit integration
