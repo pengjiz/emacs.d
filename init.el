@@ -2209,7 +2209,7 @@ This is a non-interactive version of `ignore'."
         cider-auto-select-test-report-buffer nil)
   (setf nrepl-hide-special-buffers t))
 
-(use-package flycheck-joker
+(use-package flycheck-clj-kondo
   :ensure t
   :after flycheck)
 
