@@ -2365,15 +2365,6 @@ This is a non-interactive version of `ignore'."
     (setf (default-value 'company-backends)
           (delq #'dante-company (default-value 'company-backends)))))
 
-(use-package hindent
-  :ensure t
-  :defer t
-  :bind (;; -
-         :map hindent-mode-map
-         ([remap prog-indent-sexp] . hindent-reformat-decl)
-         ("C-c x f" . hindent-reformat-buffer))
-  :hook (haskell-mode . hindent-mode))
-
 ;;; Idris
 
 (use-package idris-mode
