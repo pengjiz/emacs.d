@@ -2196,12 +2196,7 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t
   :after clojure-mode
-  :bind (;; -
-         :map clojure-mode-map
-         ("C-c a a" . cider)
-         :map cider-mode-map
-         ("C-c x f" . cider-format-buffer)
-         ("C-c x F" . cider-format-edn-buffer))
+  :bind (:map clojure-mode-map ("C-c a a" . cider))
   :config
   (setf cider-save-file-on-load nil)
   (setf cider-repl-pop-to-buffer-on-connect nil
@@ -2259,8 +2254,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package rust-mode
   :ensure t
-  :defer t
-  :bind (:map rust-mode-map ("C-c x f" . rust-format-buffer)))
+  :defer t)
 
 (use-package racer
   :ensure t
@@ -2549,7 +2543,6 @@ This is a non-interactive version of `ignore'."
 (use-package tide
   :ensure t
   :defer t
-  :bind (:map tide-mode-map ("C-c x f" . tide-format))
   :hook ((js2-mode typescript-mode typescript-tsx-mode) . my-enable-tide)
   :init
   (defun my-enable-tide ()
@@ -2774,9 +2767,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :bind (;; -
          :map bibtex-mode-map
          ("C-M-q" . bibtex-fill-entry)
-         ("M-g L" . bibtex-validate)
-         ("C-c x f" . bibtex-reformat)
-         ("C-c x F" . bibtex-convert-alien))
+         ("M-g L" . bibtex-validate))
   :init (setf bibtex-dialect 'biblatex)
   :config
   (setf bibtex-align-at-equal-sign t)
