@@ -1099,8 +1099,7 @@ This is a non-interactive version of `ignore'."
                         "*idris-holes*"
                         "*idris-info*"
                         "*cider-doc*"
-                        "*cider-inspect*"
-                        "*Racket Describe*"))
+                        "*cider-inspect*"))
            (display-buffer-reuse-window
             display-buffer-reuse-mode-window
             display-buffer-below-selected)
@@ -1131,7 +1130,6 @@ This is a non-interactive version of `ignore'."
                         "*TeX errors*"
                         "*BibTeX validation errors*"
                         "*R dired*"
-                        "*Racket Profile*"
                         "*Ibuffer*"
                         (and (1+ nonl) "Buffers*")))
            (display-buffer-reuse-window
@@ -1157,7 +1155,6 @@ This is a non-interactive version of `ignore'."
                         "*idris-notes*"
                         "*blacken-error*"
                         "*jq-format-json errors*"
-                        "*Racket Logger*"
                         "*HsCompilation*"
                         (and (1+ nonl) " output*")))
            (display-buffer-reuse-window
@@ -1329,7 +1326,6 @@ This is a non-interactive version of `ignore'."
          ("C-j" . company-complete-selection))
   :hook ((emacs-lisp-mode
           clojure-mode
-          racket-mode
           c-mode
           c++-mode
           cmake-mode
@@ -1358,7 +1354,6 @@ This is a non-interactive version of `ignore'."
   (defun my-enable-company ()
     (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
                                                  'clojure-mode
-                                                 'racket-mode
                                                  'rust-mode
                                                  'idris-mode
                                                  'css-mode
@@ -1479,7 +1474,6 @@ This is a non-interactive version of `ignore'."
          :map flycheck-mode-map
          ("M-g l" . flycheck-list-errors))
   :hook ((emacs-lisp-mode
-          racket-mode
           clojure-mode
           c-mode
           c++-mode
@@ -2209,42 +2203,6 @@ This is a non-interactive version of `ignore'."
   :after flycheck)
 
 ;;; Racket
-
-(use-package racket-mode
-  :ensure t
-  :defer t
-  :config
-  (defun my-setup-racket-mode ()
-    (kill-local-variable 'eldoc-documentation-function))
-  (add-hook 'racket-mode-hook #'my-setup-racket-mode))
-
-(use-package racket-repl
-  :defer t
-  :after racket-mode
-  :bind (;; -
-         :map racket-mode-map
-         ("C-c a a" . racket-repl)
-         :map racket-repl-mode-map
-         ("C-c a a" . racket-repl-exit))
-  :config
-  (defun my-setup-racket-repl-mode ()
-    (kill-local-variable 'eldoc-documentation-function)
-    (kill-local-variable 'comint-prompt-read-only)
-    (kill-local-variable 'comint-scroll-show-maximum-output)
-    (make-local-variable 'tab-always-indent)
-    (setf tab-always-indent 'complete))
-  (add-hook 'racket-repl-mode-hook #'my-setup-racket-repl-mode))
-
-(use-package racket-logger
-  :defer t
-  :after racket-mode
-  :config
-  (defun my-avoid-ido-for-racket (fn &rest args)
-    "Apply FN on ARGS, but force using `completing-read'."
-    (cl-letf (((symbol-function 'ido-completing-read)
-               #'completing-read))
-      (apply fn args)))
-  (advice-add #'racket-logger-topic-level :around #'my-avoid-ido-for-racket))
 
 (use-package scribble-mode
   :ensure t

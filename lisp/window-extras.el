@@ -60,22 +60,6 @@ Otherwise apply FN on BUFFER and ARGS."
     (advice-add #'org-src-switch-to-buffer :around
                 #'window-extras--pop-to-org-src-buffer)))
 
-;; Racket mode
-(defvar racket-logger--buffer-name)
-(declare-function racket-logger "ext:racket-logger")
-
-(defun window-extras--pop-to-racket-logger-buffer (fn &rest args)
-  "Apply FN on ARGS but force using `pop-to-buffer'."
-  (save-window-excursion
-    (apply fn args))
-  (pop-to-buffer racket-logger--buffer-name))
-
-(defun window-extras--setup-racket ()
-  "Setup Racket mode integration."
-  (with-eval-after-load 'racket-logger
-    (advice-add #'racket-logger :around
-                #'window-extras--pop-to-racket-logger-buffer)))
-
 ;;; Buffer display hack
 
 ;; Calc
@@ -127,7 +111,6 @@ Otherwise apply FN on BUFFER and ARGS."
 (defun window-extras-setup ()
   "Setup window extensions."
   (window-extras--setup-org)
-  (window-extras--setup-racket)
   (window-extras--setup-calc)
   (window-extras--setup-ielm)
   (window-extras--setup-idris))
