@@ -2192,13 +2192,22 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t
   :after clojure-mode
-  :bind (:map clojure-mode-map ("C-c a a" . cider))
-  :config
-  (setf cider-save-file-on-load nil)
-  (setf cider-repl-pop-to-buffer-on-connect nil
-        cider-auto-select-error-buffer nil
-        cider-auto-select-test-report-buffer nil)
-  (setf nrepl-hide-special-buffers t))
+  :bind (:map clojure-mode-map ("C-c a a" . cider)))
+
+(use-package cider-eval
+  :defer t
+  :after cider
+  :config (setf cider-save-file-on-load t))
+
+(use-package cider-repl
+  :defer t
+  :after cider
+  :bind (:map cider-repl-mode-map ("C-c a a" . cider-quit)))
+
+(use-package nrepl-client
+  :defer t
+  :after cider
+  :config (setf nrepl-hide-special-buffers t))
 
 (use-package flycheck-clj-kondo
   :ensure t
