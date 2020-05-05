@@ -1099,7 +1099,8 @@ This is a non-interactive version of `ignore'."
                         "*idris-holes*"
                         "*idris-info*"
                         "*cider-doc*"
-                        "*cider-inspect*"))
+                        "*cider-inspect*"
+                        "*Geiser documentation*"))
            (display-buffer-reuse-window
             display-buffer-reuse-mode-window
             display-buffer-below-selected)
@@ -1152,6 +1153,7 @@ This is a non-interactive version of `ignore'."
                         "*skewer-error*"
                         "*cider-error*"
                         "*cider-test-report*"
+                        "*Geiser dbg*"
                         "*idris-notes*"
                         "*blacken-error*"
                         "*jq-format-json errors*"
@@ -1326,6 +1328,7 @@ This is a non-interactive version of `ignore'."
          ("C-j" . company-complete-selection))
   :hook ((emacs-lisp-mode
           clojure-mode
+          scheme-mode
           c-mode
           c++-mode
           cmake-mode
@@ -1475,6 +1478,7 @@ This is a non-interactive version of `ignore'."
          ("M-g l" . flycheck-list-errors))
   :hook ((emacs-lisp-mode
           clojure-mode
+          scheme-mode
           c-mode
           c++-mode
           rust-mode
@@ -2203,6 +2207,29 @@ This is a non-interactive version of `ignore'."
   :after flycheck)
 
 ;;; Racket
+
+(use-package geiser-mode
+  :ensure geiser
+  :defer t
+  :bind (:map geiser-mode-map ("C-c a a" . run-geiser))
+  :init (setf geiser-active-implementations '(racket)))
+
+(use-package geiser-repl
+  :defer t
+  :after geiser-mode
+  :bind (:map geiser-repl-mode-map ("C-c a a" . geiser-repl-exit))
+  :init
+  (make-directory (my-expand-var-file-name "geiser/") t)
+  (setf geiser-repl-history-filename (my-expand-var-file-name "geiser/history"))
+  :config
+  (setf geiser-repl-company-p nil)
+  (setf geiser-repl-read-only-prompt-p nil
+        geiser-repl-read-only-output-p nil))
+
+(use-package geiser-autodoc
+  :defer t
+  :after geiser-mode
+  :config (setf geiser-autodoc-delay eldoc-idle-delay))
 
 (use-package scribble-mode
   :ensure t
