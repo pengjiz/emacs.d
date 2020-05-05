@@ -1155,8 +1155,6 @@ This is a non-interactive version of `ignore'."
                         "*cider-test-report*"
                         "*Geiser dbg*"
                         "*idris-notes*"
-                        "*blacken-error*"
-                        "*jq-format-json errors*"
                         "*HsCompilation*"
                         (and (1+ nonl) " output*")))
            (display-buffer-reuse-window
