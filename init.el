@@ -3085,6 +3085,13 @@ This is a replacement for `reftex--query-search-regexps'."
     (push '("dot" . graphviz-dot) org-src-lang-modes)
     (cl-pushnew '(dot . t) org-babel-load-languages :test #'eq :key #'car)))
 
+;;; GLSL
+
+(use-package glsl-mode
+  :ensure t
+  :defer t
+  :config (unbind-key "<S-iso-lefttab>" glsl-mode-map))
+
 ;;; JSON
 
 (use-package json-mode
