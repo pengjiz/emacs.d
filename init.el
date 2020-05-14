@@ -2913,9 +2913,8 @@ This is a replacement for `reftex--query-search-regexps'."
         org-agenda-deadline-leaders '("Deadline: " "In %d days: " "OVERDUE %d days: ")
         org-agenda-scheduled-leaders '("Scheduled: " "SCHEDULED %dx: ")
         org-agenda-block-separator "")
-  (setf org-agenda-span 10
-        org-agenda-start-on-weekday nil
-        org-agenda-start-day "-3d")
+  (setf org-agenda-span 'day
+        org-agenda-start-on-weekday 0)
 
   (defun my-realign-tags-in-org-agenda ()
     "Realign tags after changing the layout in Org agenda buffers."
