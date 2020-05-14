@@ -3053,14 +3053,8 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf (default-value 'markdown-enable-math) t)
   (setf markdown-fontify-code-blocks-natively t)
   (setf markdown-max-image-size '(300 . nil))
-  (let ((css-url (concat "file://"
-                         (my-expand-etc-file-name "css/pandoc.css"))))
-    (setf markdown-command
-          (mapconcat #'shell-quote-argument
-                     `("pandoc" "--toc" "--section-divs"
-                       "--standalone" "--css" ,css-url
-                       "-f" "markdown" "-t" "html5")
-                     " "))))
+  (setf markdown-css-paths `(,(concat "file://" (my-expand-etc-file-name "css/pandoc.css")))
+        markdown-command '("pandoc" "--section-divs" "--from=markdown" "--to=html5")))
 
 ;;; ReStructuredText
 
