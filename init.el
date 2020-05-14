@@ -2342,11 +2342,10 @@ This is a non-interactive version of `ignore'."
          ("C-c C-t" . dante-type-at)
          ("C-c TAB" . dante-info))
   :hook (haskell-mode . dante-mode)
-  :init
-  (setf dante-mode-map (make-sparse-keymap))
-  (setf dante-methods-alist `((stack "stack.yaml" ("stack" "repl" dante-target))
-                              (ghci ,(lambda (_) t) ("ghci"))))
+  :init (setf dante-mode-map (make-sparse-keymap))
   :config
+  (setf dante-methods '(stack bare-ghci))
+
   (with-eval-after-load 'company
     (setf (default-value 'company-backends)
           (delq #'dante-company (default-value 'company-backends)))))
