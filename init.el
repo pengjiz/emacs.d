@@ -462,17 +462,14 @@ This is a non-interactive version of `ignore'."
 
   (defun my-save-window-configuration-before-ediff ()
     "Save window configuration before Ediff."
-    (setf my-window-configuration-before-ediff
-          (current-window-configuration)))
+    (setf my-window-configuration-before-ediff (current-window-configuration)))
 
   (defun my-restore-window-configuration-after-ediff ()
     "Restore window configuration after Ediff."
     (set-window-configuration my-window-configuration-before-ediff))
 
-  (add-hook 'ediff-before-setup-hook
-            #'my-save-window-configuration-before-ediff)
-  (dolist (hook '(ediff-quit-hook
-                  ediff-suspend-hook))
+  (add-hook 'ediff-before-setup-hook #'my-save-window-configuration-before-ediff)
+  (dolist (hook '(ediff-quit-hook ediff-suspend-hook))
     (add-hook hook #'my-restore-window-configuration-after-ediff t)))
 
 (use-package proced
@@ -2517,8 +2514,7 @@ This is a non-interactive version of `ignore'."
 (use-package rjsx-mode
   :ensure t
   :defer t
-  :mode ("components/.+\\.js\\'"
-         "\\.react\\.js\\'"))
+  :mode ("components/.+\\.js\\'" "\\.react\\.js\\'"))
 
 (use-package typescript-mode
   :ensure t
@@ -2737,11 +2733,9 @@ This is a non-interactive version of `ignore'."
 DEFAULT is the default value.
 
 This is a replacement for `reftex--query-search-regexps'."
-    (split-string
-     (read-string
-      (format "Regex [&& Regex...] (%s): " default)
-      nil 'reftex-cite-regexp-hist default)
-     "[ \t]*&&[ \t]*"))
+    (split-string (read-string (format "Regex [&& Regex...] (%s): " default)
+                               nil 'reftex-cite-regexp-hist default)
+                  "[ \t]*&&[ \t]*"))
   (setf (symbol-function 'reftex--query-search-regexps)
         #'my-query-reftex-citation-search-regexps))
 
@@ -2978,9 +2972,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :init
   (defun my-load-org-babel-languages ()
     "Load all languages once."
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     org-babel-load-languages)
+    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
     ;; Only once
     (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
   :config
