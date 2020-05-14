@@ -1037,7 +1037,7 @@ This is a non-interactive version of `ignore'."
 (use-package auth-source
   :defer t
   :config
-  (setf auth-sources (list (my-expand-sync-file-name "misc/authinfo.gpg")))
+  (setf auth-sources `(,(my-expand-sync-file-name "misc/authinfo.gpg")))
   (setf auth-source-cache-expiry 3600))
 
 (use-package epa
@@ -1450,7 +1450,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :init
   (setf yas-minor-mode-map (make-sparse-keymap))
-  (setf yas-snippet-dirs (list (my-expand-etc-file-name "snippets/")))
+  (setf yas-snippet-dirs `(,(my-expand-etc-file-name "snippets/")))
   (setf yas-alias-to-yas/prefix-p nil)
   :config
   (setf yas-prompt-functions '(yas-completing-prompt))
@@ -3038,10 +3038,8 @@ This is a replacement for `reftex--query-search-regexps'."
         org-html-postamble nil
         org-html-htmlize-output-type 'css
         org-html-head-include-default-style nil
-        org-html-head (format
-                       "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
-                       (concat "file://"
-                               (my-expand-etc-file-name "css/org.css")))))
+        org-html-head (format "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
+                              (concat "file://" (my-expand-etc-file-name "css/org.css")))))
 
 ;;; Markdown
 

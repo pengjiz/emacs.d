@@ -17,8 +17,7 @@
   :group 'python)
 
 (defcustom conda-environment-directories
-  (list
-   (expand-file-name (convert-standard-filename ".conda/envs/") "~"))
+  `(,(expand-file-name (convert-standard-filename ".conda/envs/") "~"))
   "A list of directories of the Conda environments."
   :type '(repeat directory))
 
