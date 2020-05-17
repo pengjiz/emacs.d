@@ -1126,6 +1126,7 @@ This is a non-interactive version of `ignore'."
                         "*Org Clock*"
                         "*Clock Task Select*"
                         "*Calendar*"
+                        "*Projectile Commander Help*"
                         "*RefTeX Select*"
                         "*Bookmark List*"
                         "*Key*"
@@ -1645,8 +1646,6 @@ This is a non-interactive version of `ignore'."
         projectile-known-projects-file (my-expand-var-file-name "projectile/bookmarks.eld"))
   :config
   (setf projectile-dynamic-mode-line nil)
-  (setf projectile-verbose nil)
-  (setf projectile-enable-caching t)
   (setf projectile-completion-system (if (fboundp #'ivy-read) 'ivy 'default))
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
@@ -1656,61 +1655,59 @@ This is a non-interactive version of `ignore'."
              ("x e" . projectile-run-eshell)
              ("x i" . projectile-run-ielm))
 
-  (defun my-set-projectile-commander-bindings ()
-    "Set the key bindings for the Projectile Commander."
-    (def-projectile-commander-method ?f
-      "Find file in project."
-      (if (fboundp #'counsel-projectile-find-file)
-          (counsel-projectile-find-file)
-        (projectile-find-file)))
+  ;; Projectile Commander bindings
+  (setf (symbol-function 'projectile-commander-bindings) #'my-ignore)
 
-    (def-projectile-commander-method ?T
-      "Find test file in project."
-      (projectile-find-test-file))
+  (def-projectile-commander-method ?f
+    "Find file in project."
+    (if (fboundp #'counsel-projectile-find-file)
+        (counsel-projectile-find-file)
+      (projectile-find-file)))
 
-    (def-projectile-commander-method ?b
-      "Switch to project buffer."
-      (if (fboundp #'counsel-projectile-switch-to-buffer)
-          (counsel-projectile-switch-to-buffer)
-        (projectile-switch-to-buffer)))
+  (def-projectile-commander-method ?T
+    "Find test file in project."
+    (projectile-find-test-file))
 
-    (def-projectile-commander-method ?d
-      "Find directory in project."
-      (if (fboundp #'counsel-projectile-find-dir)
-          (counsel-projectile-find-dir)
-        (projectile-find-dir)))
+  (def-projectile-commander-method ?e
+    "Find recently visited file in project."
+    (projectile-recentf))
 
-    (def-projectile-commander-method ?D
-      "Open project root in dired."
-      (projectile-dired))
+  (def-projectile-commander-method ?b
+    "Switch to project buffer."
+    (if (fboundp #'counsel-projectile-switch-to-buffer)
+        (counsel-projectile-switch-to-buffer)
+      (projectile-switch-to-buffer)))
 
-    (def-projectile-commander-method ?v
-      "Open project root in vc-dir or magit."
-      (projectile-vc))
+  (def-projectile-commander-method ?d
+    "Find directory in project."
+    (if (fboundp #'counsel-projectile-find-dir)
+        (counsel-projectile-find-dir)
+      (projectile-find-dir)))
 
-    (def-projectile-commander-method ?r
-      "Replace a string in the project."
-      (projectile-replace))
+  (def-projectile-commander-method ?D
+    "Open project root in dired."
+    (projectile-dired))
 
-    (def-projectile-commander-method ?o
-      "Run multi-occur on project buffers."
-      (projectile-multi-occur))
+  (def-projectile-commander-method ?v
+    "Open project root in vc-dir or magit."
+    (projectile-vc))
 
-    (def-projectile-commander-method ?k
-      "Kill all project buffers."
-      (projectile-kill-buffers))
+  (def-projectile-commander-method ?r
+    "Replace a string in project."
+    (projectile-replace))
 
-    (when (fboundp #'counsel-projectile-rg)
-      (def-projectile-commander-method ?s
-        "Run rg on project."
-        (counsel-projectile-rg)))
+  (def-projectile-commander-method ?o
+    "Run multi-occur on project buffers."
+    (projectile-multi-occur))
 
-    (def-projectile-commander-method ?e
-      "Find recently visited file in project."
-      (projectile-recentf)))
+  (when (fboundp #'counsel-projectile-rg)
+    (def-projectile-commander-method ?s
+      "Run rg on project."
+      (counsel-projectile-rg)))
 
-  (setf (symbol-function 'projectile-commander-bindings)
-        #'my-set-projectile-commander-bindings)
+  (def-projectile-commander-method ?k
+    "Kill all project buffers."
+    (projectile-kill-buffers))
 
   (projectile-mode))
 
