@@ -2146,6 +2146,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package cc-mode
   :defer t
+  :bind (:map c-mode-base-map ("C-c C-b" . c-context-line-break))
   :init
   (with-eval-after-load 'org
     (cl-pushnew '(awk . t) org-babel-load-languages :test #'eq :key #'car))
@@ -2749,10 +2750,7 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package bibtex
   :defer t
-  :bind (;; -
-         :map bibtex-mode-map
-         ("C-M-q" . bibtex-fill-entry)
-         ("M-g L" . bibtex-validate))
+  :bind (:map bibtex-mode-map ("M-g L" . bibtex-validate))
   :init (setf bibtex-dialect 'biblatex)
   :config
   (setf bibtex-align-at-equal-sign t)
@@ -2773,8 +2771,7 @@ This is a replacement for `reftex--query-search-regexps'."
         bibtex-autokey-titlewords 1
         bibtex-autokey-titleword-length 10)
 
-  (dolist (key '("C-c C-q"  "C-c $"))
-    (unbind-key key bibtex-mode-map)))
+  (unbind-key "C-c $" bibtex-mode-map))
 
 ;;; Ledger
 
@@ -3072,7 +3069,17 @@ This is a replacement for `reftex--query-search-regexps'."
 (use-package glsl-mode
   :ensure t
   :defer t
-  :config (unbind-key "<S-iso-lefttab>" glsl-mode-map))
+  :bind (;; -
+         :map glsl-mode-map
+         ("C-M-q" . c-indent-exp)
+         ("C-c C-\\" . c-backslash-region)
+         ("C-c C-d" . glsl-find-man-page)
+         ("C-c C-n" . c-forward-conditional)
+         ("C-c C-p" . c-backward-conditional)
+         ("C-c C-u" . c-up-conditional)
+         ([remap backward-sentence] . c-beginning-of-statement)
+         ([remap forward-sentence] . c-end-of-statement))
+  :init (setf glsl-mode-map (make-sparse-keymap)))
 
 ;;; JSON
 
