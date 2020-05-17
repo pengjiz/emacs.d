@@ -251,7 +251,8 @@ This is a non-interactive version of `ignore'."
 (use-package simple-extras
   :load-path "lisp"
   :config
-  (add-hook 'prog-mode-hook #'simple-extras-auto-fill-comments-mode)
+  (dolist (hook '(prog-mode-hook protobuf-mode-hook))
+    (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
   (bind-keys ("C-c e r" . simple-extras-eval-last-sexp-and-replace)
              ([remap move-beginning-of-line] . simple-extras-move-beginning-of-line)
@@ -276,7 +277,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package bug-reference
   :defer t
-  :hook (prog-mode . bug-reference-prog-mode)
+  :hook ((prog-mode protobuf-mode) . bug-reference-prog-mode)
   :bind (("C-c t u" . bug-reference-mode)
          ("C-c t U" . bug-reference-prog-mode)
          :map bug-reference-map
@@ -285,6 +286,7 @@ This is a non-interactive version of `ignore'."
 (use-package goto-addr
   :defer t
   :hook (((prog-mode
+           protobuf-mode
            TeX-mode
            conf-mode
            yaml-mode)
@@ -301,7 +303,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package subword
   :defer t
-  :hook (prog-mode . subword-mode)
+  :hook ((prog-mode protobuf-mode) . subword-mode)
   :bind ("C-c t b" . subword-mode))
 
 (use-package align
@@ -514,8 +516,13 @@ This is a non-interactive version of `ignore'."
   :bind (("C-c t w" . whitespace-mode)
          ("C-c t W" . whitespace-toggle-options)
          ("C-c x w" . whitespace-cleanup))
-  :hook (((prog-mode text-mode bibtex-mode conf-mode) . my-enable-whitespace)
-         (TeX-update-style . whitespace-mode))
+  :hook ((TeX-update-style . whitespace-mode)
+         ((prog-mode
+           protobuf-mode
+           text-mode
+           bibtex-mode
+           conf-mode)
+          . my-enable-whitespace))
   :init
   (defun my-enable-whitespace ()
     (unless (bound-and-true-p TeX-mode-p)
@@ -556,7 +563,7 @@ This is a non-interactive version of `ignore'."
 (use-package hideshow
   :defer t
   :bind (:map hs-minor-mode-map ("C-c @ t" . hs-toggle-hiding))
-  :hook ((prog-mode bibtex-mode) . my-enable-hideshow)
+  :hook ((prog-mode protobuf-mode bibtex-mode) . my-enable-hideshow)
   :init
   (setf hs-minor-mode-map (make-sparse-keymap))
 
@@ -581,7 +588,7 @@ This is a non-interactive version of `ignore'."
          ("C-c @ n" . hydra-outline/outline-next-visible-heading)
          ("C-c @ b" . hydra-outline/outline-backward-same-level)
          ("C-c @ f" . hydra-outline/outline-forward-same-level))
-  :hook ((prog-mode TeX-mode) . outline-minor-mode)
+  :hook ((prog-mode protobuf-mode TeX-mode) . outline-minor-mode)
   :init
   (setf outline-minor-mode-map (make-sparse-keymap))
 
@@ -614,12 +621,12 @@ This is a non-interactive version of `ignore'."
 (use-package rainbow-delimiters
   :ensure t
   :defer t
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :hook ((prog-mode protobuf-mode) . rainbow-delimiters-mode))
 
 (use-package highlight-numbers
   :ensure t
   :defer t
-  :hook (prog-mode . highlight-numbers-mode))
+  :hook ((prog-mode protobuf-mode) . highlight-numbers-mode))
 
 (use-package highlight-escape-sequences
   :ensure t
@@ -629,6 +636,7 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t
   :hook ((prog-mode
+          protobuf-mode
           TeX-update-style
           conf-mode
           yaml-mode)
@@ -1513,7 +1521,7 @@ This is a non-interactive version of `ignore'."
   :bind (("C-c t s" . flyspell-mode)
          ("C-c x s" . flyspell-region))
   :hook (((text-mode bibtex-mode) . flyspell-mode)
-         (prog-mode . flyspell-prog-mode))
+         ((prog-mode protobuf-mode) . flyspell-prog-mode))
   :init
   (setf flyspell-issue-welcome-flag nil
         flyspell-issue-message-flag nil)
