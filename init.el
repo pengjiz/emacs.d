@@ -1154,6 +1154,7 @@ This is a non-interactive version of `ignore'."
                         "*Shell Command Output*"
                         "*Async Shell Command*"
                         "*firestarter*"
+                        "*Macroexpansion*"
                         "*Ledger Report*"
                         "*Gnuplot Trail*"
                         "*skewer-error*"
@@ -2166,6 +2167,10 @@ This is a non-interactive version of `ignore'."
   (setf c-default-style '((awk-mode . "awk")
                           (protobuf-mode . "protobuf")
                           (other . "common"))))
+
+(use-package cmacexp
+  :defer t
+  :config (setf c-macro-prompt-flag t))
 
 (use-package company-c-headers
   :ensure t
