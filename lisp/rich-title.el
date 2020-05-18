@@ -36,7 +36,7 @@
     (setf rich-title--project-name (rich-title--get-project-name))
     (force-mode-line-update)))
 
-(defun rich-title--initialize-project ()
+(defun rich-title--setup-project ()
   "Setup project system."
   (add-hook 'find-file-hook #'rich-title--set-project-name))
 
@@ -87,8 +87,8 @@ This is a customized version of `org-clock-update-mode-line'."
   (setf org-mode-line-string (org-clock-get-clock-string))
   (force-mode-line-update))
 
-(defun rich-title--initialize-org-clock ()
-  "Setup org clock."
+(defun rich-title--setup-org-clock ()
+  "Setup Org clock."
   (with-eval-after-load 'org-clock
     (setf (symbol-function 'org-clock-get-clock-string)
           #'rich-title--get-org-clock-string
@@ -104,15 +104,17 @@ This is a customized version of `org-clock-update-mode-line'."
     invocation-name
     "  "
     (:eval (rich-title--get-file-name))
-    rich-title--project-name))
+    rich-title--project-name)
+  "Base frame title format.")
 
 (defconst rich-title--format-with-clock
-  `(,@rich-title--base-format "  " org-mode-line-string))
+  `(,@rich-title--base-format "  " org-mode-line-string)
+  "Frame title format with Org clock string.")
 
 (defun rich-title-setup ()
   "Setup frame title."
-  (rich-title--initialize-project)
-  (rich-title--initialize-org-clock)
+  (rich-title--setup-project)
+  (rich-title--setup-org-clock)
 
   (setf frame-title-format rich-title--base-format)
   (with-eval-after-load 'org-clock

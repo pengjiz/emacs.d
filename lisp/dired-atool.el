@@ -44,7 +44,7 @@ files or directories."
 
 ;;; Run program
 
-(defvar dired-atool--process-buffer-name "*dired-atool*"
+(defconst dired-atool--process-buffer-name "*dired-atool*"
   "Buffer name for atool process.")
 
 (defun dired-atool--sentinel (process event)
