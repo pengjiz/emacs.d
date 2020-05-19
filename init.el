@@ -2839,7 +2839,6 @@ This is a replacement for `reftex--query-search-regexps'."
         org-catch-invisible-edits 'show-and-error)
   (setf org-goto-interface 'outline-path-completion)
   (setf org-image-actual-width '(300))
-  (setf org-tags-column 0)
   (setf org-modules '(org-id org-docview org-eww org-habit))
   (setf org-export-backends '(ascii html latex))
   (setf org-file-apps '((auto-mode . emacs)
@@ -2852,8 +2851,8 @@ This is a replacement for `reftex--query-search-regexps'."
                                             :scale 1.2))
 
   ;; Refile
-  (setf org-refile-targets '((nil :maxlevel . 3)
-                             (org-agenda-files :maxlevel . 3))
+  (setf org-refile-targets '((nil . (:maxlevel . 5))
+                             (org-agenda-files . (:maxlevel . 5)))
         org-refile-use-outline-path 'file
         org-refile-allow-creating-parent-nodes 'confirm
         org-outline-path-complete-in-steps nil)
@@ -2909,10 +2908,6 @@ This is a replacement for `reftex--query-search-regexps'."
   (setf org-agenda-window-setup 'only-window
         org-agenda-restore-windows-after-quit t)
   (setf org-agenda-start-with-log-mode t
-        org-agenda-skip-scheduled-if-deadline-is-shown 'not-today
-        org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled
-        org-agenda-deadline-leaders '("Deadline: " "In %d days: " "OVERDUE %d days: ")
-        org-agenda-scheduled-leaders '("Scheduled: " "SCHEDULED %dx: ")
         org-agenda-block-separator "")
   (setf org-agenda-span 'day
         org-agenda-start-on-weekday 0)
@@ -2940,8 +2935,7 @@ This is a replacement for `reftex--query-search-regexps'."
 (use-package org-clock
   :defer t
   :init
-  (setf org-clock-persist-file
-        (my-expand-var-file-name "org/clock-save.el"))
+  (setf org-clock-persist-file (my-expand-var-file-name "org/clock-save.el"))
   (with-eval-after-load 'org
     (org-clock-persistence-insinuate))
   :config
