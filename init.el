@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 
-;; This is my Emacs configuration.
+;; My personal Emacs configuration.
 
 ;;; Code:
 
@@ -202,7 +202,7 @@ This is a non-interactive version of `ignore'."
 
   (shell-command-with-editor-mode))
 
-;;; General Editing helper
+;;; General utility
 
 (progn ; disabled commands
   (put #'narrow-to-defun 'disabled nil)
@@ -1776,7 +1776,7 @@ This is a non-interactive version of `ignore'."
              ("C-x C-a b" . hydra-debug/gud-break)
              ("C-x C-a d" . hydra-debug/gud-remove)))
 
-;;; Compiler output viewer
+;;; Compiler explorer
 
 (use-package rmsbolt
   :ensure t
@@ -1784,7 +1784,7 @@ This is a non-interactive version of `ignore'."
   :bind ("C-c c r" . rmsbolt-mode)
   :config (setf rmsbolt-automatic-recompile nil))
 
-;;; HTML rendering & web browsing
+;;; Browser
 
 (use-package shr-color
   :defer t
@@ -2096,7 +2096,7 @@ This is a non-interactive version of `ignore'."
              ([remap move-end-of-line] . eshell-extras-accept-suggestion)
              ([remap forward-word] . eshell-extras-accept-suggestion-word)))
 
-;;; C/C++ & Awk
+;;; C & C++ & AWK
 
 (use-package cc-mode
   :defer t
@@ -2324,7 +2324,7 @@ This is a non-interactive version of `ignore'."
   (setf idris-stay-in-current-window-on-compiler-error t)
   (setf idris-enable-elab-prover t))
 
-;;; ESS (mainly R)
+;;; R
 
 (use-package ess
   :ensure t
@@ -2365,7 +2365,7 @@ This is a non-interactive version of `ignore'."
          ("C-c a m" . ess-rdired)
          (";" . ess-cycle-assign)))
 
-;;; Web
+;;; SGML
 
 (use-package web-mode
   :ensure t
@@ -3146,7 +3146,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :ensure t
   :defer t)
 
-;;; Image, PDF, etc.
+;;; Viewer
 
 (use-package doc-view
   :defer t
