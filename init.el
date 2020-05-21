@@ -1236,18 +1236,23 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind (("M-z" . ivy-resume)
          :map ivy-minibuffer-map
-         ([remap hydra-ivy/body] . ivy-dispatching-done)
-         ([remap avy-goto-char] . ivy-avy)
-         ([remap avy-goto-char-2] . ivy-avy))
+         ([remap hydra-ivy/body] . ivy-dispatching-done))
   :init (ivy-mode)
   :config
-  (setf ivy-display-style 'fancy
-        ivy-count-format "(%d/%d) ")
+  (setf ivy-count-format "(%d/%d) ")
   (setf ivy-use-selectable-prompt t
         ivy-wrap t)
   (setf ivy-use-virtual-buffers t
         ivy-virtual-abbreviate 'abbreviate)
   (setf ivy-read-action-format-function #'ivy-read-action-format-columns))
+
+(use-package ivy-avy
+  :defer t
+  :after ivy
+  :bind (;; -
+         :map ivy-minibuffer-map
+         ([remap avy-goto-char] . ivy-avy)
+         ([remap avy-goto-char-2] . ivy-avy)))
 
 (use-package counsel
   :ensure t
