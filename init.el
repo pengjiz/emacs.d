@@ -998,17 +998,6 @@ This is a non-interactive version of `ignore'."
          ("Z" . dired-atool-do-unpack)
          ("P" . dired-atool-do-pack)))
 
-(use-package dired-async
-  :ensure async
-  :after dired
-  :config
-  (defun my-show-dired-async-message (msg _ &rest args)
-    "Show MSG formatted  with ARGS with `message'."
-    (apply #'message msg args))
-  (setf dired-async-message-function #'my-show-dired-async-message)
-
-  (dired-async-mode))
-
 (use-package image-dired
   :defer t
   :after dired
