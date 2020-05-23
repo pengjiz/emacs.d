@@ -322,7 +322,11 @@ This is a non-interactive version of `ignore'."
 (use-package unfill
   :ensure t
   :defer t
-  :bind ([remap fill-paragraph] . unfill-toggle))
+  :bind ([remap fill-paragraph] . unfill-toggle)
+  :init
+  (defvar c-mode-base-map)
+  (with-eval-after-load 'cc-mode
+    (bind-key [remap c-fill-paragraph] #'unfill-toggle c-mode-base-map)))
 
 (use-package move-dup
   :ensure t
@@ -893,6 +897,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind (([remap list-directory] . dired)
          :map dired-mode-map
+         ("e" . browse-url-of-dired-file)
          ("K" . dired-kill-subdir)
          ([remap dired-up-directory] . my-dired-up-directory))
   :config
@@ -1017,11 +1022,8 @@ This is a non-interactive version of `ignore'."
 (use-package disk-usage
   :ensure t
   :defer t
-  :bind (("C-c f s" . disk-usage-here)
-         ("C-c f S" . disk-usage))
-  :init
-  (with-eval-after-load 'dired
-    (bind-key "]" #'disk-usage-here dired-mode-map)))
+  :after dired
+  :bind (:map dired-mode-map ("]" . disk-usage-here)))
 
 (use-package trashed
   :ensure t
@@ -3151,6 +3153,7 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (use-package doc-view
   :defer t
+  :bind (:map doc-view-mode-map ("&" . browse-url-of-file))
   :config
   (setf doc-view-continuous t)
   (setf doc-view-resolution 300)
