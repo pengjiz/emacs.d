@@ -261,8 +261,7 @@ This is a non-interactive version of `ignore'."
 
   (defvar ess-roxy-mode-map)
   (with-eval-after-load 'ess-roxy
-    (bind-key [remap move-beginning-of-line]
-              #'simple-extras-move-beginning-of-ess-line
+    (bind-key [remap move-beginning-of-line] #'simple-extras-move-beginning-of-ess-line
               ess-roxy-mode-map))
 
   (simple-extras-setup))
@@ -447,7 +446,8 @@ This is a non-interactive version of `ignore'."
     (bind-key "C-c o p" #'interleave-mode org-mode-map))
 
   (with-eval-after-load 'doc-view
-    (bind-key "C-c o p" #'interleave-open-notes-file-for-pdf doc-view-mode-map)))
+    (bind-key "C-c o p" #'interleave-open-notes-file-for-pdf
+              doc-view-mode-map)))
 
 (use-package htmlize
   :ensure t
@@ -465,7 +465,6 @@ This is a non-interactive version of `ignore'."
         ediff-split-window-function #'split-window-horizontally)
 
   (defvar my-window-configuration-before-ediff nil)
-
   (defun my-save-window-configuration-before-ediff ()
     "Save window configuration before Ediff."
     (setf my-window-configuration-before-ediff (current-window-configuration)))
@@ -511,10 +510,6 @@ This is a non-interactive version of `ignore'."
   (setf (default-value 'fill-column) 80)
   (setf sentence-end-double-space nil))
 
-(use-package whitespace-cleanup-mode
-  :ensure t
-  :config (global-whitespace-cleanup-mode))
-
 (use-package whitespace
   :defer t
   :bind (("C-c t w" . whitespace-mode)
@@ -551,6 +546,10 @@ This is a non-interactive version of `ignore'."
       (apply fn args)))
   (advice-add #'whitespace-cleanup :around #'my-set-whitespaces-to-clean)
   (advice-add #'whitespace-cleanup-region :around #'my-set-whitespaces-to-clean))
+
+(use-package whitespace-cleanup-mode
+  :ensure t
+  :config (global-whitespace-cleanup-mode))
 
 ;;; Indentation
 
@@ -875,10 +874,7 @@ This is a non-interactive version of `ignore'."
   (setf recentf-auto-cleanup 120)
   :config
   (setf recentf-max-saved-items 50)
-  (setf recentf-exclude '("/elpa/"
-                          "/var/"
-                          "/\\.git/"
-                          "/Trash/"))
+  (setf recentf-exclude '("/elpa/" "/var/" "/\\.git/" "/Trash/"))
   (recentf-mode))
 
 (use-package bookmark
@@ -1262,8 +1258,7 @@ This is a non-interactive version of `ignore'."
 
   (defvar company-active-map)
   (with-eval-after-load 'company
-    (bind-key [remap company-filter-candidates]
-              #'counsel-company
+    (bind-key [remap company-filter-candidates] #'counsel-company
               company-active-map))
 
   (with-eval-after-load 'comint
@@ -1273,8 +1268,7 @@ This is a non-interactive version of `ignore'."
 
   (defvar inferior-ess-mode-map)
   (with-eval-after-load 'ess-inf
-    (bind-key [remap ess-msg-and-comint-dynamic-list-input-ring]
-              #'counsel-shell-history
+    (bind-key [remap ess-msg-and-comint-dynamic-list-input-ring] #'counsel-shell-history
               inferior-ess-mode-map))
 
   ;; NOTE: Due to an Eshell bug we cannot bind key in the mode map.
@@ -1408,6 +1402,8 @@ This is a non-interactive version of `ignore'."
   :bind (([remap dabbrev-expand] . hippie-expand)
          ([remap dabbrev-completion] . hippie-expand))
   :config
+  (setf hippie-expand-ignore-buffers
+        '("\\` \\*" doc-view-mode image-mode dired-mode))
   (setf hippie-expand-try-functions-list
         '(try-complete-file-name-partially
           try-complete-file-name
@@ -1416,11 +1412,6 @@ This is a non-interactive version of `ignore'."
           try-expand-line-all-buffers
           try-expand-dabbrev-all-buffers
           try-expand-dabbrev-from-kill))
-
-  ;; Ignore some buffers
-  (setf hippie-expand-ignore-buffers
-        '("\\` \\*" doc-view-mode image-mode dired-mode))
-
   ;; Expand snippets
   (when (require 'yasnippet nil t)
     (cl-pushnew #'yas-hippie-try-expand hippie-expand-try-functions-list
@@ -1707,7 +1698,7 @@ This is a non-interactive version of `ignore'."
 
   (require 'ansi-color)
   (defun my-apply-ansi-colors-for-compilation ()
-    "Apply ANSI colors."
+    "Apply ANSI colors on compilation results."
     (when (eq major-mode 'compilation-mode)
       (let ((inhibit-read-only t))
         (ansi-color-apply-on-region compilation-filter-start (point-max)))))
@@ -2038,7 +2029,6 @@ This is a non-interactive version of `ignore'."
   (defun my-setup-eshell-mode ()
     (dolist (key '("M-s" "M-?" "<backtab>"))
       (unbind-key key eshell-mode-map))
-
     (bind-keys :map eshell-mode-map
                ([remap eshell-pcomplete] . completion-at-point)
                ([remap pcomplete-expand-and-complete] . completion-at-point)
@@ -2082,7 +2072,6 @@ This is a non-interactive version of `ignore'."
 
   ;; NOTE: Due to an Eshell bug we cannot bind key in the mode map.
   (bind-key [remap eshell-truncate-buffer] #'eshell-extras-clear-buffer)
-
   (bind-keys :map eshell-extras-autosuggest-suggestion-map
              ([remap forward-char] . eshell-extras-accept-suggestion)
              ([remap move-end-of-line] . eshell-extras-accept-suggestion)
@@ -2898,7 +2887,7 @@ This is a replacement for `reftex--query-search-regexps'."
   :bind (("C-c o i" . org-mru-clock-in)
          ("C-c o u" . org-mru-clock-select-recent-task)))
 
-;; Source and babel
+;; Source code and Babel
 (use-package org-src
   :defer t
   :config
@@ -2912,14 +2901,15 @@ This is a replacement for `reftex--query-search-regexps'."
   :hook (org-mode . my-load-org-babel-languages)
   :init
   (defun my-load-org-babel-languages ()
-    "Load all languages once."
+    "Load all Org Babel languages once."
     (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
-    ;; Only once
+    ;; Only load languages once
     (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
   :config
   (setf org-confirm-babel-evaluate nil)
 
   (defun my-redisplay-org-inline-images ()
+    "Redisplay Org inline images."
     (when org-inline-image-overlays
       (org-redisplay-inline-images)))
   (add-hook 'org-babel-after-execute-hook #'my-redisplay-org-inline-images))
