@@ -873,7 +873,8 @@ This is a non-interactive version of `ignore'."
   (setf recentf-max-saved-items 50)
   (setf recentf-exclude '("/elpa/"
                           "/var/"
-                          "/\\.git/"))
+                          "/\\.git/"
+                          "/Trash/"))
   (recentf-mode))
 
 (use-package bookmark
@@ -1022,6 +1023,11 @@ This is a non-interactive version of `ignore'."
   (with-eval-after-load 'dired
     (bind-key "]" #'disk-usage-here dired-mode-map)))
 
+(use-package trashed
+  :ensure t
+  :defer t
+  :bind ("C-c f t" . trashed))
+
 ;;; Security
 
 (use-package password-cache
@@ -1101,7 +1107,8 @@ This is a non-interactive version of `ignore'."
            (window-height . 15)
            (reusable-frames . nil))
           ;; Application
-          (,(rx bos (or "*eshell"
+          (,(rx bos (or "Trash Can"
+                        "*eshell"
                         "*Occur"
                         "*ivy-occur"
                         " *Agenda Commands*"
