@@ -10,49 +10,7 @@
   (require 'cl-lib)
   (require 'subr-x))
 
-;;; Open the file with external programs
-
-(declare-function dired-get-file-for-visit "dired")
 (declare-function projectile-project-root "ext:projectile")
-
-(defun files-extras--get-open-program (&optional arg)
-  "Get the program name to open files externally.
-With non-nil ARG always prompt for the program."
-  (let ((program (cl-case system-type
-                   ((gnu gnu/linux gnu/kfreebsd) "xdg-open")
-                   ((darwin) "open"))))
-    (unless (and (not arg)
-                 program
-                 (executable-find program))
-      (setf program
-            (read-shell-command "Open current file with: ")))
-    program))
-
-(defun files-extras-open-externally (&optional arg)
-  "Open the current file externally.
-With non-nil ARG always prompt for the program to use."
-  (interactive "P")
-  (when (file-remote-p default-directory)
-    (user-error "Remote hosts not supported"))
-  (unless buffer-file-name
-    (user-error "Not visiting a file"))
-  (unless (file-exists-p buffer-file-name)
-    (error "File does not exist"))
-  (call-process
-   (files-extras--get-open-program arg)
-   nil 0 nil
-   buffer-file-name))
-
-(defun files-extras-open-externally-in-dired (&optional arg)
-  "Open the file at point externally.
-With non-nil ARG always prompt for the program to use."
-  (interactive "P")
-  (when (file-remote-p default-directory)
-    (user-error "Remote hosts not supported"))
-  (let ((file (dired-get-file-for-visit)))
-    (call-process (files-extras--get-open-program arg)
-                  nil 0 nil
-                  file)))
 
 ;;; Copy filename
 

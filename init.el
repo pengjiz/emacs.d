@@ -837,19 +837,8 @@ This is a non-interactive version of `ignore'."
 (use-package files-extras
   :load-path "lisp"
   :defer t
-  :commands (files-extras-open-externally
-             files-extras-open-externally-in-dired)
-  :bind (("C-c f x" . files-extras-open-externally)
-         ("C-c f w" . files-extras-copy-filename)
-         ("C-c f l" . files-extras-list-files))
-  :init
-  (defvar image-mode-map)
-  (with-eval-after-load 'image-mode
-    (bind-key "&" #'files-extras-open-externally image-mode-map))
-
-  (defvar dired-mode-map)
-  (with-eval-after-load 'dired
-    (bind-key "r" #'files-extras-open-externally-in-dired dired-mode-map)))
+  :bind (("C-c f w" . files-extras-copy-filename)
+         ("C-c f l" . files-extras-list-files)))
 
 (use-package ffap
   :defer t
