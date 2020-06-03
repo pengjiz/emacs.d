@@ -198,54 +198,20 @@ If DEFAULT is non-nil, set the default value."
 
 (defvar liteline--active-window nil "Current active window.")
 
-(declare-function lv-message "ext:lv")
-(declare-function transient--show "ext:transient")
-
 (defun liteline--set-active-window (&rest _)
   "Set `liteline--active-window'."
   (when-let* ((window (selected-window)))
-    (unless (or (eq window liteline--active-window)
-                (window-minibuffer-p window))
-      (setf liteline--active-window window)
-      (force-mode-line-update))))
-
-(defun liteline--set-active-window-after-select (_ &optional norecord)
-  "Set active window if NORECORD is nil."
-  (unless norecord
-    (liteline--set-active-window)))
-
-(defun liteline--clear-active-window (&rest _)
-  "Clear `liteline--active-window'."
-  (setf liteline--active-window nil)
-  (force-mode-line-update))
+    (unless (minibuffer-window-active-p window)
+      (setf liteline--active-window window))))
 
 (defun liteline--active-p ()
   "Return t if the current window is active."
   (eq (selected-window) liteline--active-window))
 
-(defun liteline--ignore-active-window (fn &rest args)
-  "Ignore the active window system when calling FN on ARGS."
-  (cl-letf (((symbol-function 'liteline--set-active-window)
-             (lambda (&rest _) nil)))
-    (apply fn args)))
-
 (defun liteline--setup-active-window ()
   "Setup the active window system."
-  ;; Start
   (liteline--set-active-window)
-
-  ;; After change window configuration
-  (add-hook 'window-configuration-change-hook #'liteline--set-active-window)
-  ;; After switching window
-  (advice-add #'select-window :after #'liteline--set-active-window-after-select)
-  ;; After switching frame
-  (advice-add #'handle-switch-frame :after #'liteline--set-active-window)
-
-  ;; Some functions do not play well with this
-  (with-eval-after-load 'lv
-    (advice-add #'lv-message :around #'liteline--ignore-active-window))
-  (with-eval-after-load 'transient
-    (advice-add #'transient--show :around #'liteline--ignore-active-window)))
+  (add-hook 'pre-redisplay-functions #'liteline--set-active-window))
 
 ;;; Basic segment
 
