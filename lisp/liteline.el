@@ -19,7 +19,7 @@
 
 (defcustom liteline-word-count-modes
   '(text-mode)
-  "Major modes in which showing word count is meanningful."
+  "Major modes in which word count is shown."
   :type '(repeat symbol))
 
 (defcustom liteline-input-method-names-alist
@@ -199,13 +199,13 @@ If DEFAULT is non-nil, set the default value."
 (defvar liteline--active-window nil "Current active window.")
 
 (defun liteline--set-active-window (&rest _)
-  "Set `liteline--active-window'."
+  "Set `litelite--active-window' to the current active window."
   (when-let* ((window (selected-window)))
     (unless (minibuffer-window-active-p window)
       (setf liteline--active-window window))))
 
 (defun liteline--active-p ()
-  "Return t if the current window is active."
+  "Return t if the selected window is active."
   (eq (selected-window) liteline--active-window))
 
 (defun liteline--setup-active-window ()
@@ -217,7 +217,7 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Buffer information
 (defun liteline--get-buffer-modification ()
-  "Return a string showing buffer modification status."
+  "Return buffer modification status."
   (cond (buffer-read-only
          (propertize "%%"
                      'face 'liteline-buffer-read-only))
@@ -227,7 +227,7 @@ If DEFAULT is non-nil, set the default value."
         (t "-")))
 
 (defun liteline--get-buffer-name ()
-  "Return a string showing buffer name."
+  "Return buffer name."
   (let* ((face (if (and buffer-file-name
                         (not (file-exists-p buffer-file-name)))
                    'liteline-buffer-file-non-existent
@@ -258,13 +258,13 @@ If DEFAULT is non-nil, set the default value."
    (liteline--get-buffer-hostname)
    " "))
 
-;; Buffer size and point position
+;; Position
 (declare-function image-get-display-property "image-mode")
 (declare-function image-mode-window-get "image-mode")
 (declare-function doc-view-last-page-number "doc-view")
 
 (liteline-def-segment buffer-position
-  "Show the position of point in the buffer."
+  "Show the position information."
   (cl-case major-mode
     ((image-mode)
      (let ((size (image-size (image-get-display-property) :pixels)))
@@ -289,9 +289,9 @@ If DEFAULT is non-nil, set the default value."
                 (concat "C" column-number " ")))))
       "%p "))))
 
-;; Buffer encoding
+;; Encoding
 (liteline-def-segment buffer-encoding
-  "Show the eol style and encoding of the buffer."
+  "Show the encoding information."
   (and (liteline--active-p)
        (concat
         " "
@@ -308,7 +308,7 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Input method
 (liteline-def-segment input-method
-  "Show the input method of the buffer."
+  "Show the input method name."
   (and (liteline--active-p)
        current-input-method
        (concat
@@ -328,7 +328,7 @@ If DEFAULT is non-nil, set the default value."
     (add-hook 'conda-post-deactivate-hook #'force-mode-line-update)))
 
 (defun liteline--clear-local-mode-line ()
-  "Unset the local mode line."
+  "Unset the local `mode-line-format'."
   (kill-local-variable 'mode-line-format))
 
 ;; NOTE: Suppress a compiler warning.
@@ -358,7 +358,7 @@ If DEFAULT is non-nil, set the default value."
                 #'liteline--avoid-reftex-mode-line)))
 
 (defun liteline--get-major-mode-extra-info ()
-  "Show the extra information for the current major mode."
+  "Return the extra information for the current major mode."
   (cl-case major-mode
     ;; Conda environment
     ((python-mode inferior-python-mode)
@@ -389,7 +389,7 @@ If DEFAULT is non-nil, set the default value."
          (concat " " string))))))
 
 (liteline-def-segment major-mode
-  "Show the major mode name together with process string."
+  "Show the major mode name and other related information."
   '(" "
     mode-name
     (:eval (liteline--get-major-mode-extra-info))
@@ -442,7 +442,7 @@ If DEFAULT is non-nil, set the default value."
         (propertize (apply #'concat " " action) 'face 'liteline-action)))))
 
 ;; Flycheck
-(defvar-local liteline--flycheck nil "Current Flycheck status string.")
+(defvar-local liteline--flycheck nil "Current Flycheck status.")
 (put 'liteline--flycheck 'risky-local-variable t)
 
 (defvar flycheck-current-errors)
@@ -496,7 +496,7 @@ If DEFAULT is non-nil, set the default value."
        (concat " " liteline--flycheck " ")))
 
 ;; Git
-(defvar-local liteline--git nil "Current Git status string.")
+(defvar-local liteline--git nil "Current Git status.")
 (put 'liteline--git 'risky-local-variable t)
 
 (defun liteline--update-git ()
@@ -519,7 +519,7 @@ If DEFAULT is non-nil, set the default value."
              (otherwise (propertize "!" 'face 'liteline-git-error)))))))
 
 (defun liteline--setup-git ()
-  "Setup Git."
+  "Setup Git integration."
   (add-hook 'after-revert-hook #'liteline--update-git)
   (add-hook 'after-save-hook #'liteline--update-git)
   (add-hook 'find-file-hook #'liteline--update-git t)
@@ -547,7 +547,7 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Misc information
 (defun liteline--get-org-timer ()
-  "Return a string of the Org timer."
+  "Return Org timer information."
   (when (bound-and-true-p org-timer-mode-line-string)
     (substring-no-properties org-timer-mode-line-string 2 -1)))
 
