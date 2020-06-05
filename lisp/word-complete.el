@@ -1,4 +1,4 @@
-;;; word-complete.el --- Complete word at point -*- lexical-binding: t -*-
+;;; word-complete.el --- Complete word at point  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

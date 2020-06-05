@@ -1,4 +1,4 @@
-;;; pest-mode.el --- Major mode for pest PEG -*- lexical-binding: t -*-
+;;; pest-mode.el --- Major mode for pest PEG  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

@@ -1,4 +1,4 @@
-;;; auctex-latexmk.el --- AUCTeX Latexmk support -*- lexical-binding: t -*-
+;;; auctex-latexmk.el --- AUCTeX Latexmk support  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

@@ -1,4 +1,4 @@
-;;; rich-title.el --- Informative frame title -*- lexical-binding: t -*-
+;;; rich-title.el --- Informative frame title  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

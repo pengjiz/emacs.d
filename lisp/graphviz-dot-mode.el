@@ -1,4 +1,4 @@
-;;; graphviz-dot-mode.el --- Major mode for DOT -*- lexical-binding: t -*-
+;;; graphviz-dot-mode.el --- Major mode for DOT  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 

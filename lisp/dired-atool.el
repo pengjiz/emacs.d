@@ -1,4 +1,4 @@
-;;; dired-atool.el --- Dired integration for atool -*- lexical-binding: t -*-
+;;; dired-atool.el --- Dired integration for atool  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
