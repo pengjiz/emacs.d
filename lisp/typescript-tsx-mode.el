@@ -1,4 +1,4 @@
-;;; typescript-tsx-mode.el --- Major mode for TSX files  -*- lexical-binding: t; -*-
+;;; typescript-tsx-mode.el --- Major mode for TSX  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -8,15 +8,14 @@
 
 (require 'web-mode)
 
-(define-derived-mode typescript-tsx-mode web-mode
-  "TypeScript-TSX"
+(define-derived-mode typescript-tsx-mode web-mode "TSX"
   "Major mode for the TypeScript TSX language.")
 
 ;; Flycheck integration
 (declare-function flycheck-add-mode "ext:flycheck")
 
 (with-eval-after-load 'flycheck
-  (flycheck-add-mode 'typescript-tslint 'typescript-tsx-mode))
+  (flycheck-add-mode 'javascript-eslint 'typescript-tsx-mode))
 (with-eval-after-load 'tide
   (flycheck-add-mode 'tsx-tide 'typescript-tsx-mode))
 
