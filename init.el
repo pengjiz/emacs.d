@@ -1242,7 +1242,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :after ivy
   :bind (("M-s s" . counsel-rg)
-         ("C-c e u" . counsel-unicode-char)
          ("C-c e o" . counsel-colors-web)
          ("C-c e O" . counsel-colors-emacs)
          ("C-c o j" . counsel-org-goto-all)
