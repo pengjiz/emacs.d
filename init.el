@@ -1230,6 +1230,7 @@ This is a non-interactive version of `ignore'."
   (setf ivy-read-action-format-function #'ivy-read-action-format-columns))
 
 (use-package ivy-avy
+  :ensure t
   :defer t
   :after ivy
   :bind (;; -
