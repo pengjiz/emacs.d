@@ -2,5 +2,5 @@
 # name: hugo figure
 # key: hfig
 # --
-{{< figure src="/assets/images/`(file-name-base buffer-file-name)`/$1.png" caption="$2" >}}
+{{< figure src="$1" caption="$2" >}}
 $0
