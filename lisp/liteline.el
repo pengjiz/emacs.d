@@ -508,19 +508,18 @@ If DEFAULT is non-nil, set the default value."
                        'face 'liteline-git-branch)
            ":"
            (cl-case (vc-state buffer-file-name)
-             ((added) (propertize "A" 'face 'liteline-git-new))
-             ((edited) (propertize "E" 'face 'liteline-git-edited))
-             ((removed) (propertize "D" 'face 'liteline-git-warning))
-             ((need-merge) (propertize "M" 'face 'liteline-git-warning))
-             ((need-update) (propertize "O" 'face 'liteline-git-warning))
-             ((conflict) (propertize "C" 'face 'liteline-git-error))
-             ((ignored) "#")
              ((up-to-date) "-")
-             (otherwise (propertize "!" 'face 'liteline-git-error)))))))
+             ((edited) (propertize "*" 'face 'liteline-git-edited))
+             ((added) (propertize "+" 'face 'liteline-git-new))
+             ((conflict) (propertize "=" 'face 'liteline-git-error))
+             ((removed) (propertize "!" 'face 'liteline-git-warning))
+             ((needs-update) (propertize "^" 'face 'liteline-git-warning))
+             ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
+             ((ignored) "~")
+             (otherwise (propertize "?" 'face 'liteline-git-error)))))))
 
 (defun liteline--setup-git ()
   "Setup Git integration."
-  (add-hook 'after-revert-hook #'liteline--update-git)
   (add-hook 'after-save-hook #'liteline--update-git)
   (add-hook 'find-file-hook #'liteline--update-git t)
   (with-eval-after-load 'vc-hooks
