@@ -2388,35 +2388,10 @@ This is a non-interactive version of `ignore'."
 (use-package simple-httpd
   :ensure t
   :defer t
-  :bind ("C-c m s" . my-start-httpd-server)
+  :bind ("C-c m s" . httpd-serve-directory)
   :init
   (setf httpd-host 'local
-        httpd-port 8017)
-
-  (defun my-start-httpd-server (directory port)
-    "Start server at DIRECTORY and PORT."
-    (interactive (list
-                  (read-directory-name "Directory: " nil nil t)
-                  (read-number "Port: " httpd-port)))
-    (setf httpd-root directory)
-    (setf httpd-port port)
-    (httpd-start)
-    (let ((url (format "http://%s:%d/"
-                       (cl-case httpd-host
-                         ;; NOTE: nil may not be a valid value any more.
-                         ((nil) "0.0.0.0")
-                         ((local) "localhost")
-                         (otherwise httpd-host))
-                       port)))
-      (message "Serving %s on %s" directory url)
-      (browse-url url)
-      (kill-new url)))
-  :config
-  (defun my-set-httpd-process-exit-no-query (&rest _)
-    "Do not query on exiting the httpd server process."
-    (when-let* ((httpd-process (get-process "httpd")))
-      (set-process-query-on-exit-flag httpd-process nil)))
-  (advice-add #'httpd-start :after #'my-set-httpd-process-exit-no-query))
+        httpd-port 8017))
 
 ;;; CSS
 
