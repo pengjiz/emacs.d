@@ -1327,7 +1327,6 @@ This is a non-interactive version of `ignore'."
           idris-mode
           ess-r-mode
           python-mode
-          web-mode
           css-mode
           js2-mode
           typescript-mode
@@ -2345,36 +2344,6 @@ This is a non-interactive version of `ignore'."
 
 ;;; SGML
 
-(use-package web-mode
-  :ensure t
-  :defer t
-  :mode ("\\.html?\\'"
-         "\\.tmpl\\'"
-         "\\.djhtml\\'"
-         "\\.j2\\'"
-         "\\.njk\\'"
-         "\\.gohtml\\'"
-         "\\.gotmpl\\'"
-         "\\.ejs\\'"
-         "\\.mustache\\'"
-         "\\.hbs\\'"
-         "\\.vue\\'")
-  :bind (:map web-mode-map ("C-c C-w" . web-mode-set-engine))
-  :config
-  (setf web-mode-markup-indent-offset 2
-        web-mode-css-indent-offset 2
-        web-mode-code-indent-offset 2
-        web-mode-sql-indent-offset 2)
-  (setf web-mode-enable-current-element-highlight t)
-  (setf web-mode-enable-html-entities-fontification t
-        web-mode-enable-comment-annotation t)
-  (setf web-mode-enable-auto-pairing nil)
-  ;; NOTE: This causes problems after yanking, so disable it.
-  (setf web-mode-enable-auto-indentation nil)
-
-  (dolist (key '("C-c C-h" "C-c C-i" "C-c C-m" "C-c C-j" "C-c C-r"))
-    (unbind-key key web-mode-map)))
-
 (use-package nxml-mode
   :defer t
   :config
@@ -2471,7 +2440,7 @@ This is a non-interactive version of `ignore'."
   :load-path "lisp"
   :ensure flycheck
   :defer t
-  :hook ((web-mode css-mode js2-mode typescript-mode) . flycheck-npm-setup))
+  :hook ((css-mode js2-mode typescript-mode) . flycheck-npm-setup))
 
 ;;; Python
 
