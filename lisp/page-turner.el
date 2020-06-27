@@ -213,7 +213,7 @@ If nil use value of `fill-column'."
 (declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 (defvar markdown-live-preview-window-function)
 
-(defun page-turner--get-preview-buffer (file)
+(defun page-turner--get-markdown-live-preview-buffer (file)
   "Get a buffer showing FILE with EWW."
   (let* ((shr-width (or page-turner-text-width fill-column))
          (buffer (markdown-live-preview-window-eww file)))
@@ -225,7 +225,7 @@ If nil use value of `fill-column'."
   "Setup Markdown mode integration."
   (with-eval-after-load 'markdown-mode
     (setf markdown-live-preview-window-function
-          #'page-turner--get-preview-buffer)))
+          #'page-turner--get-markdown-live-preview-buffer)))
 
 ;;; Documentation
 
