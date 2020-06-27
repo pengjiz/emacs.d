@@ -1357,9 +1357,7 @@ This is a non-interactive version of `ignore'."
                                    company-etags))
                                 ((derived-mode-p 'cmake-mode)
                                  '(company-cmake))
-                                ((derived-mode-p 'js2-mode
-                                                 'typescript-mode
-                                                 'typescript-tsx-mode)
+                                ((derived-mode-p 'js2-mode 'typescript-mode)
                                  '(company-tide))
                                 ((derived-mode-p 'python-mode)
                                  '(company-anaconda))
@@ -1474,7 +1472,6 @@ This is a non-interactive version of `ignore'."
           css-mode
           js2-mode
           typescript-mode
-          typescript-tsx-mode
           python-mode
           sh-mode
           lua-mode
@@ -2426,26 +2423,15 @@ This is a non-interactive version of `ignore'."
         js2-mode-show-strict-warnings nil
         js2-strict-missing-semi-warning nil))
 
-(use-package rjsx-mode
-  :ensure t
-  :defer t
-  :mode ("components/.+\\.js\\'" "\\.react\\.js\\'"))
-
 (use-package typescript-mode
   :ensure t
   :defer t
   :config (setf typescript-indent-level 2))
 
-(use-package typescript-tsx-mode
-  :load-path "lisp"
-  :ensure web-mode
-  :defer t
-  :mode "\\.tsx\\'")
-
 (use-package tide
   :ensure t
   :defer t
-  :hook ((js2-mode typescript-mode typescript-tsx-mode) . my-enable-tide)
+  :hook ((js2-mode typescript-mode) . my-enable-tide)
   :init
   (defun my-enable-tide ()
     (unless (file-remote-p default-directory)
