@@ -53,5 +53,10 @@ read with `read-string' and PROMPT."
                        "https://github.com/search?q=%s"
                        "GitHub")
 
+;; MDN CSS
+(web-search-def-engine "mdn-css"
+                       "https://developer.mozilla.org/en-US/docs/Web/CSS/%s"
+                       "MDN CSS")
+
 (provide 'web-search)
 ;;; web-search.el ends here

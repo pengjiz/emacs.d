@@ -733,10 +733,14 @@ This is a non-interactive version of `ignore'."
 (use-package web-search
   :load-path "lisp"
   :defer t
+  :commands web-search-mdn-css
   :bind (("M-s b g" . web-search-google)
          ("M-s b w" . web-search-wikipedia)
          ("M-s b d" . web-search-wiktionary)
-         ("M-s b h" . web-search-github)))
+         ("M-s b h" . web-search-github))
+  :init
+  (with-eval-after-load 'css-mode
+    (setf (symbol-function 'css-lookup-symbol) #'web-search-mdn-css)))
 
 ;;; Buffer
 
@@ -1468,7 +1472,6 @@ This is a non-interactive version of `ignore'."
           rust-mode
           haskell-mode
           ess-r-mode
-          css-mode
           js2-mode
           typescript-mode
           python-mode
@@ -2363,6 +2366,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package css-mode
   :defer t
+  :bind (:map css-mode-map ("C-c C-d" . css-lookup-symbol))
   :config (setf css-indent-offset 2))
 
 (use-package counsel-css
