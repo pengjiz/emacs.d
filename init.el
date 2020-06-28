@@ -2412,17 +2412,7 @@ This is a non-interactive version of `ignore'."
 
   (with-eval-after-load 'company
     (setf (default-value 'company-backends)
-          (delq #'company-tide (default-value 'company-backends))))
-
-  (defun my-find-tide-project-root ()
-    "Find `tide-project-root', and fallback to `projectile-project-root'."
-    (or tide-project-root
-        (or (locate-dominating-file default-directory "tsconfig.json")
-            (locate-dominating-file default-directory "jsconfig.json"))
-        (or (and (bound-and-true-p projectile-mode)
-                 (projectile-project-root))
-            default-directory)))
-  (setf (symbol-function 'tide-project-root) #'my-find-tide-project-root))
+          (delq #'company-tide (default-value 'company-backends)))))
 
 (use-package skewer-mode
   :ensure t
