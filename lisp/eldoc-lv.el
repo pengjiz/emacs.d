@@ -10,6 +10,8 @@
 (eval-when-compile
   (require 'cl-lib))
 
+;;; Core
+
 (defvar eldoc-lv--buffer nil "Buffer for ElDoc.")
 (defvar eldoc-lv--window nil "Window for ElDoc.")
 
@@ -65,6 +67,8 @@ FORMAT-STRING and ARGS are passed to `eldoc-lv--message' or `message'."
             (apply #'eldoc-lv--message format-string args)
           (eldoc-lv--cleanup)))
     (apply #'message format-string args)))
+
+;;; Third-party integration
 
 (defvar aw-ignored-buffers)
 (with-eval-after-load 'ace-window

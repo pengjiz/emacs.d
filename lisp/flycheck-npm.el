@@ -10,6 +10,8 @@
 (eval-when-compile
   (require 'subr-x))
 
+;;; Core
+
 ;; NOTE: For security reasons, we require that node_modules must be in the same
 ;; directory as package.json, and it must be under the home directory of the
 ;; current user. Otherwise we just return nil. That is why we need the following

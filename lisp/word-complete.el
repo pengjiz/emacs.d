@@ -9,6 +9,8 @@
 (eval-when-compile
   (require 'cl-lib))
 
+;;; Option
+
 (defgroup word-complete nil
   "Complete word at point."
   :group 'convenience)
@@ -19,6 +21,8 @@
 In this file, each line should be a word."
   :type '(choice file
                  (const :tag "None" nil)))
+
+;;; Get words
 
 (defvar word-complete--words nil "Words from the dictionary.")
 
@@ -37,6 +41,8 @@ In this file, each line should be a word."
             'utf-8)
            "[\n\r]" t)))
   word-complete--words)
+
+;;; Completion interface
 
 (defun word-complete--completion-at-point ()
   "Complete word at point according to a dictionary.
@@ -61,6 +67,8 @@ The dictionary file is specified by `word-complete-dictionary'."
 (with-eval-after-load 'minibuffer
   (cl-pushnew '(word (styles basic substring)) completion-category-overrides
               :test #'eq :key #'car))
+
+;;; Command
 
 (defun word-complete (&optional arg)
   "Complete word using command `completion-at-point'.

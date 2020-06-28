@@ -9,12 +9,16 @@
 (eval-when-compile
   (require 'subr-x))
 
-(defmacro web-search-def-engine (name url-template prompt)
+;;; Core
+
+(defmacro web-search-define-engine (name url-template title)
   "Define a command with NAME to use a search engine.
 
-The search engine address is formed with URL-TEMPLATE and the user input
-read with `read-string' and PROMPT."
+The address is formed with URL-TEMPLATE and the user input read
+with a prompt constructed with TITLE."
+  (declare (indent 1))
   `(defun ,(intern (format "web-search-%s" name)) (query)
+     ,(format "Search %s with QUERY." title)
      (interactive
       (let* ((default (if (use-region-p)
                           (buffer-substring-no-properties
@@ -22,7 +26,7 @@ read with `read-string' and PROMPT."
                            (region-end))
                         (thing-at-point 'symbol t)))
              (input (read-string
-                     (concat ,prompt
+                     (concat ,title
                              (and default
                                   (not (string-empty-p default))
                                   (format " (%s)" default))
@@ -34,29 +38,29 @@ read with `read-string' and PROMPT."
 ;;; Search engine
 
 ;; Google
-(web-search-def-engine "google"
-                       "https://www.google.com/search?q=%s"
-                       "Google")
+(web-search-define-engine google
+  "https://www.google.com/search?q=%s"
+  "Google")
 
 ;; Wikipedia
-(web-search-def-engine "wikipedia"
-                       "https://en.wikipedia.org/wiki/%s"
-                       "Wikipedia")
+(web-search-define-engine wikipedia
+  "https://en.wikipedia.org/wiki/%s"
+  "Wikipedia")
 
 ;; Wiktionary
-(web-search-def-engine "wiktionary"
-                       "https://en.wiktionary.org/wiki/%s"
-                       "Wiktionary")
+(web-search-define-engine wiktionary
+  "https://en.wiktionary.org/wiki/%s"
+  "Wiktionary")
 
 ;; GitHub
-(web-search-def-engine "github"
-                       "https://github.com/search?q=%s"
-                       "GitHub")
+(web-search-define-engine github
+  "https://github.com/search?q=%s"
+  "GitHub")
 
 ;; MDN CSS
-(web-search-def-engine "mdn-css"
-                       "https://developer.mozilla.org/en-US/docs/Web/CSS/%s"
-                       "MDN CSS")
+(web-search-define-engine mdn-css
+  "https://developer.mozilla.org/en-US/docs/Web/CSS/%s"
+  "MDN CSS")
 
 (provide 'web-search)
 ;;; web-search.el ends here

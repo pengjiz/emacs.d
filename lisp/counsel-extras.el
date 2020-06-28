@@ -10,6 +10,8 @@
 (eval-when-compile
   (require 'subr-x))
 
+;;; Option
+
 (defgroup counsel-extras nil
   "Extra counsel extensions."
   :group 'counsel)

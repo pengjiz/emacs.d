@@ -11,6 +11,8 @@
 (eval-when-compile
   (require 'subr-x))
 
+;;; Option
+
 (defgroup dired-atool nil
   "Dired integration for atool."
   :group 'dired)

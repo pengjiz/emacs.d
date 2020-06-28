@@ -40,7 +40,7 @@ If nil use value of `fill-column'."
   :type '(choice number
                  (const :tag "None" nil)))
 
-;;; Prose
+;;; Prose style
 
 (declare-function shr-fill-line "shr")
 (declare-function face-remap-remove-relative "face-remap")
@@ -144,7 +144,8 @@ If nil use value of `fill-column'."
       (visual-line-mode))
     (setf page-turner--in-prose-styles t)))
 
-;; EWW
+;;; EWW
+
 (declare-function eww-readable "eww")
 (declare-function eww-display-html "eww")
 
@@ -179,7 +180,8 @@ If nil use value of `fill-column'."
     (advice-add #'eww-readable :around #'page-turner--avoid-shr-truncating)
     (advice-add #'eww-display-html :before #'page-turner--reset-eww-styles)))
 
-;; Nov mode
+;;; Nov mode
+
 (defvar nov-text-width)
 (defvar nov-variable-pitch)
 
@@ -190,7 +192,8 @@ If nil use value of `fill-column'."
           nov-variable-pitch t)
     (add-hook 'nov-mode-hook #'page-turner--set-prose-styles)))
 
-;; Elfeed
+;;; Elfeed
+
 (declare-function elfeed-insert-html "ext:elfeed-show")
 (declare-function elfeed-insert-link "ext:elfeed-show")
 
@@ -204,15 +207,15 @@ If nil use value of `fill-column'."
     (advice-add #'elfeed-insert-html :around #'page-turner--avoid-shr-truncating)
     (add-hook 'elfeed-show-mode-hook #'page-turner--set-prose-styles)))
 
-;; Markdown mode
-;;
+;;; Markdown mode
+
+(declare-function markdown-live-preview-window-eww "ext:markdown-mode")
+(defvar markdown-live-preview-window-function)
+
 ;; NOTE: For some reason visual fill column and visual line does not work well
 ;; with live previewing, so here we only set font and text width.
 ;;
 ;; TODO: Find a way to enable all prose styles.
-(declare-function markdown-live-preview-window-eww "ext:markdown-mode")
-(defvar markdown-live-preview-window-function)
-
 (defun page-turner--get-markdown-live-preview-buffer (file)
   "Get a buffer showing FILE with EWW."
   (let* ((shr-width (or page-turner-text-width fill-column))
@@ -227,9 +230,8 @@ If nil use value of `fill-column'."
     (setf markdown-live-preview-window-function
           #'page-turner--get-markdown-live-preview-buffer)))
 
-;;; Documentation
+;;; Man
 
-;; Man
 (defvar Man-width)
 
 (defun page-turner--setup-man ()

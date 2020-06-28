@@ -113,7 +113,7 @@
 
 ;; NOTE: In general each segment should have a trailing whitespace as
 ;; the separator. There might be a better way to handle this.
-(defmacro liteline-def-segment (name &rest body)
+(defmacro liteline-define-segment (name &rest body)
   "Define a mode line segment with NAME and BODY and `byte-compile' it."
   (declare (indent defun) (doc-string 2))
   (let ((sym (intern (format "liteline--segment-%s" name)))
@@ -156,8 +156,9 @@
              (error "%s is not a valid segment" segment))))
     (cons "" (nreverse forms))))
 
-(defun liteline-def-mode-line (name lhs &optional rhs)
+(defun liteline-define-mode-line (name lhs &optional rhs)
   "Define a function of NAME with LHS and RHS for mode line."
+  (declare (indent 1))
   (let ((sym (intern (format "liteline--mode-line-%s" name)))
         (lhs-forms (liteline--prepare-segments lhs))
         (rhs-forms (liteline--prepare-segments rhs)))
@@ -248,7 +249,7 @@ If DEFAULT is non-nil, set the default value."
               (host (file-remote-p root 'host)))
     (concat "@" host)))
 
-(liteline-def-segment buffer-info
+(liteline-define-segment buffer-info
   "Show the basic buffer information."
   (concat
    " "
@@ -263,7 +264,7 @@ If DEFAULT is non-nil, set the default value."
 (declare-function image-mode-window-get "image-mode")
 (declare-function doc-view-last-page-number "doc-view")
 
-(liteline-def-segment buffer-position
+(liteline-define-segment buffer-position
   "Show the position information."
   (cl-case major-mode
     ((image-mode)
@@ -290,7 +291,7 @@ If DEFAULT is non-nil, set the default value."
       "%p "))))
 
 ;; Encoding
-(liteline-def-segment buffer-encoding
+(liteline-define-segment buffer-encoding
   "Show the encoding information."
   (and (liteline--active-p)
        (concat
@@ -307,7 +308,7 @@ If DEFAULT is non-nil, set the default value."
         " ")))
 
 ;; Input method
-(liteline-def-segment input-method
+(liteline-define-segment input-method
   "Show the input method name."
   (and (liteline--active-p)
        current-input-method
@@ -388,7 +389,7 @@ If DEFAULT is non-nil, set the default value."
        (unless (string-empty-p string)
          (concat " " string))))))
 
-(liteline-def-segment major-mode
+(liteline-define-segment major-mode
   "Show the major mode name and other related information."
   '(" "
     mode-name
@@ -429,7 +430,7 @@ If DEFAULT is non-nil, set the default value."
                (when (apply #'derived-mode-p liteline-word-count-modes)
                  (format " %dW" (count-words start end))))))))
 
-(liteline-def-segment action
+(liteline-define-segment action
   "Show action status."
   (when (liteline--active-p)
     (let (action)
@@ -489,7 +490,7 @@ If DEFAULT is non-nil, set the default value."
               #'liteline--update-flycheck)
     (liteline--update-flycheck flycheck-last-status-change)))
 
-(liteline-def-segment flycheck
+(liteline-define-segment flycheck
   "Show Flycheck status."
   (and (liteline--active-p)
        liteline--flycheck
@@ -525,14 +526,14 @@ If DEFAULT is non-nil, set the default value."
   (with-eval-after-load 'vc-hooks
     (advice-add #'vc-refresh-state :after #'liteline--update-git)))
 
-(liteline-def-segment git
+(liteline-define-segment git
   "Show Git branch and state."
   (and (liteline--active-p)
        liteline--git
        (concat " " liteline--git " ")))
 
 ;; Minor mode
-(liteline-def-segment minor-modes
+(liteline-define-segment minor-modes
   "Show some important minor modes."
   (when (liteline--active-p)
     (let (modes)
@@ -550,7 +551,7 @@ If DEFAULT is non-nil, set the default value."
   (when (bound-and-true-p org-timer-mode-line-string)
     (substring-no-properties org-timer-mode-line-string 2 -1)))
 
-(liteline-def-segment misc
+(liteline-define-segment misc
   "Show some misc but important information."
   (when (liteline--active-p)
     (concat " " (liteline--get-org-timer) " ")))
@@ -566,10 +567,9 @@ If DEFAULT is non-nil, set the default value."
 ;;; Mode line
 
 ;; Main
-(liteline-def-mode-line
- 'main
- '(action buffer-info buffer-position)
- '(misc git buffer-encoding input-method minor-modes major-mode flycheck))
+(liteline-define-mode-line 'main
+  '(action buffer-info buffer-position)
+  '(misc git buffer-encoding input-method minor-modes major-mode flycheck))
 
 ;;; Entry point
 
