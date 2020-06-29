@@ -735,7 +735,7 @@ This is a non-interactive version of `ignore'."
   :bind (("M-s b g" . web-search-google)
          ("M-s b w" . web-search-wikipedia)
          ("M-s b d" . web-search-wiktionary)
-         ("M-s b h" . web-search-github))
+         ("M-s b c" . web-search-github))
   :init
   (with-eval-after-load 'css-mode
     (setf (symbol-function 'css-lookup-symbol) #'web-search-mdn-css)))
@@ -1427,6 +1427,7 @@ This is a non-interactive version of `ignore'."
 
 (use-package abbrev
   :defer t
+  :bind ("C-c e e" . expand-abbrev)
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
 
