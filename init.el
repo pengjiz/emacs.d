@@ -1329,6 +1329,7 @@ This is a non-interactive version of `ignore'."
           idris-mode
           ess-r-mode
           python-mode
+          html-mode
           css-mode
           js2-mode
           typescript-mode
@@ -2320,6 +2321,10 @@ This is a non-interactive version of `ignore'."
 
 ;;; SGML
 
+(use-package sgml-mode
+  :defer t
+  :config (unbind-key "C-c C-v" sgml-mode-map))
+
 (use-package nxml-mode
   :defer t
   :config
@@ -2410,7 +2415,7 @@ This is a non-interactive version of `ignore'."
   :load-path "lisp"
   :ensure flycheck
   :defer t
-  :hook ((css-mode js2-mode typescript-mode) . flycheck-npm-setup))
+  :hook ((html-mode css-mode js2-mode typescript-mode) . flycheck-npm-setup))
 
 ;;; Python
 
