@@ -1427,7 +1427,8 @@ This is a non-interactive version of `ignore'."
 
 (use-package abbrev
   :defer t
-  :bind ("C-c e e" . expand-abbrev)
+  :bind (("C-c t r" . abbrev-mode)
+         ("C-c e e" . expand-abbrev))
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
 
