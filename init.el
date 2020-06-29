@@ -1430,6 +1430,14 @@ This is a non-interactive version of `ignore'."
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
 
+(use-package autoinsert
+  :defer t
+  :bind ("C-c e t" . auto-insert)
+  :init
+  (setf auto-insert t)
+  (setf auto-insert-directory (my-expand-etc-file-name "insert/")
+        auto-insert-alist nil))
+
 ;;; Lint
 
 (use-package flycheck
@@ -1947,7 +1955,24 @@ This is a non-interactive version of `ignore'."
   :init
   (with-eval-after-load 'org
     (cl-pushnew '(emacs-lisp . t) org-babel-load-languages
-                :test #'eq :key #'car)))
+                :test #'eq :key #'car))
+  :config
+  (define-auto-insert '("\\.el\\'" . "Emacs-Lisp file template")
+    '("Name: "
+      ";;; " str ".el --- " _
+      "  -*- lexical-binding: t -*-
+
+;;; Commentary:
+
+;;
+
+;;; Code:
+
+
+
+(provide '" str ")
+;;; " str ".el ends here
+")))
 
 (use-package eros
   :ensure t
@@ -2068,7 +2093,18 @@ This is a non-interactive version of `ignore'."
 
   (setf c-default-style '((awk-mode . "awk")
                           (protobuf-mode . "protobuf")
-                          (other . "common"))))
+                          (other . "common")))
+
+  (define-auto-insert `(,(rx "." (or "H" "h" "hh" "hpp" "hxx" "h++") eos)
+                        . "C/C++ header template")
+    '("Guard: "
+      "#ifndef " str "
+#define " str "
+
+" _ "
+
+#endif
+")))
 
 (use-package cmacexp
   :defer t
@@ -2323,7 +2359,23 @@ This is a non-interactive version of `ignore'."
 
 (use-package sgml-mode
   :defer t
-  :config (unbind-key "C-c C-v" sgml-mode-map))
+  :config
+  (unbind-key "C-c C-v" sgml-mode-map)
+
+  (define-auto-insert '(html-mode . "HTML file template")
+    '("Title: "
+      "<!DOCTYPE html>
+<html lang=\"en\">
+  <head>
+    <meta charset=\"utf-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+    <title>" str | "Untitled" "</title>" _ "
+  </head>
+  <body>
+
+  </body>
+</html>
+")))
 
 (use-package nxml-mode
   :defer t
@@ -2481,7 +2533,9 @@ This is a non-interactive version of `ignore'."
   (define-abbrev text-mode-abbrev-table
     "`email" "" (lambda () (insert user-mail-address)) :system t)
   (define-abbrev text-mode-abbrev-table
-    "`time" "" (lambda () (insert (current-time-string))) :system t))
+    "`time" "" (lambda () (insert (current-time-string))) :system t)
+
+  (define-auto-insert '("/UNLICENSE\\'" . "The Unlicense") "unlicense"))
 
 ;;; LaTeX
 
@@ -2549,7 +2603,22 @@ This is a non-interactive version of `ignore'."
   (defun my-setup-LaTeX-mode ()
     (make-local-variable 'TeX-electric-math)
     (setf TeX-electric-math '("\\(" . "\\)")))
-  (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode))
+  (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode)
+
+  (define-auto-insert '(latex-mode . "LaTeX file template")
+    '("Class: "
+      "\\documentclass[11pt]{" str | "scrartcl" "}
+
+\\title{" _ "}
+\\author{}
+\\date{}
+
+\\begin{document}
+
+\\maketitle
+
+\\end{document}
+")))
 
 (use-package preview
   :defer t
