@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: file template
-# key: tmpl
-# --
-# -*- mode: snippet -*-
-# name: $1
-# key: $2
-# --
-$0

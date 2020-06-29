@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: r plot
-# key: plr
-# --
-#+header: :results output graphics :exports both
-#+header: :width 500 :height 300
-#+begin_src R :file $1.png
-$0
-#+end_src

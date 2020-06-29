@@ -1410,11 +1410,7 @@ This is a non-interactive version of `ignore'."
           try-expand-dabbrev
           try-expand-line-all-buffers
           try-expand-dabbrev-all-buffers
-          try-expand-dabbrev-from-kill))
-  ;; Expand snippets
-  (when (require 'yasnippet nil t)
-    (cl-pushnew #'yas-hippie-try-expand hippie-expand-try-functions-list
-                :test #'eq)))
+          try-expand-dabbrev-from-kill)))
 
 (use-package word-complete
   :load-path "lisp"
@@ -1432,27 +1428,6 @@ This is a non-interactive version of `ignore'."
   :defer t
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
-
-(use-package yasnippet
-  :ensure t
-  :defer t
-  :init
-  (setf yas-minor-mode-map (make-sparse-keymap))
-  (setf yas-snippet-dirs `(,(my-expand-etc-file-name "snippets/")))
-  (setf yas-alias-to-yas/prefix-p nil)
-  :config
-  (setf yas-prompt-functions '(yas-completing-prompt))
-  (setf yas-verbosity 2)
-  (setf yas-also-auto-indent-first-line t
-        yas-wrap-around-region nil)
-  (yas-global-mode))
-
-(use-package ivy-yasnippet
-  :ensure t
-  :defer t
-  :after ivy
-  :bind ("C-c e e" . ivy-yasnippet)
-  :config (setf ivy-yasnippet-create-snippet-if-not-matched nil))
 
 ;;; Lint
 
