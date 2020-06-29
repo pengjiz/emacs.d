@@ -118,8 +118,6 @@ This is a non-interactive version of `ignore'."
                  "C-x 4 m"
                  ;; tmm
                  "M-`"
-                 ;; frame commands
-                 "C-x 5"
                  ;; suspend frame
                  "C-z"
                  "C-x C-z"
@@ -1634,7 +1632,7 @@ This is a non-interactive version of `ignore'."
         (symbol-function 'projectile-commander) #'projectile-dired)
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (dolist (key '("s" "x" "m" "5"))
+  (dolist (key '("s" "x" "m"))
     (unbind-key key projectile-command-map))
   (bind-keys :map projectile-command-map
              ("x e" . projectile-run-eshell)
@@ -2209,7 +2207,7 @@ This is a non-interactive version of `ignore'."
   :ensure t
   :defer t
   :config
-  (dolist (key '("C-c C-l" "C-c C-b" "C-c C-v" "C-c C-t" "C-c C-i"))
+  (dolist (key '("C-c C-l" "C-c C-b" "C-c C-t" "C-c C-i"))
     (unbind-key key haskell-mode-map)))
 
 (use-package haskell
@@ -2261,7 +2259,7 @@ This is a non-interactive version of `ignore'."
 (use-package haskell-hoogle
   :defer t
   :after haskell-mode
-  :bind (:map haskell-mode-map ("M-s b m" . haskell-hoogle))
+  :bind (:map haskell-mode-map ("C-c C-v" . haskell-hoogle))
   :config (setf haskell-hoogle-command nil))
 
 (use-package haskell-extras
@@ -2381,7 +2379,10 @@ This is a non-interactive version of `ignore'."
   :config
   (setf js-indent-level 2
         js-switch-indent-offset 2
-        js-chain-indent nil))
+        js-chain-indent nil)
+
+  (dolist (key '("C-c M-:" "C-c C-j" "C-M-x"))
+    (unbind-key key js-mode-map)))
 
 (use-package js2-mode
   :ensure t
@@ -2461,10 +2462,10 @@ This is a non-interactive version of `ignore'."
   :defer t
   :bind (;; -
          :map anaconda-mode-map
+         ([remap python-describe-at-point] . anaconda-mode-show-doc)
          ([remap xref-find-definitions] . anaconda-mode-find-definitions)
          ([remap xref-find-references] . anaconda-mode-find-references)
-         ("C-c C-t" . anaconda-mode-find-assignments)
-         ("C-c C-d" . anaconda-mode-show-doc))
+         ("C-c C-v" . anaconda-mode-find-assignments))
   :hook (python-mode . my-enable-anaconda)
   :init
   (setf anaconda-mode-map (make-sparse-keymap))
