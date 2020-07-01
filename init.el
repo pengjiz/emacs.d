@@ -1962,7 +1962,7 @@ This is a non-interactive version of `ignore'."
   ;; essential to turn it on, not toggle.
   (appt-activate 1))
 
-;;; Emacs-Lisp
+;;; Emacs Lisp
 
 (use-package elisp-mode
   :defer t
@@ -1986,8 +1986,9 @@ This is a non-interactive version of `ignore'."
   :defer t
   :commands emacs-lisp-snippets-file-template
   :init
-  (define-auto-insert '("\\.el\\'" . "Emacs-Lisp file template")
-    #'emacs-lisp-snippets-file-template))
+  (with-eval-after-load 'autoinsert
+    (define-auto-insert '("\\.el\\'" . "Emacs Lisp file template")
+      #'emacs-lisp-snippets-file-template)))
 
 (use-package ielm
   :defer t
@@ -2114,9 +2115,10 @@ This is a non-interactive version of `ignore'."
   :defer t
   :commands c-snippets-header-template
   :init
-  (define-auto-insert `(,(rx "." (or "h" "H" "hh" "hpp" "hxx" "h++") eos)
-                        . "C/C++ header template")
-    #'c-snippets-header-template))
+  (with-eval-after-load 'autoinsert
+    (define-auto-insert `(,(rx "." (or "h" "H" "hh" "hpp" "hxx" "h++") eos)
+                          . "C/C++ header template")
+      #'c-snippets-header-template)))
 
 (use-package company-c-headers
   :ensure t
@@ -2374,8 +2376,9 @@ This is a non-interactive version of `ignore'."
   :defer t
   :commands html-snippets-file-template
   :init
-  (define-auto-insert '(html-mode . "HTML file template")
-    #'html-snippets-file-template))
+  (with-eval-after-load 'autoinsert
+    (define-auto-insert '(html-mode . "HTML file template")
+      #'html-snippets-file-template)))
 
 (use-package nxml-mode
   :defer t
@@ -2530,8 +2533,9 @@ This is a non-interactive version of `ignore'."
   :defer t
   :mode ("/LICENSE\\'" "/UNLICENSE\\'")
   :config
-  (define-auto-insert '("/UNLICENSE\\'" . "The Unlicense")
-    "unlicense"))
+  (with-eval-after-load 'autoinsert
+    (define-auto-insert '("/UNLICENSE\\'" . "The Unlicense")
+      "unlicense")))
 
 ;;; LaTeX
 
@@ -2616,8 +2620,9 @@ This is a non-interactive version of `ignore'."
   :defer t
   :commands latex-snippets-file-template
   :init
-  (define-auto-insert '(latex-mode . "LaTeX file template")
-    #'latex-snippets-file-template))
+  (with-eval-after-load 'autoinsert
+    (define-auto-insert '(latex-mode . "LaTeX file template")
+      #'latex-snippets-file-template)))
 
 (use-package reftex
   :defer t
