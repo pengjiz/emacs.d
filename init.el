@@ -264,6 +264,17 @@ This is a non-interactive version of `ignore'."
 
   (simple-extras-setup))
 
+(use-package simple-snippets
+  :load-path "lisp"
+  :defer t
+  :commands (simple-snippets-email simple-snippets-time)
+  :init
+  (with-eval-after-load 'text-mode
+    (define-abbrev text-mode-abbrev-table ";email"
+      "" #'simple-snippets-email :system t)
+    (define-abbrev text-mode-abbrev-table ";time"
+      "" #'simple-snippets-time :system t)))
+
 (use-package undo-propose
   :ensure t
   :defer t
@@ -1432,6 +1443,12 @@ This is a non-interactive version of `ignore'."
   :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
 
+(use-package tempo
+  :defer t
+  :config
+  (setf tempo-interactive t)
+  (setf tempo-show-completion-buffer nil))
+
 (use-package autoinsert
   :defer t
   :bind ("C-c e t" . auto-insert)
@@ -1957,29 +1974,20 @@ This is a non-interactive version of `ignore'."
   :init
   (with-eval-after-load 'org
     (cl-pushnew '(emacs-lisp . t) org-babel-load-languages
-                :test #'eq :key #'car))
-  :config
-  (define-auto-insert '("\\.el\\'" . "Emacs-Lisp file template")
-    '("Name: "
-      ";;; " str ".el --- " _
-      "  -*- lexical-binding: t -*-
-
-;;; Commentary:
-
-;;
-
-;;; Code:
-
-
-
-(provide '" str ")
-;;; " str ".el ends here
-")))
+                :test #'eq :key #'car)))
 
 (use-package eros
   :ensure t
   :after elisp-mode
   :config (eros-mode))
+
+(use-package emacs-lisp-snippets
+  :load-path "lisp"
+  :defer t
+  :commands emacs-lisp-snippets-file-template
+  :init
+  (define-auto-insert '("\\.el\\'" . "Emacs-Lisp file template")
+    #'emacs-lisp-snippets-file-template))
 
 (use-package ielm
   :defer t
@@ -2095,22 +2103,20 @@ This is a non-interactive version of `ignore'."
 
   (setf c-default-style '((awk-mode . "awk")
                           (protobuf-mode . "protobuf")
-                          (other . "common")))
-
-  (define-auto-insert `(,(rx "." (or "H" "h" "hh" "hpp" "hxx" "h++") eos)
-                        . "C/C++ header template")
-    '("Guard: "
-      "#ifndef " str "
-#define " str "
-
-" _ "
-
-#endif
-")))
+                          (other . "common"))))
 
 (use-package cmacexp
   :defer t
   :config (setf c-macro-prompt-flag t))
+
+(use-package c-snippets
+  :load-path "lisp"
+  :defer t
+  :commands c-snippets-header-template
+  :init
+  (define-auto-insert `(,(rx "." (or "h" "H" "hh" "hpp" "hxx" "h++") eos)
+                        . "C/C++ header template")
+    #'c-snippets-header-template))
 
 (use-package company-c-headers
   :ensure t
@@ -2361,23 +2367,15 @@ This is a non-interactive version of `ignore'."
 
 (use-package sgml-mode
   :defer t
-  :config
-  (unbind-key "C-c C-v" sgml-mode-map)
+  :config (unbind-key "C-c C-v" sgml-mode-map))
 
+(use-package html-snippets
+  :load-path "lisp"
+  :defer t
+  :commands html-snippets-file-template
+  :init
   (define-auto-insert '(html-mode . "HTML file template")
-    '("Title: "
-      "<!DOCTYPE html>
-<html lang=\"en\">
-  <head>
-    <meta charset=\"utf-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-    <title>" str | "Untitled" "</title>" _ "
-  </head>
-  <body>
-
-  </body>
-</html>
-")))
+    #'html-snippets-file-template))
 
 (use-package nxml-mode
   :defer t
@@ -2532,12 +2530,8 @@ This is a non-interactive version of `ignore'."
   :defer t
   :mode ("/LICENSE\\'" "/UNLICENSE\\'")
   :config
-  (define-abbrev text-mode-abbrev-table
-    "`email" "" (lambda () (insert user-mail-address)) :system t)
-  (define-abbrev text-mode-abbrev-table
-    "`time" "" (lambda () (insert (current-time-string))) :system t)
-
-  (define-auto-insert '("/UNLICENSE\\'" . "The Unlicense") "unlicense"))
+  (define-auto-insert '("/UNLICENSE\\'" . "The Unlicense")
+    "unlicense"))
 
 ;;; LaTeX
 
@@ -2605,22 +2599,7 @@ This is a non-interactive version of `ignore'."
   (defun my-setup-LaTeX-mode ()
     (make-local-variable 'TeX-electric-math)
     (setf TeX-electric-math '("\\(" . "\\)")))
-  (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode)
-
-  (define-auto-insert '(latex-mode . "LaTeX file template")
-    '("Class: "
-      "\\documentclass[11pt]{" str | "scrartcl" "}
-
-\\title{" _ "}
-\\author{}
-\\date{}
-
-\\begin{document}
-
-\\maketitle
-
-\\end{document}
-")))
+  (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode))
 
 (use-package preview
   :defer t
@@ -2631,6 +2610,14 @@ This is a non-interactive version of `ignore'."
   :load-path "lisp"
   :after latex
   :config (auctex-latexmk-setup))
+
+(use-package latex-snippets
+  :load-path "lisp"
+  :defer t
+  :commands latex-snippets-file-template
+  :init
+  (define-auto-insert '(latex-mode . "LaTeX file template")
+    #'latex-snippets-file-template))
 
 (use-package reftex
   :defer t
