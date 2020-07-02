@@ -2460,11 +2460,22 @@ This is a non-interactive version of `ignore'."
   :bind (:map skewer-mode-map ("C-c a a" . run-skewer))
   :hook (js2-mode . skewer-mode))
 
+(use-package skewer-repl
+  :defer t
+  :after skewer-mode
+  :bind (:map skewer-mode-map ("C-c a m" . skewer-repl)))
+
 (use-package skewer-css
   :ensure skewer-mode
   :defer t
   :bind (:map skewer-css-mode-map ("C-c a a" . run-skewer))
   :hook (css-mode . skewer-css-mode))
+
+(use-package skewer-html
+  :ensure skewer-mode
+  :defer t
+  :bind (:map skewer-html-mode-map ("C-c a a" . run-skewer))
+  :hook (html-mode . skewer-html-mode))
 
 (use-package flycheck-npm
   :load-path "lisp"
