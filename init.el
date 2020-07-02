@@ -2001,11 +2001,6 @@ This is a non-interactive version of `ignore'."
   :after elisp-mode
   :hook (flycheck-mode . flycheck-cask-setup))
 
-(use-package flycheck-package
-  :ensure t
-  :after flycheck
-  :config (flycheck-package-setup))
-
 (use-package cask-mode
   :ensure t
   :defer t)
