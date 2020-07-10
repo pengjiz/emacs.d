@@ -715,12 +715,8 @@ This is a non-interactive version of `ignore'."
 (use-package dumb-jump
   :ensure t
   :defer t
-  :bind (("M-g d" . dumb-jump-go)
-         ("M-g D" . dumb-jump-go-other-window)
-         ("M-g b" . dumb-jump-back))
-  :config
-  (setf dumb-jump-selector 'ivy)
-  (setf dumb-jump-aggressive nil))
+  :after xref
+  :init (add-hook 'xref-backend-functions #'dumb-jump-xref-activate t))
 
 ;;; Search & replace
 
