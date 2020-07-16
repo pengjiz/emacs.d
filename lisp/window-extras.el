@@ -91,6 +91,26 @@ Otherwise apply FN on BUFFER and ARGS."
   (with-eval-after-load 'ielm
     (advice-add #'ielm :around #'window-extras--pop-to-ielm-buffer)))
 
+;; Ediff
+(defvar window-extras--pre-ediff-configuration nil
+  "Window configuration before entering Ediff.")
+
+(defun window-extras--save-pre-ediff-configuration ()
+  "Save window configuration before entering Ediff."
+  (setf window-extras--pre-ediff-configuration (current-window-configuration)))
+
+(defun window-extras--restore-pre-ediff-configuration ()
+  "Restore window configuration after leaving Ediff."
+  (when (window-configuration-p window-extras--pre-ediff-configuration)
+    (set-window-configuration window-extras--pre-ediff-configuration)))
+
+(defun window-extras--setup-ediff ()
+  "Setup Ediff integration."
+  (add-hook 'ediff-before-setup-hook
+            #'window-extras--save-pre-ediff-configuration)
+  (dolist (hook '(ediff-quit-hook ediff-suspend-hook))
+    (add-hook hook #'window-extras--restore-pre-ediff-configuration t)))
+
 ;; Idris mode
 (defvar idris-hole-list-buffer-name)
 (declare-function idris-hole-list-quit "ext:idris-hole-list")
@@ -113,6 +133,7 @@ Otherwise apply FN on BUFFER and ARGS."
   (window-extras--setup-org)
   (window-extras--setup-calc)
   (window-extras--setup-ielm)
+  (window-extras--setup-ediff)
   (window-extras--setup-idris))
 
 (provide 'window-extras)

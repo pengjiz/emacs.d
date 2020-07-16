@@ -474,20 +474,7 @@ This is a non-interactive version of `ignore'."
   :defer t
   :config
   (setf ediff-window-setup-function #'ediff-setup-windows-plain
-        ediff-split-window-function #'split-window-horizontally)
-
-  (defvar my-window-configuration-before-ediff nil)
-  (defun my-save-window-configuration-before-ediff ()
-    "Save window configuration before Ediff."
-    (setf my-window-configuration-before-ediff (current-window-configuration)))
-
-  (defun my-restore-window-configuration-after-ediff ()
-    "Restore window configuration after Ediff."
-    (set-window-configuration my-window-configuration-before-ediff))
-
-  (add-hook 'ediff-before-setup-hook #'my-save-window-configuration-before-ediff)
-  (dolist (hook '(ediff-quit-hook ediff-suspend-hook))
-    (add-hook hook #'my-restore-window-configuration-after-ediff t)))
+        ediff-split-window-function #'split-window-horizontally))
 
 (use-package proced
   :defer t
