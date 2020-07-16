@@ -25,9 +25,10 @@
 
   (setf inhibit-default-init t
         inhibit-startup-screen t
+        inhibit-startup-buffer-menu t
+        initial-buffer-choice t
         initial-scratch-message nil
-        initial-major-mode #'fundamental-mode
-        (symbol-function 'display-startup-echo-area-message) #'my-ignore))
+        initial-major-mode #'fundamental-mode))
 
 (progn ; UI
   (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
@@ -3147,8 +3148,6 @@ This is a replacement for `reftex--query-search-regexps'."
 
 (progn ; end
   (setf gc-cons-threshold my-default-gc-cons-threshold)
-  (makunbound 'my-default-gc-cons-threshold)
-  (unless noninteractive
-    (message "Finish loading init file (%s)" (emacs-init-time))))
+  (makunbound 'my-default-gc-cons-threshold))
 
 ;;; init.el ends here
