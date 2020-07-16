@@ -8,10 +8,12 @@
 
 ;;; Boot
 
-;; Temporarily increase GC threshold
-(progn ; GC
-  (defvar my-default-gc-cons-threshold gc-cons-threshold)
-  (setf gc-cons-threshold 100000000))
+(progn ; garbage collection
+  (setf gc-cons-threshold 100000000)
+  (defun my-set-gc-cons-threshold ()
+    "Set `gc-cons-threshold' to a normal value."
+    (setf gc-cons-threshold 10000000))
+  (add-hook 'emacs-startup-hook #'my-set-gc-cons-threshold))
 
 (progn ; startup
   (setf load-prefer-newer t
@@ -3143,11 +3145,5 @@ This is a replacement for `reftex--query-search-regexps'."
   :load-path "lisp"
   :defer t
   :hook (after-init . rich-title-setup))
-
-;;; End
-
-(progn ; end
-  (setf gc-cons-threshold my-default-gc-cons-threshold)
-  (makunbound 'my-default-gc-cons-threshold))
 
 ;;; init.el ends here
