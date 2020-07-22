@@ -8,14 +8,13 @@
 
 ;;; Boot
 
-(progn ; garbage collection
+(progn ; fundamental
   (setf gc-cons-threshold 100000000)
   (defun my-set-gc-cons-threshold ()
     "Set `gc-cons-threshold' to a normal value."
     (setf gc-cons-threshold 10000000))
-  (add-hook 'emacs-startup-hook #'my-set-gc-cons-threshold))
+  (add-hook 'emacs-startup-hook #'my-set-gc-cons-threshold)
 
-(progn ; startup
   (setf load-prefer-newer t
         ad-redefinition-action 'accept
         debugger-stack-frame-as-list t)
@@ -23,37 +22,7 @@
         delete-by-moving-to-trash t)
   (setf (default-value 'mode-line-format) nil
         frame-title-format nil)
-  (prefer-coding-system 'utf-8)
-
-  (setf inhibit-default-init t
-        inhibit-startup-screen t
-        inhibit-startup-buffer-menu t
-        initial-buffer-choice t
-        initial-scratch-message nil
-        initial-major-mode #'fundamental-mode)
-  ;; NOTE: A non-nil value for this variable will trigger some weird logic. So
-  ;; we always keep it nil and modify the function instead.
-  (setf inhibit-startup-echo-area-message nil)
-  (unless (daemonp)
-    (setf (symbol-function 'display-startup-echo-area-message) #'my-ignore)))
-
-(progn ; UI
-  (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
-  (when (fboundp #'scroll-bar-mode) (scroll-bar-mode 0))
-  (menu-bar-mode 0)
-  (tooltip-mode 0)
-  (blink-cursor-mode 0)
-  (setf ring-bell-function #'my-ignore
-        echo-keystrokes 0.25
-        use-dialog-box nil
-        (symbol-function 'yes-or-no-p) #'y-or-n-p
-        mode-line-default-help-echo nil
-        frame-resize-pixelwise t
-        window-resize-pixelwise t
-        (default-value 'indicate-empty-lines) t
-        (default-value 'cursor-in-non-selected-windows) nil
-        visible-cursor nil
-        x-stretch-cursor t))
+  (prefer-coding-system 'utf-8))
 
 (progn ; package
   (require 'package)
@@ -106,13 +75,42 @@
     (expand-file-name (convert-standard-filename file)
                       my-sync-directory))
 
-  ;; NOTE: Overriding non-interactive functions with ignore will make them
-  ;; interactive and appear in M-x and others. So here we define a new
-  ;; non-interactive ignore for those.
+  ;; NOTE: To manipulate non-interactive functions we need to use
+  ;; non-interactive functions, so that they will not become interactive.
   (defun my-ignore (&rest _)
-    "Do nothing and return nil.
-This is a non-interactive version of `ignore'."
+    "Do nothing and return nil."
     nil))
+
+(progn ; startup
+  (setf inhibit-default-init t
+        inhibit-startup-screen t
+        inhibit-startup-buffer-menu t
+        initial-buffer-choice t
+        initial-scratch-message nil
+        initial-major-mode #'fundamental-mode)
+  ;; NOTE: A non-nil value for this variable will trigger some weird logic. So
+  ;; we always keep it nil and modify the function instead.
+  (setf inhibit-startup-echo-area-message nil)
+  (unless (daemonp)
+    (setf (symbol-function 'display-startup-echo-area-message) #'my-ignore)))
+
+(progn ; user interface
+  (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
+  (when (fboundp #'scroll-bar-mode) (scroll-bar-mode 0))
+  (menu-bar-mode 0)
+  (tooltip-mode 0)
+  (blink-cursor-mode 0)
+  (setf ring-bell-function #'ignore
+        echo-keystrokes 0.25
+        use-dialog-box nil
+        (symbol-function 'yes-or-no-p) #'y-or-n-p
+        mode-line-default-help-echo nil
+        frame-resize-pixelwise t
+        window-resize-pixelwise t
+        (default-value 'indicate-empty-lines) t
+        (default-value 'cursor-in-non-selected-windows) nil
+        visible-cursor nil
+        x-stretch-cursor t))
 
 ;;; Initialization
 
@@ -1938,7 +1936,7 @@ This is a non-interactive version of `ignore'."
   (when (fboundp #'alert)
     (setf appt-display-format 'window
           appt-disp-window-function #'my-display-appt-message
-          appt-delete-window-function #'my-ignore)
+          appt-delete-window-function #'ignore)
 
     (defun my-display-appt-message (min _ msg)
       "Display MSG due in MIN minutes with `alert'."
