@@ -30,7 +30,12 @@
         inhibit-startup-buffer-menu t
         initial-buffer-choice t
         initial-scratch-message nil
-        initial-major-mode #'fundamental-mode))
+        initial-major-mode #'fundamental-mode)
+  ;; NOTE: A non-nil value for this variable will trigger some weird logic. So
+  ;; we always keep it nil and modify the function instead.
+  (setf inhibit-startup-echo-area-message nil)
+  (unless (daemonp)
+    (setf (symbol-function 'display-startup-echo-area-message) #'my-ignore)))
 
 (progn ; UI
   (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
