@@ -20,9 +20,31 @@
         debugger-stack-frame-as-list t)
   (setf create-lockfiles nil
         delete-by-moving-to-trash t)
-  (setf (default-value 'mode-line-format) nil
-        frame-title-format nil)
   (prefer-coding-system 'utf-8))
+
+(progn ; user interface
+  (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
+  (when (fboundp #'scroll-bar-mode) (scroll-bar-mode 0))
+  (menu-bar-mode 0)
+
+  (setf (default-value 'mode-line-format) nil
+        mode-line-default-help-echo nil)
+
+  (tooltip-mode 0)
+  (setf ring-bell-function #'ignore
+        use-dialog-box nil
+        (symbol-function 'yes-or-no-p) #'y-or-n-p
+        echo-keystrokes 0.25)
+
+  (blink-cursor-mode 0)
+  (setf (default-value 'cursor-in-non-selected-windows) nil
+        visible-cursor nil
+        x-stretch-cursor t)
+
+  (push '(font . "Source Code Pro-12") default-frame-alist)
+  (setf frame-resize-pixelwise t
+        window-resize-pixelwise t
+        (default-value 'indicate-empty-lines) t))
 
 (progn ; package
   (require 'package)
@@ -84,33 +106,17 @@
 (progn ; startup
   (setf inhibit-default-init t
         inhibit-startup-screen t
-        inhibit-startup-buffer-menu t
-        initial-buffer-choice t
+        inhibit-startup-buffer-menu t)
+
+  (setf initial-buffer-choice t
         initial-scratch-message nil
         initial-major-mode #'fundamental-mode)
+
   ;; NOTE: A non-nil value for this variable will trigger some weird logic. So
   ;; we always keep it nil and modify the function instead.
   (setf inhibit-startup-echo-area-message nil)
   (unless (daemonp)
     (setf (symbol-function 'display-startup-echo-area-message) #'my-ignore)))
-
-(progn ; user interface
-  (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
-  (when (fboundp #'scroll-bar-mode) (scroll-bar-mode 0))
-  (menu-bar-mode 0)
-  (tooltip-mode 0)
-  (blink-cursor-mode 0)
-  (setf ring-bell-function #'ignore
-        echo-keystrokes 0.25
-        use-dialog-box nil
-        (symbol-function 'yes-or-no-p) #'y-or-n-p
-        mode-line-default-help-echo nil
-        frame-resize-pixelwise t
-        window-resize-pixelwise t
-        (default-value 'indicate-empty-lines) t
-        (default-value 'cursor-in-non-selected-windows) nil
-        visible-cursor nil
-        x-stretch-cursor t))
 
 ;;; Initialization
 
@@ -171,9 +177,7 @@
 
 (use-package color-theme-sanityinc-tomorrow
   :ensure t
-  :config
-  (load-theme 'sanityinc-tomorrow-night t)
-  (push '(font . "Source Code Pro-12") default-frame-alist))
+  :config (load-theme 'sanityinc-tomorrow-night t))
 
 (use-package url
   :defer t
@@ -407,9 +411,9 @@
 (use-package calc
   :defer t
   :bind (([remap calc-dispatch] . quick-calc)
+         ("C-c m c" . calc)
          ("C-c x c" . calc-grab-region)
-         ("C-c x C" . calc-grab-rectangle)
-         ("C-c m c" . calc))
+         ("C-c x C" . calc-grab-rectangle))
   :init
   (defvar org-babel-load-languages)
   (with-eval-after-load 'org
@@ -438,9 +442,7 @@
 (use-package man
   :defer t
   :bind ("C-c m k" . man)
-  :config
-  ;; Select man buffers after it is displayed
-  (setf Man-notify-method 'aggressive))
+  :config (setf Man-notify-method 'aggressive))
 
 (use-package edit-indirect
   :ensure t
