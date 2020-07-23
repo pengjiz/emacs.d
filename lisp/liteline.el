@@ -107,29 +107,49 @@
   '((t (:inherit (bold error))))
   "Face used for errors in Git.")
 
-;;; Mode line helper (mostly copied from doom-emacs)
+;;; Mode line helper
 
 (eval-and-compile
-  (defvar liteline--segment-fns-alist nil "Functions for segments."))
+  (defvar liteline--segment-fns-alist nil "Functions of segments.")
 
-;; NOTE: In general each segment should have a trailing whitespace as
-;; the separator. There might be a better way to handle this.
-(defmacro liteline-define-segment (name &rest body)
-  "Define a mode line segment with NAME and BODY and `byte-compile' it."
-  (declare (indent defun) (doc-string 2))
-  (let ((sym (intern (format "liteline--segment-%s" name)))
-        (docstring (if (stringp (car body))
-                       (pop body)
-                     (format "Liteline segment %s." name))))
-    (cl-pushnew (cons name sym) liteline--segment-fns-alist
-                :test #'equal)
+  (defun liteline--prepare-segments (segments)
+    "Prepare mode line forms of SEGMENTS.
+Return forms that can be passed directly to `format-mode-line'."
+    (let (forms it)
+      (dolist (segment segments)
+        (cond ((stringp segment)
+               (push segment forms))
+              ((consp segment)
+               (push segment forms))
+              ((symbolp segment)
+               (if (setf it (cdr (assq segment liteline--segment-fns-alist)))
+                   (push `(:eval (,it)) forms)
+                 (push it forms)))
+              (t
+               (error "%s is not a valid segment" segment))))
+      (cons "" (nreverse forms)))))
+
+(defmacro liteline-define-segment (name doc &rest body)
+  "Define a mode line segment function for NAME with DOC and BODY."
+  (declare (indent defun)
+           (doc-string 2))
+  (let ((symbol (intern (format "liteline--segment-%s" name))))
+    (cl-pushnew (cons name symbol) liteline--segment-fns-alist
+                :test #'eq :key #'car)
     `(progn
-       (setf (symbol-function ',sym) (lambda () ,docstring ,@body))
-       (cl-pushnew (cons ',name #',sym) liteline--segment-fns-alist
-                   :test #'equal)
-       ,(unless (bound-and-true-p byte-compile-current-file)
-          `(let (byte-compile-warnings)
-             (byte-compile #',sym))))))
+       (defun ,symbol ()
+         ,(or doc (format "Show the %s information." name))
+         ,@body)
+       (cl-pushnew (cons ',name #',symbol) liteline--segment-fns-alist
+                   :test #'eq :key #'car))))
+
+(defvar liteline--mode-line-fns-alist nil "Functions of mode lines.")
+
+(defun liteline--prepare-mode-line (name)
+  "Prepare the mode line of NAME."
+  (if-let* ((fn (cdr (assq name liteline--mode-line-fns-alist))))
+      `(:eval (,fn))
+    (error "%s is not a valid mode line" name)))
 
 (defsubst liteline--escape (string)
   "Escape special characters in STRING for mode line."
@@ -141,67 +161,45 @@
                                   '(mouse-face help-echo keymap local-map)
                                   string))
 
-(defun liteline--prepare-segments (segments)
-  "Prepare SEGMENTS for defining a mode line."
-  (let (forms it)
-    (dolist (segment segments)
-      (cond ((stringp segment)
-             (push segment forms))
-            ((consp segment)
-             (push segment forms))
-            ((symbolp segment)
-             (if (setf it (cdr (assq segment liteline--segment-fns-alist)))
-                 (push `(:eval (,it)) forms)
-               (push it forms)))
-            (t
-             (error "%s is not a valid segment" segment))))
-    (cons "" (nreverse forms))))
+(defun liteline--wrap-mode-line (left right)
+  "Wrap LEFT and RIGHT segment forms into a full mode line."
+  (let* ((right-string (format-mode-line right))
+         (right-width (string-width right-string)))
+    (liteline--clean-text-properties right-string)
+    (list left
+          (propertize
+           " "
+           'display
+           `((space :align-to (- (+ right right-fringe right-margin)
+                                 ,right-width))))
+          (liteline--escape right-string))))
 
-(defun liteline-define-mode-line (name lhs &optional rhs)
-  "Define a function of NAME with LHS and RHS for mode line."
+(defmacro liteline-define-mode-line (name left &optional right)
+  "Define a mode line function for NAME with LEFT and RIGHT segments."
   (declare (indent 1))
-  (let ((sym (intern (format "liteline--mode-line-%s" name)))
-        (lhs-forms (liteline--prepare-segments lhs))
-        (rhs-forms (liteline--prepare-segments rhs)))
-    (setf (symbol-function sym)
-          (lambda ()
-            (let* ((rhs-string (format-mode-line (cons "" rhs-forms)))
-                   (rhs-width (string-width rhs-string)))
-              ;; NOTE: Generally those segments with mouse interaction are in
-              ;; the right half, so here we only clean it. Also note that this
-              ;; function modify the object in place.
-              (liteline--clean-text-properties rhs-string)
-              (list lhs-forms
-                    (propertize
-                     " "
-                     'display
-                     `((space :align-to (- (+ right right-fringe right-margin)
-                                           ,rhs-width))))
-                    ;; NOTE: The % character in the string will cause problems
-                    ;; so here we remove them.
-                    (liteline--escape rhs-string)))))))
-
-(defun liteline--get-mode-line (name)
-  "Return the `mode-line-format' of NAME."
-  (let ((fn (intern-soft (format "liteline--mode-line-%s" name))))
-    (when (functionp fn)
-      `(:eval (,fn)))))
+  (let ((symbol (intern (format "liteline--mode-line-%s" name))))
+    `(progn
+       (defun ,symbol ()
+         ,(format "Show the %s mode line." name)
+         (liteline--wrap-mode-line ',(liteline--prepare-segments left)
+                                   ',(liteline--prepare-segments right)))
+       (cl-pushnew (cons ',name #',symbol) liteline--mode-line-fns-alist
+                   :test #'eq :key #'car))))
 
 (defun liteline-set-mode-line (name &optional default)
-  "Set `mode-line-format' to the format of NAME.
+  "Set `mode-line-format' to the mode line of NAME.
 If DEFAULT is non-nil, set the default value."
-  (when-let* ((ml-format (liteline--get-mode-line name)))
-    (setf (if default
-              (default-value 'mode-line-format)
-            mode-line-format)
-          (list "%e" ml-format))))
+  (setf (if default
+            (default-value 'mode-line-format)
+          mode-line-format)
+        (list "%e" (liteline--prepare-mode-line name))))
 
 ;;; Active window
 
 (defvar liteline--active-window nil "Current active window.")
 
 (defun liteline--set-active-window (&rest _)
-  "Set `litelite--active-window' to the current active window."
+  "Set `liteline--active-window' to the current active window."
   (when-let* ((window (selected-window)))
     (unless (minibuffer-window-active-p window)
       (setf liteline--active-window window))))
@@ -568,15 +566,22 @@ If DEFAULT is non-nil, set the default value."
 ;;; Mode line
 
 ;; Main
-(liteline-define-mode-line 'main
-  '(action buffer-info buffer-position)
-  '(misc git buffer-encoding input-method minor-modes major-mode flycheck))
+(liteline-define-mode-line main
+  (action
+   buffer-info
+   buffer-position)
+  (misc
+   git
+   buffer-encoding
+   input-method
+   minor-modes
+   major-mode
+   flycheck))
 
 ;;; Entry point
 
 (defun liteline-setup ()
   "Setup mode line."
-  ;; Preparation for segments
   (liteline--setup-active-window)
   (liteline--setup-conda)
   (liteline--setup-reftex)
@@ -584,7 +589,6 @@ If DEFAULT is non-nil, set the default value."
   (liteline--setup-git)
   (litelite--setup-two-column)
 
-  ;; Default mode line
   (liteline-set-mode-line 'main t))
 
 (provide 'liteline)
