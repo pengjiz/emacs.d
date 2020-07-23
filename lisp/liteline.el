@@ -132,7 +132,8 @@ Return forms that can be passed directly to `format-mode-line'."
 (defmacro liteline-define-segment (name doc &rest body)
   "Define a mode line segment function for NAME with DOC and BODY."
   (declare (indent defun)
-           (doc-string 2))
+           (doc-string 2)
+           (debug (&define name stringp def-body)))
   (let ((symbol (intern (format "liteline--segment-%s" name))))
     (cl-pushnew (cons name symbol) liteline--segment-fns-alist
                 :test #'eq :key #'car)
@@ -176,7 +177,8 @@ Return forms that can be passed directly to `format-mode-line'."
 
 (defmacro liteline-define-mode-line (name left &optional right)
   "Define a mode line function for NAME with LEFT and RIGHT segments."
-  (declare (indent 1))
+  (declare (indent 1)
+           (debug (&define name listp [&optional listp])))
   (let ((symbol (intern (format "liteline--mode-line-%s" name))))
     `(progn
        (defun ,symbol ()

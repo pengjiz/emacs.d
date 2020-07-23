@@ -16,7 +16,8 @@
 
 The address is formed with URL-TEMPLATE and the user input read
 with a prompt constructed with TITLE."
-  (declare (indent 1))
+  (declare (indent 1)
+           (debug (&define name stringp stringp)))
   `(defun ,(intern (format "web-search-%s" name)) (query)
      ,(format "Search %s with QUERY." title)
      (interactive
