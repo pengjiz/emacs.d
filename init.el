@@ -3031,6 +3031,13 @@ This is a replacement for `reftex--query-search-regexps'."
   :after org
   :init (cl-pushnew '(graphql . t) org-babel-load-languages :test #'eq :key #'car))
 
+;;; Assembly
+
+(use-package nasm-mode
+  :ensure t
+  :defer t
+  :mode "\\.nasm\\'")
+
 ;;; BNF
 
 (use-package bnf-mode
