@@ -1354,6 +1354,7 @@
                                                  'rust-mode
                                                  'idris-mode
                                                  'css-mode
+                                                 'latex-mode
                                                  'ledger-mode)
                                  '(company-capf))
                                 ((derived-mode-p 'c-mode 'c++-mode)
@@ -1366,13 +1367,7 @@
                                 ((derived-mode-p 'python-mode)
                                  '(company-anaconda))
                                 ((derived-mode-p 'haskell-mode)
-                                 '(dante-company))
-                                ((derived-mode-p 'latex-mode)
-                                 '((company-auctex-macros
-                                    company-auctex-symbols
-                                    company-auctex-environments)
-                                   company-reftex-citations
-                                   company-reftex-labels)))))
+                                 '(dante-company)))))
       (make-local-variable 'company-backends)
       (dolist (backend (nreverse backends))
         (push backend company-backends)))
@@ -2643,14 +2638,6 @@ This is a replacement for `reftex--query-search-regexps'."
                   "[ \t]*&&[ \t]*"))
   (setf (symbol-function 'reftex--query-search-regexps)
         #'my-query-reftex-citation-search-regexps))
-
-(use-package company-auctex
-  :ensure t
-  :defer t)
-
-(use-package company-reftex
-  :ensure t
-  :defer t)
 
 (use-package bibtex
   :defer t
