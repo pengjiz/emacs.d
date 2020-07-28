@@ -1981,16 +1981,6 @@
   :bind ("C-c a i" . ielm)
   :config (setf ielm-prompt-read-only (default-value 'comint-prompt-read-only)))
 
-(use-package flycheck-cask
-  :ensure t
-  :defer t
-  :after elisp-mode
-  :hook (flycheck-mode . flycheck-cask-setup))
-
-(use-package cask-mode
-  :ensure t
-  :defer t)
-
 ;;; Eshell
 
 (use-package eshell
