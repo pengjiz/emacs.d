@@ -93,7 +93,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
   (let* ((path (conda--get-environment-path environment))
-         ;; NOTE: This may not work on Windows
+         ;; FIXME: This does not work on Windows.
          (bin-path (expand-file-name "bin" path)))
     ;; Error when the environment is not found
     (unless path
@@ -160,9 +160,6 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (setenv "CONDA_PREFIX" nil)
 
   ;; Eshell
-  ;;
-  ;; NOTE: This will update all Eshell buffers, which is what I usually
-  ;; want.
   (setf (default-value 'eshell-path-env) (getenv "PATH"))
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer

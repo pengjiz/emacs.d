@@ -11,6 +11,7 @@
 
 ;;; Move point
 
+;; Normal line
 (defun simple-extras-move-beginning-of-line (arg)
   "Move point back to indentation or beginning of line.
 
@@ -30,6 +31,7 @@ If ARG is not nil or 1, move forward ARG - 1 lines first."
     (when (= point-before (point))
       (move-beginning-of-line 1))))
 
+;; Visual line
 (defun simple-extras-back-to-indentation-of-visual-line ()
   "Move point to the first non-whitespace character on this visual line."
   (interactive "^")
@@ -60,10 +62,7 @@ If ARG is not nil or 1, move forward ARG - 1 visual lines first."
     (when (= point-before (point))
       (beginning-of-visual-line 1))))
 
-;; NOTE: A workaround for ESS. It might be better to just remap commands.
-;; However, for some unknown reason the ESS map takes higher priority than the
-;; visual line map, making it hard to remap command for visual line movement.
-;; Therefore here is this function.
+;; ESS line
 (declare-function ess-roxy-move-beginning-of-line "ext:ess-roxy")
 (declare-function ess-roxy-entry-p "ext:ess-roxy")
 

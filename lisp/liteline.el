@@ -333,7 +333,6 @@ If DEFAULT is non-nil, set the default value."
   "Unset the local `mode-line-format'."
   (kill-local-variable 'mode-line-format))
 
-;; NOTE: Suppress a compiler warning.
 (defun liteline--get-buffer-size (&optional _)
   "Keep the original `buffer-size' function."
   nil)

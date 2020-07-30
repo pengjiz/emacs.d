@@ -125,25 +125,8 @@
   (setf custom-file (my-expand-var-file-name "custom.el"))
   (load custom-file t t t)
 
-  (dolist (key '(;; compose mail
-                 "C-x m"
-                 "C-x 4 m"
-                 ;; tmm
-                 "M-`"
-                 ;; suspend frame
-                 "C-z"
-                 "C-x C-z"
-                 ;; zap to char
-                 "M-z"
-                 ;; back to indentation
-                 "M-m"
-                 ;; upcase & downcase region
-                 "C-x C-u"
-                 "C-x C-l"
-                 ;; count words
-                 "M-="
-                 ;; ispell word
-                 "M-$"))
+  (dolist (key '("M-`" "M-=" "M-$" "M-z" "M-m" "C-z" "C-x C-z"
+                 "C-x C-u" "C-x C-l" "C-x m" "C-x 4 m"))
     (unbind-key key)))
 
 (use-package hydra
@@ -574,10 +557,6 @@
   :init
   (setf hs-minor-mode-map (make-sparse-keymap))
 
-  ;; NOTE: Workaround an issue with Idris prover. I do not actually use the
-  ;; prover but the script mode is anyway activated when quitting the process
-  ;; and because it has no comment start and end so hideshow activation will
-  ;; fail and terminate the quitting process.
   (defun my-enable-hideshow ()
     (unless (eq major-mode 'idris-prover-script-mode)
       (hs-minor-mode))))
@@ -684,7 +663,7 @@
          ([remap avy-goto-char] . avy-isearch)
          ([remap avy-goto-char-2] . avy-isearch))
   :config
-  ;; NOTE: Set this to nil will enable smart case search.
+  ;; Smart case search
   (setf avy-case-fold-search nil)
   (setf avy-all-windows nil
         avy-all-windows-alt t)
@@ -845,7 +824,7 @@
   :defer t
   :config (setf ffap-machine-p-known 'reject))
 
-;; Automatically set +x for scripts
+;; Automatically make scripts executable
 (use-package executable
   :defer t
   :hook (after-save . executable-make-buffer-file-executable-if-script-p))
@@ -944,20 +923,19 @@
   (setf dired-omit-files "\\`[#.]\\|[#~]\\'"
         dired-omit-extensions nil))
 
-;; More colors in Dired buffers
+;; More colors in Dired
 (use-package diredfl
   :ensure t
   :defer t
   :hook (dired-mode . diredfl-mode))
 
-;; Narrow in Dired
+;; Filtering in Dired
 (use-package dired-narrow
   :ensure t
   :defer t
   :after dired
   :bind (:map dired-mode-map ("/" . dired-narrow)))
 
-;; Show file git info
 (use-package dired-git-info
   :ensure t
   :defer t
@@ -1259,7 +1237,6 @@
     (bind-key [remap ess-msg-and-comint-dynamic-list-input-ring] #'counsel-shell-history
               inferior-ess-mode-map))
 
-  ;; NOTE: Due to an Eshell bug we cannot bind key in the mode map.
   (with-eval-after-load 'esh-mode
     (bind-keys ([remap eshell-previous-matching-input] . counsel-esh-history)
                ([remap eshell-list-history] . counsel-esh-history)))
@@ -1342,8 +1319,7 @@
                                                  'ledger-mode)
                                  '(company-capf))
                                 ((derived-mode-p 'c-mode 'c++-mode)
-                                 '(company-c-headers
-                                   company-etags))
+                                 '(company-c-headers company-etags))
                                 ((derived-mode-p 'cmake-mode)
                                  '(company-cmake))
                                 ((derived-mode-p 'js2-mode 'typescript-mode)
@@ -1531,7 +1507,7 @@
   (add-hook 'git-commit-mode-hook #'my-setup-git-commit-mode)
   (add-hook 'git-commit-setup-hook #'git-commit-turn-on-flyspell))
 
-;; Browse history
+;; Browse other versions
 (use-package git-timemachine
   :ensure t
   :defer t
@@ -1550,7 +1526,7 @@
   (advice-add #'git-timemachine--show-minibuffer-details :around
               #'my-show-git-timemachine-details-in-header-line))
 
-;; Show edits in the left fringe
+;; Show edits
 (use-package diff-hl
   :ensure t
   :defer t
@@ -1568,7 +1544,6 @@
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
-  ;; In terminal there is no fringe
   (unless (display-graphic-p)
     (diff-hl-margin-mode))
 
@@ -1686,7 +1661,7 @@
   :defer t
   :config
   (setf eldoc-echo-area-use-multiline-p nil)
-  ;; Describe the unicode char at point by default
+  ;; Describe the character at point by default
   (setf eldoc-documentation-function #'describe-char-eldoc))
 
 (use-package eldoc-lv
@@ -1707,7 +1682,7 @@
   (setf (default-value 'comint-prompt-read-only) nil
         comint-scroll-to-bottom-on-input 'this))
 
-;;; Debugger
+;;; Debugging
 
 (use-package gud
   :defer t
@@ -1728,8 +1703,6 @@
              ("C-x C-a r" . hydra-debug/gud-cont)
              ("C-x C-a b" . hydra-debug/gud-break)
              ("C-x C-a d" . hydra-debug/gud-remove)))
-
-;;; Compiler explorer
 
 (use-package rmsbolt
   :ensure t
@@ -1928,7 +1901,7 @@
         (alert (concat msg " in " min " minutes")
                :title "Appt"))))
 
-  ;; NOTE: This is not a normal minor mode, the positive argument is
+  ;; NOTE: This is not a normal minor mode and the positive argument is
   ;; essential to turn it on, not toggle.
   (appt-activate 1))
 
@@ -1989,7 +1962,6 @@
                               eshell-tramp
                               eshell-unix))
 
-  ;; Workaround an Eshell bug
   (defun my-setup-eshell-mode ()
     (dolist (key '("M-s" "M-?" "<backtab>"))
       (unbind-key key eshell-mode-map))
@@ -1999,7 +1971,6 @@
                ([remap pcomplete-expand] . completion-at-point)
                ("C-x m" . eshell-life-is-too-much)
                ("C-c a a" . eshell-life-is-too-much)))
-
   (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
 
 (use-package em-alias
@@ -2034,7 +2005,6 @@
   :config
   (eshell-extras-setup)
 
-  ;; NOTE: Due to an Eshell bug we cannot bind key in the mode map.
   (bind-key [remap eshell-truncate-buffer] #'eshell-extras-clear-buffer)
   (bind-keys :map eshell-extras-autosuggest-suggestion-map
              ([remap forward-char] . eshell-extras-accept-suggestion)
@@ -2237,7 +2207,9 @@
   :defer t
   :after haskell-mode
   :bind (:map haskell-mode-map ("C-c C-v" . haskell-hoogle))
-  :config (setf haskell-hoogle-command nil))
+  :config
+  ;; Always use the website
+  (setf haskell-hoogle-command nil))
 
 (use-package haskell-extras
   :load-path "lisp"
@@ -2602,16 +2574,14 @@
 (use-package reftex-cite
   :defer t
   :config
-  (defun my-query-reftex-citation-search-regexps (default)
-    "Query for regular expressions of search queries.
-DEFAULT is the default value.
-
-This is a replacement for `reftex--query-search-regexps'."
+  (defun my-read-reftex-search-regexps (default)
+    "Read regular expressions for searching.
+When no input read, use DEFAULT value."
     (split-string (read-string (format "Regex [&& Regex...] (%s): " default)
                                nil 'reftex-cite-regexp-hist default)
                   "[ \t]*&&[ \t]*"))
   (setf (symbol-function 'reftex--query-search-regexps)
-        #'my-query-reftex-citation-search-regexps))
+        #'my-read-reftex-search-regexps))
 
 (use-package bibtex
   :defer t
@@ -2664,8 +2634,9 @@ This is a replacement for `reftex--query-search-regexps'."
 (use-package flycheck-ledger
   :ensure t
   :after flycheck
-  :config (setf flycheck-ledger-pedantic t
-                flycheck-ledger-explicit t))
+  :config
+  (setf flycheck-ledger-pedantic t
+        flycheck-ledger-explicit t))
 
 ;;; Org
 
@@ -2800,7 +2771,7 @@ This is a replacement for `reftex--query-search-regexps'."
         org-clock-clocked-in-display 'frame-title)
 
   (defun my-confirm-quitting-when-clocking ()
-    "Confirm quitting if clocking."
+    "Confirm quitting when clocking."
     (or (not (org-clocking-p))
         (progn
           (org-clock-goto)

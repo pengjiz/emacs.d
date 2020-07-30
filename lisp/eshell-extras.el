@@ -143,7 +143,7 @@ Return the first line of output if any. Otherwise return nil."
   "Setup Eshell prompt."
   (setf eshell-prompt-function #'eshell-extras--get-prompt
         eshell-prompt-regexp "^.* λ "
-        ;; This makes Eshell prompt read-only, which I do not want
+        ;; Highlighting prompt also makes it read-only, which I do not want.
         eshell-highlight-prompt nil))
 
 ;;; Autosuggest

@@ -43,7 +43,7 @@ If the buffer is not visiting a file, copy the
 ;;; List files
 
 (defun files-extras-list-files (&optional arg)
-  "List files in the Projectile project root.
+  "List files in the Projectile project root or `default-directory'.
 With non-nil ARG prompt the user for the directory."
   (interactive "P")
   (let ((display-buffer-overriding-action
