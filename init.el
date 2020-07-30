@@ -707,12 +707,6 @@
   :defer t
   :bind ("M-g I" . imenu-anywhere))
 
-(use-package dumb-jump
-  :ensure t
-  :defer t
-  :after xref
-  :init (add-hook 'xref-backend-functions #'dumb-jump-xref-activate t))
-
 ;;; Search & replace
 
 (use-package isearch
