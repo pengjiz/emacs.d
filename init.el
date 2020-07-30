@@ -892,8 +892,7 @@
   :bind (([remap list-directory] . dired)
          :map dired-mode-map
          ("e" . browse-url-of-dired-file)
-         ("K" . dired-kill-subdir)
-         ([remap dired-up-directory] . my-dired-up-directory))
+         ("K" . dired-kill-subdir))
   :config
   (setf dired-recursive-copies 'always
         dired-recursive-deletes 'top)
@@ -919,16 +918,7 @@
   (put #'dired-find-alternate-file 'disabled nil)
 
   (dolist (key '("c" "Z" "P"))
-    (unbind-key key dired-mode-map))
-
-  (defun my-dired-up-directory ()
-    "Go to the parent directory."
-    (interactive)
-    (let ((buffer (current-buffer)))
-      (dired-up-directory)
-      (unless (or (eq buffer (current-buffer))
-                  (get-buffer-window buffer t))
-        (kill-buffer buffer)))))
+    (unbind-key key dired-mode-map)))
 
 ;; Writable Dired
 (use-package wdired
