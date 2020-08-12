@@ -1428,7 +1428,6 @@
           typescript-mode
           python-mode
           sh-mode
-          lua-mode
           LaTeX-mode
           markdown-mode
           ledger-mode)
