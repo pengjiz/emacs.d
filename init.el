@@ -129,6 +129,11 @@
                  "C-x C-u" "C-x C-l" "C-x m" "C-x 4 m"))
     (unbind-key key)))
 
+(use-package async-bytecomp
+  :ensure async
+  :init (setf async-byte-compile-log-file (my-expand-var-file-name "async-bytecomp.log"))
+  :config (async-bytecomp-package-mode))
+
 (use-package hydra
   :ensure t
   :defer t
