@@ -1291,12 +1291,12 @@
           scheme-mode
           c-mode
           c++-mode
-          cmake-mode
           rust-mode
           haskell-mode
           idris-mode
           ess-r-mode
           python-mode
+          sh-mode
           html-mode
           css-mode
           js2-mode
@@ -1319,14 +1319,13 @@
                                                  'clojure-mode
                                                  'rust-mode
                                                  'idris-mode
+                                                 'sh-mode
                                                  'css-mode
                                                  'latex-mode
                                                  'ledger-mode)
                                  '(company-capf))
                                 ((derived-mode-p 'c-mode 'c++-mode)
                                  '(company-c-headers company-etags))
-                                ((derived-mode-p 'cmake-mode)
-                                 '(company-cmake))
                                 ((derived-mode-p 'js2-mode 'typescript-mode)
                                  '(company-tide))
                                 ((derived-mode-p 'python-mode)
