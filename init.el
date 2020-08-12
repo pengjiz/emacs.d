@@ -134,6 +134,20 @@
   :init (setf async-byte-compile-log-file (my-expand-var-file-name "async-bytecomp.log"))
   :config (async-bytecomp-package-mode))
 
+(use-package color-theme-sanityinc-tomorrow
+  :ensure t
+  :config (load-theme 'sanityinc-tomorrow-night t))
+
+(use-package liteline
+  :load-path "lisp"
+  :defer t
+  :hook (after-init . liteline-setup))
+
+(use-package rich-title
+  :load-path "lisp"
+  :defer t
+  :hook (after-init . rich-title-setup))
+
 (use-package hydra
   :ensure t
   :defer t
@@ -163,10 +177,6 @@
     (run-with-timer (* min 60) nil #'alert msg :title "Reminder"))
   :config (setf alert-fade-time 15))
 
-(use-package color-theme-sanityinc-tomorrow
-  :ensure t
-  :config (load-theme 'sanityinc-tomorrow-night t))
-
 (use-package url
   :defer t
   :init (setf url-configuration-directory (my-expand-var-file-name "url/")))
@@ -186,7 +196,6 @@
   (unless (server-running-p)
     (server-start)))
 
-;; Use Emacs as EDITOR
 (use-package with-editor
   :ensure t
   :hook ((shell-mode eshell-mode) . my-export-editor)
@@ -737,10 +746,6 @@
   (setf uniquify-buffer-name-style 'forward)
   (setf uniquify-after-kill-buffer-p t))
 
-(progn ; recursive minibuffers
-  (setf enable-recursive-minibuffers t)
-  (minibuffer-depth-indicate-mode))
-
 (use-package ibuffer
   :defer t
   :bind (([remap list-buffers] . ibuffer)
@@ -1180,6 +1185,10 @@
   (setf aw-minibuffer-flag t))
 
 ;;; Completion
+
+(progn ; recursive minibuffers
+  (setf enable-recursive-minibuffers t)
+  (minibuffer-depth-indicate-mode))
 
 (use-package minibuffer
   :defer t
@@ -1630,6 +1639,20 @@
   :ensure t
   :config (editorconfig-mode))
 
+;;; ElDoc
+
+(use-package eldoc
+  :defer t
+  :config
+  (setf eldoc-echo-area-use-multiline-p nil)
+  ;; Describe the character at point by default
+  (setf eldoc-documentation-function #'describe-char-eldoc))
+
+(use-package eldoc-lv
+  :load-path "lisp"
+  :after eldoc
+  :config (eldoc-lv-setup))
+
 ;;; Compile
 
 (use-package compile
@@ -1658,20 +1681,6 @@
   :bind ("C-c c f" . firestarter-mode)
   :config (setf firestarter-default-type t))
 
-;;; ElDoc
-
-(use-package eldoc
-  :defer t
-  :config
-  (setf eldoc-echo-area-use-multiline-p nil)
-  ;; Describe the character at point by default
-  (setf eldoc-documentation-function #'describe-char-eldoc))
-
-(use-package eldoc-lv
-  :load-path "lisp"
-  :after eldoc
-  :config (eldoc-lv-setup))
-
 ;;; Comint
 
 (use-package comint
@@ -1684,6 +1693,79 @@
   :config
   (setf (default-value 'comint-prompt-read-only) nil
         comint-scroll-to-bottom-on-input 'this))
+
+;;; Eshell
+
+(use-package eshell
+  :defer t
+  :bind (("C-x m" . eshell)
+         ("C-c a e" . eshell))
+  :init (setf eshell-directory-name (my-expand-var-file-name "eshell/"))
+  :config
+  (setf eshell-scroll-to-bottom-on-input 'this)
+  (setf eshell-modify-global-environment t)
+  (setf eshell-modules-list '(eshell-alias
+                              eshell-basic
+                              eshell-cmpl
+                              eshell-dirs
+                              eshell-glob
+                              eshell-hist
+                              eshell-ls
+                              eshell-pred
+                              eshell-prompt
+                              eshell-script
+                              eshell-term
+                              eshell-tramp
+                              eshell-unix))
+
+  (defun my-setup-eshell-mode ()
+    (dolist (key '("M-s" "M-?" "<backtab>"))
+      (unbind-key key eshell-mode-map))
+    (bind-keys :map eshell-mode-map
+               ([remap eshell-pcomplete] . completion-at-point)
+               ([remap pcomplete-expand-and-complete] . completion-at-point)
+               ([remap pcomplete-expand] . completion-at-point)
+               ("C-x m" . eshell-life-is-too-much)
+               ("C-c a a" . eshell-life-is-too-much)))
+  (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
+
+(use-package em-alias
+  :defer t
+  :init (setf eshell-aliases-file (my-expand-etc-file-name "eshell/aliases")))
+
+(use-package em-glob
+  :defer t
+  :config
+  (setf eshell-glob-case-insensitive t
+        eshell-error-if-no-glob t))
+
+(use-package em-hist
+  :defer t
+  :config
+  (setf eshell-history-size 2000
+        eshell-input-filter #'eshell-input-filter-initial-space))
+
+(use-package em-script
+  :defer t
+  :init
+  (setf eshell-rc-script (my-expand-etc-file-name "eshell/profile")
+        eshell-login-script (my-expand-etc-file-name "eshell/login")))
+
+(use-package eshell-z
+  :ensure t
+  :after eshell)
+
+(use-package eshell-extras
+  :load-path "lisp"
+  :after eshell
+  :config
+  (eshell-extras-setup)
+
+  (bind-key [remap eshell-truncate-buffer] #'eshell-extras-clear-buffer)
+  (bind-keys :map eshell-extras-autosuggest-suggestion-map
+             ([remap forward-char] . eshell-extras-accept-suggestion)
+             ([remap move-end-of-line] . eshell-extras-accept-suggestion)
+             ([remap forward-word] . eshell-extras-accept-suggestion-word)))
 
 ;;; Debugging
 
@@ -1765,6 +1847,39 @@
   ;; NOTE: This fixes the weird issue that cursor is not at the beginning of
   ;; buffer after switching when there are tables in the entry.
   (setf elfeed-show-entry-switch #'pop-to-buffer-same-window))
+
+;;; Viewer
+
+(use-package doc-view
+  :defer t
+  :bind (:map doc-view-mode-map ("&" . browse-url-of-file))
+  :config
+  (setf doc-view-continuous t)
+  (setf doc-view-resolution 300)
+
+  (when (and (not (eq doc-view-pdf->png-converter-function
+                      #'doc-view-pdf->png-converter-mupdf))
+             (executable-find "mutool"))
+    (setf doc-view-pdf->png-converter-function
+          (lambda (pdf png page callback)
+            (doc-view-start-process
+             "pdf->png" "mutool"
+             `("draw"
+               ,(concat "-o" png)
+               ,(format "-r%d" (round doc-view-resolution))
+               ,pdf
+               ,@(when page `(,(format "%d" page))))
+             callback)))))
+
+(use-package image-file
+  :when (display-graphic-p)
+  :config (auto-image-file-mode))
+
+(use-package nov
+  :ensure t
+  :defer t
+  :mode ("\\.epub\\'" . nov-mode)
+  :init (setf nov-save-place-file (my-expand-var-file-name "nov-places")))
 
 ;;; Chatting
 
@@ -1940,79 +2055,6 @@
   :defer t
   :bind ("C-c a i" . ielm)
   :config (setf ielm-prompt-read-only (default-value 'comint-prompt-read-only)))
-
-;;; Eshell
-
-(use-package eshell
-  :defer t
-  :bind (("C-x m" . eshell)
-         ("C-c a e" . eshell))
-  :init (setf eshell-directory-name (my-expand-var-file-name "eshell/"))
-  :config
-  (setf eshell-scroll-to-bottom-on-input 'this)
-  (setf eshell-modify-global-environment t)
-  (setf eshell-modules-list '(eshell-alias
-                              eshell-basic
-                              eshell-cmpl
-                              eshell-dirs
-                              eshell-glob
-                              eshell-hist
-                              eshell-ls
-                              eshell-pred
-                              eshell-prompt
-                              eshell-script
-                              eshell-term
-                              eshell-tramp
-                              eshell-unix))
-
-  (defun my-setup-eshell-mode ()
-    (dolist (key '("M-s" "M-?" "<backtab>"))
-      (unbind-key key eshell-mode-map))
-    (bind-keys :map eshell-mode-map
-               ([remap eshell-pcomplete] . completion-at-point)
-               ([remap pcomplete-expand-and-complete] . completion-at-point)
-               ([remap pcomplete-expand] . completion-at-point)
-               ("C-x m" . eshell-life-is-too-much)
-               ("C-c a a" . eshell-life-is-too-much)))
-  (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
-
-(use-package em-alias
-  :defer t
-  :init (setf eshell-aliases-file (my-expand-etc-file-name "eshell/aliases")))
-
-(use-package em-glob
-  :defer t
-  :config
-  (setf eshell-glob-case-insensitive t
-        eshell-error-if-no-glob t))
-
-(use-package em-hist
-  :defer t
-  :config
-  (setf eshell-history-size 2000
-        eshell-input-filter #'eshell-input-filter-initial-space))
-
-(use-package em-script
-  :defer t
-  :init
-  (setf eshell-rc-script (my-expand-etc-file-name "eshell/profile")
-        eshell-login-script (my-expand-etc-file-name "eshell/login")))
-
-(use-package eshell-z
-  :ensure t
-  :after eshell)
-
-(use-package eshell-extras
-  :load-path "lisp"
-  :after eshell
-  :config
-  (eshell-extras-setup)
-
-  (bind-key [remap eshell-truncate-buffer] #'eshell-extras-clear-buffer)
-  (bind-keys :map eshell-extras-autosuggest-suggestion-map
-             ([remap forward-char] . eshell-extras-accept-suggestion)
-             ([remap move-end-of-line] . eshell-extras-accept-suggestion)
-             ([remap forward-word] . eshell-extras-accept-suggestion-word)))
 
 ;;; C & C++ & AWK
 
@@ -2468,6 +2510,25 @@
   :ensure t
   :defer t)
 
+;;; Shell script
+
+(use-package sh-script
+  :defer t
+  :bind (:map sh-mode-map ("C-c a a" . sh-show-shell))
+  :init
+  (setf sh-shell-file "/bin/bash")
+
+  (with-eval-after-load 'org
+    (cl-pushnew '(shell . t) org-babel-load-languages :test #'eq :key #'car))
+  :config (setf sh-basic-offset 2))
+
+;;; Lua
+
+(use-package lua-mode
+  :ensure t
+  :defer t
+  :config (setf lua-indent-level 2))
+
 ;;; Text
 
 (use-package text-mode
@@ -2915,59 +2976,6 @@ When no input read, use DEFAULT value."
          ([remap forward-sentence] . c-end-of-statement))
   :init (setf glsl-mode-map (make-sparse-keymap)))
 
-;;; JSON
-
-(use-package json-mode
-  :ensure t
-  :defer t)
-
-;;; jq
-
-(use-package jq-mode
-  :ensure t
-  :defer t
-  :init
-  (with-eval-after-load 'org
-    (cl-pushnew '(jq . t) org-babel-load-languages :test #'eq :key #'car))
-
-  (with-eval-after-load 'json-mode
-    (bind-key "C-c C-c" #'jq-interactively json-mode-map)))
-
-;;; Protobuf
-
-(use-package protobuf-mode
-  :ensure t
-  :defer t)
-
-;;; YAML
-
-(use-package yaml-mode
-  :ensure t
-  :defer t
-  :config
-  (defun my-setup-yaml-mode ()
-    (flyspell-mode 0)
-    (auto-fill-mode 0))
-  (add-hook 'yaml-mode-hook #'my-setup-yaml-mode))
-
-;;; CSV
-
-(use-package csv-mode
-  :ensure t
-  :defer t)
-
-;;; GraphQL
-
-(use-package graphql-mode
-  :ensure t
-  :defer t)
-
-(use-package ob-graphql
-  :ensure t
-  :defer t
-  :after org
-  :init (cl-pushnew '(graphql . t) org-babel-load-languages :test #'eq :key #'car))
-
 ;;; Assembly
 
 (use-package nasm-mode
@@ -3010,74 +3018,63 @@ When no input read, use DEFAULT value."
   :defer t
   :hook (sql-mode . sqlup-mode))
 
-;;; Lua
-
-(use-package lua-mode
-  :ensure t
-  :defer t
-  :config (setf lua-indent-level 2))
-
-;;; Shell script
-
-(use-package sh-script
-  :defer t
-  :bind (:map sh-mode-map ("C-c a a" . sh-show-shell))
-  :init
-  (setf sh-shell-file "/bin/bash")
-
-  (with-eval-after-load 'org
-    (cl-pushnew '(shell . t) org-babel-load-languages :test #'eq :key #'car))
-  :config (setf sh-basic-offset 2))
-
 ;;; Env file
 
 (use-package dotenv-mode
   :ensure t
   :defer t)
 
-;;; Viewer
+;;; JSON
 
-(use-package doc-view
-  :defer t
-  :bind (:map doc-view-mode-map ("&" . browse-url-of-file))
-  :config
-  (setf doc-view-continuous t)
-  (setf doc-view-resolution 300)
+(use-package json-mode
+  :ensure t
+  :defer t)
 
-  (when (and (not (eq doc-view-pdf->png-converter-function
-                      #'doc-view-pdf->png-converter-mupdf))
-             (executable-find "mutool"))
-    (setf doc-view-pdf->png-converter-function
-          (lambda (pdf png page callback)
-            (doc-view-start-process
-             "pdf->png" "mutool"
-             `("draw"
-               ,(concat "-o" png)
-               ,(format "-r%d" (round doc-view-resolution))
-               ,pdf
-               ,@(when page `(,(format "%d" page))))
-             callback)))))
+;;; jq
 
-(use-package image-file
-  :when (display-graphic-p)
-  :config (auto-image-file-mode))
-
-(use-package nov
+(use-package jq-mode
   :ensure t
   :defer t
-  :mode ("\\.epub\\'" . nov-mode)
-  :init (setf nov-save-place-file (my-expand-var-file-name "nov-places")))
+  :init
+  (with-eval-after-load 'org
+    (cl-pushnew '(jq . t) org-babel-load-languages :test #'eq :key #'car))
 
-;;; Mode line & frame title
+  (with-eval-after-load 'json-mode
+    (bind-key "C-c C-c" #'jq-interactively json-mode-map)))
 
-(use-package liteline
-  :load-path "lisp"
+;;; YAML
+
+(use-package yaml-mode
+  :ensure t
   :defer t
-  :hook (after-init . liteline-setup))
+  :config
+  (defun my-setup-yaml-mode ()
+    (flyspell-mode 0)
+    (auto-fill-mode 0))
+  (add-hook 'yaml-mode-hook #'my-setup-yaml-mode))
 
-(use-package rich-title
-  :load-path "lisp"
+;;; CSV
+
+(use-package csv-mode
+  :ensure t
+  :defer t)
+
+;;; Protobuf
+
+(use-package protobuf-mode
+  :ensure t
+  :defer t)
+
+;;; GraphQL
+
+(use-package graphql-mode
+  :ensure t
+  :defer t)
+
+(use-package ob-graphql
+  :ensure t
   :defer t
-  :hook (after-init . rich-title-setup))
+  :after org
+  :init (cl-pushnew '(graphql . t) org-babel-load-languages :test #'eq :key #'car))
 
 ;;; init.el ends here
