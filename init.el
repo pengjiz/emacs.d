@@ -754,23 +754,12 @@
   :config
   (setf ibuffer-use-other-window t)
   (setf ibuffer-expert t)
-
-  ;; Human-readable buffer size
-  (define-ibuffer-column size-h
-    (:name "Size" :inline t)
-    (file-size-human-readable (buffer-size)))
-
-  (setf ibuffer-formats
-        '((mark modified read-only " "
-                (name 22 22 :left :elide) " "
-                (size-h 9 -1 :right) " "
-                (mode 16 16 :left :elide) " "
-                filename)
-          (mark modified read-only " "
-                (name 22 22 :left :elide) " "
-                (size-h 9 -1 :right) " "
-                (mode 16 16 :left :elide) " "
-                process))))
+  (let ((state '(mark modified read-only locked " "))
+        (info '((name 18 18 :left :elide) " "
+                (size 9 -1 :right) " "
+                (mode 16 16 :left :elide) " ")))
+    (setf ibuffer-formats `((,@state ,@info filename)
+                            (,@state ,@info process)))))
 
 (use-package ibuf-ext
   :defer t
@@ -781,17 +770,12 @@
   :defer t
   :hook (ibuffer-mode . ibuffer-vc-set-filter-groups-by-vc-root)
   :config
-  (setf ibuffer-formats
-        '((mark modified read-only vc-status-mini " "
-                (name 22 22 :left :elide) " "
-                (size-h 9 -1 :right) " "
-                (mode 16 16 :left :elide) " "
-                vc-relative-file)
-          (mark modified read-only vc-status-mini " "
-                (name 22 22 :left :elide) " "
-                (size-h 9 -1 :right) " "
-                (mode 16 16 :left :elide) " "
-                process))))
+  (let ((state '(mark modified read-only locked vc-status-mini " "))
+        (info '((name 18 18 :left :elide) " "
+                (size 9 -1 :right) " "
+                (mode 16 16 :left :elide) " ")))
+    (setf ibuffer-formats `((,@state ,@info vc-relative-file)
+                            (,@state ,@info process)))))
 
 ;;; File
 
