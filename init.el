@@ -1038,7 +1038,8 @@
            (reusable-frames . nil))
           ;; Help
           (,(rx bos (or "*Man"
-                        "*Help"
+                        "*Help*"
+                        "*help"
                         "*TeX Help*"
                         "*Anaconda*"
                         "*tide-documentation*"
@@ -1088,7 +1089,6 @@
            (reusable-frames . nil))
           ;; Command
           (,(rx bos (or "*compilation"
-                        "*dired-atool*"
                         "*Compile-Log*"
                         "*Backtrace*"
                         "*Warnings*"
