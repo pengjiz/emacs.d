@@ -1105,6 +1105,10 @@
                         "*Geiser dbg*"
                         "*idris-notes*"
                         "*HsCompilation*"
+                        "*R view"
+                        "*S objects*"
+                        "*S search list*"
+                        "*ess-output*"
                         (and (1+ nonl) " output*")))
            (display-buffer-reuse-window
             display-buffer-in-side-window)
@@ -2296,9 +2300,6 @@
   (setf ess-style 'RStudio)
   (setf ess-use-ido nil
         ess-use-flymake nil)
-
-  (setf ess-eval-visibly nil
-        ess-execute-in-process-buffer t)
   (setf ess-ask-for-ess-directory nil
         ess-auto-width 'window
         inferior-R-args "--no-save"))
