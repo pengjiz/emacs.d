@@ -86,12 +86,11 @@
 ;; NOTE: In addition to getting the next command from the output buffer, AUCTeX
 ;; also suggests command from files (timestamp, etc.). So we tweak the guess
 ;; when appropriate.
-(defun auctex-latexmk--tweak-next-command (fn &rest args)
-  "Apply FN on ARGS, but tweak the return value."
-  (let ((result (apply fn args)))
-    (if (member result (list TeX-command-BibTeX TeX-command-Biber))
-        TeX-command-default
-      result)))
+(defun auctex-latexmk--tweak-next-command (result)
+  "Return the next command appropriately based on RESULT."
+  (if (member result (list TeX-command-BibTeX TeX-command-Biber))
+      TeX-command-default
+    result))
 
 ;; NOTE: With all the special treatments done, it is better to just set the
 ;; default command as Latexmk. The default command is set in the mode
@@ -112,7 +111,7 @@
   (dolist (suffix auctex-latexmk--intermediate-suffixes)
     (cl-pushnew suffix LaTeX-clean-intermediate-suffixes :test #'equal))
   (add-hook 'LaTeX-mode-hook #'auctex-latexmk--set-default)
-  (advice-add #'TeX-command-default :around
+  (advice-add #'TeX-command-default :filter-return
               #'auctex-latexmk--tweak-next-command))
 
 (provide 'auctex-latexmk)
