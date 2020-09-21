@@ -717,18 +717,6 @@
          :map isearch-mode-map
          ([remap swiper] . swiper-from-isearch)))
 
-(use-package web-search
-  :load-path "lisp"
-  :defer t
-  :commands web-search-mdn-css
-  :bind (("M-s b g" . web-search-google)
-         ("M-s b w" . web-search-wikipedia)
-         ("M-s b d" . web-search-wiktionary)
-         ("M-s b c" . web-search-github))
-  :init
-  (with-eval-after-load 'css-mode
-    (setf (symbol-function 'css-lookup-symbol) #'web-search-mdn-css)))
-
 ;;; Buffer
 
 ;; Protect a few special buffers
