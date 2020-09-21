@@ -2204,11 +2204,6 @@
          ("C-c a a" . haskell-interactive-kill)
          ("C-c M-o" . haskell-interactive-mode-clear)))
 
-(use-package haskell-compile
-  :defer t
-  :after haskell-mode
-  :config (setf (default-value 'haskell-compile-ignore-cabal) t))
-
 (use-package haskell-indentation
   :defer t
   :after haskell-mode
@@ -2224,11 +2219,6 @@
   :hook (haskell-mode . haskell-collapse-mode)
   :init (setf haskell-collapse-mode-map (make-sparse-keymap)))
 
-(use-package haskell-extras
-  :load-path "lisp"
-  :after haskell-mode
-  :config (haskell-extras-setup))
-
 (use-package dante
   :ensure t
   :defer t
@@ -2240,8 +2230,6 @@
   :hook (haskell-mode . dante-mode)
   :init (setf dante-mode-map (make-sparse-keymap))
   :config
-  (setf dante-methods '(stack bare-ghci))
-
   (with-eval-after-load 'company
     (setf (default-value 'company-backends)
           (delq #'dante-company (default-value 'company-backends)))))
