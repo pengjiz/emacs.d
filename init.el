@@ -2336,7 +2336,6 @@
 
 (use-package css-mode
   :defer t
-  :bind (:map css-mode-map ("C-c C-d" . css-lookup-symbol))
   :config (setf css-indent-offset 2))
 
 (use-package counsel-css
@@ -2933,7 +2932,6 @@ When no input read, use DEFAULT value."
          :map glsl-mode-map
          ("C-M-q" . c-indent-exp)
          ("C-c C-\\" . c-backslash-region)
-         ("C-c C-d" . glsl-find-man-page)
          ("C-c C-n" . c-forward-conditional)
          ("C-c C-p" . c-backward-conditional)
          ("C-c C-u" . c-up-conditional)
