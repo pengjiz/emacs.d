@@ -2236,14 +2236,6 @@
   :hook (haskell-mode . haskell-collapse-mode)
   :init (setf haskell-collapse-mode-map (make-sparse-keymap)))
 
-(use-package haskell-hoogle
-  :defer t
-  :after haskell-mode
-  :bind (:map haskell-mode-map ("C-c C-v" . haskell-hoogle))
-  :config
-  ;; Always use the website
-  (setf haskell-hoogle-command nil))
-
 (use-package haskell-extras
   :load-path "lisp"
   :after haskell-mode
