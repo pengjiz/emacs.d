@@ -1623,13 +1623,9 @@
   :defer t
   :config
   (setf eldoc-echo-area-use-multiline-p nil)
+  (setf eldoc-message-function #'message)
   ;; Describe the character at point by default
   (setf eldoc-documentation-function #'describe-char-eldoc))
-
-(use-package eldoc-lv
-  :load-path "lisp"
-  :after eldoc
-  :config (eldoc-lv-setup))
 
 ;;; Compile
 
