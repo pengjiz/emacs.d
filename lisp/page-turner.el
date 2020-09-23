@@ -233,11 +233,13 @@ If nil use value of `fill-column'."
 ;;; Man
 
 (defvar Man-width)
+(defvar Man-width-max)
 
 (defun page-turner--setup-man ()
   "Setup man integration."
   (with-eval-after-load 'man
-    (setf Man-width (or page-turner-text-width fill-column))))
+    (setf Man-width nil
+          Man-width-max (or page-turner-text-width fill-column))))
 
 ;;; Entry point
 

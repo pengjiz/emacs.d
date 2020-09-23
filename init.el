@@ -48,10 +48,8 @@
 
 (progn ; package
   (require 'package)
-  (setf package-enable-at-startup nil)
   (setf package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                            ("melpa" . "https://melpa.org/packages/")))
-  (package-initialize)
 
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
@@ -705,7 +703,9 @@
 (use-package isearch
   :defer t
   :no-require t
-  :config (setf isearch-allow-scroll t))
+  :config
+  (setf isearch-allow-scroll t)
+  (setf isearch-lazy-count t))
 
 (use-package swiper
   :ensure t
@@ -1260,7 +1260,9 @@
   :ensure t
   :defer t
   :after ivy
-  :init (setf xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  :init
+  (setf xref-show-definitions-function #'ivy-xref-show-defs
+        xref-show-xrefs-function #'ivy-xref-show-xrefs))
 
 (use-package company
   :ensure t
@@ -1675,11 +1677,31 @@
 (use-package eshell
   :defer t
   :bind (("C-x m" . eshell)
-         ("C-c a e" . eshell))
+         ("C-c a e" . eshell)))
+
+(use-package esh-mode
+  :defer t
   :init (setf eshell-directory-name (my-expand-var-file-name "eshell/"))
   :config
   (setf eshell-scroll-to-bottom-on-input 'this)
-  (setf eshell-modify-global-environment t)
+
+  (defun my-setup-eshell-mode ()
+    (dolist (key '("M-s" "M-?" "<backtab>"))
+      (unbind-key key eshell-mode-map))
+    (bind-keys :map eshell-mode-map
+               ([remap pcomplete-expand-and-complete] . completion-at-point)
+               ([remap pcomplete-expand] . completion-at-point)
+               ("C-x m" . eshell-life-is-too-much)
+               ("C-c a a" . eshell-life-is-too-much)))
+  (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
+
+(use-package esh-var
+  :defer t
+  :config (setf eshell-modify-global-environment t))
+
+(use-package esh-module
+  :defer t
+  :config
   (setf eshell-modules-list '(eshell-alias
                               eshell-basic
                               eshell-cmpl
@@ -1692,18 +1714,7 @@
                               eshell-script
                               eshell-term
                               eshell-tramp
-                              eshell-unix))
-
-  (defun my-setup-eshell-mode ()
-    (dolist (key '("M-s" "M-?" "<backtab>"))
-      (unbind-key key eshell-mode-map))
-    (bind-keys :map eshell-mode-map
-               ([remap eshell-pcomplete] . completion-at-point)
-               ([remap pcomplete-expand-and-complete] . completion-at-point)
-               ([remap pcomplete-expand] . completion-at-point)
-               ("C-x m" . eshell-life-is-too-much)
-               ("C-c a a" . eshell-life-is-too-much)))
-  (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
+                              eshell-unix)))
 
 (use-package em-alias
   :defer t
@@ -1831,21 +1842,7 @@
   :bind (:map doc-view-mode-map ("&" . browse-url-of-file))
   :config
   (setf doc-view-continuous t)
-  (setf doc-view-resolution 300)
-
-  (when (and (not (eq doc-view-pdf->png-converter-function
-                      #'doc-view-pdf->png-converter-mupdf))
-             (executable-find "mutool"))
-    (setf doc-view-pdf->png-converter-function
-          (lambda (pdf png page callback)
-            (doc-view-start-process
-             "pdf->png" "mutool"
-             `("draw"
-               ,(concat "-o" png)
-               ,(format "-r%d" (round doc-view-resolution))
-               ,pdf
-               ,@(when page `(,(format "%d" page))))
-             callback)))))
+  (setf doc-view-resolution 300))
 
 (use-package image-file
   :when (display-graphic-p)
@@ -2326,11 +2323,6 @@
   :defer t
   :config (setf css-indent-offset 2))
 
-(use-package counsel-css
-  :ensure t
-  :defer t
-  :hook (css-mode . counsel-css-imenu-setup))
-
 ;;; JavaScript & TypeScript
 
 (use-package js
@@ -2679,9 +2671,8 @@ When no input read, use DEFAULT value."
         org-fontify-whole-heading-line t)
   (setf org-special-ctrl-a/e t
         org-catch-invisible-edits 'show-and-error)
-  (setf org-goto-interface 'outline-path-completion)
   (setf org-image-actual-width '(300))
-  (setf org-modules '(org-id org-docview org-eww org-habit))
+  (setf org-modules '(org-id ol-docview ol-eww org-habit))
   (setf org-export-backends '(ascii html latex))
   (setf org-file-apps '((auto-mode . emacs)
                         (directory . emacs)))
@@ -2711,13 +2702,13 @@ When no input read, use DEFAULT value."
   ;; Tag
   (setf org-tag-persistent-alist '(("note" . ?n))))
 
+(use-package org-goto
+  :defer t
+  :config (setf org-goto-interface 'outline-path-completion))
+
 (use-package org-id
   :defer t
   :init (setf org-id-locations-file (my-expand-var-file-name "org/id-locations")))
-
-(use-package org-attach
-  :defer t
-  :config (setf org-attach-file-list-property nil))
 
 (use-package org-lint
   :defer t
