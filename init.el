@@ -1840,6 +1840,11 @@
   (setf doc-view-continuous t)
   (setf doc-view-resolution 300))
 
+(use-package doc-view-extras
+  :load-path "lisp"
+  :after doc-view
+  :config (doc-view-extras-setup))
+
 (use-package image-file
   :when (display-graphic-p)
   :config (auto-image-file-mode))
