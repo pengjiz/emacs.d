@@ -20,45 +20,42 @@
 (declare-function org-src-switch-to-buffer "org-src")
 (declare-function org-export--dispatch-ui "ox")
 
-(defun window-extras--avoid-deleting-windows (fn &rest args)
+(defun window-extras--avoid-deleting-other (fn &rest args)
   "Avoid deleting other windows and apply FN on ARGS."
   (cl-letf (((symbol-function 'delete-other-windows) #'ignore))
     (apply fn args)))
 
-(defun window-extras--pop-to-org-buffer (buffer-or-name &optional norecord)
-  "Apply `pop-to-buffer' with BUFFER-OR-NAME and NORECORD."
-  (pop-to-buffer buffer-or-name nil norecord))
-
-(defun window-extras--pop-to-org-src-buffer (fn buffer &rest args)
-  "Use `pop-to-buffer' to display BUFFER when appropriate.
-Otherwise apply FN on BUFFER and ARGS."
-  (if (eq org-src-window-setup 'other-window)
-      (pop-to-buffer buffer)
-    (apply fn buffer args)))
+(defun window-extras--quit-org-src (fn &rest args)
+  "Apply FN on ARGS but quit window appropriately."
+  (let ((window (selected-window)))
+    (apply fn args)
+    (when (and (eq org-src-window-setup 'other-window)
+               (eq (cadr args) 'exit))
+      (quit-restore-window window))))
 
 (defun window-extras--setup-org ()
   "Setup Org mode integration."
   (with-eval-after-load 'org
     (setf (symbol-function 'org-switch-to-buffer-other-window)
-          #'window-extras--pop-to-org-buffer)
+          #'switch-to-buffer-other-window)
     (advice-add #'org-add-log-note :around
-                #'window-extras--avoid-deleting-windows))
+                #'window-extras--avoid-deleting-other))
 
   (with-eval-after-load 'org-agenda
     (advice-add #'org-agenda-get-restriction-and-command :around
-                #'window-extras--avoid-deleting-windows))
+                #'window-extras--avoid-deleting-other))
 
   (with-eval-after-load 'org-capture
     (advice-add #'org-capture-place-template :around
-                #'window-extras--avoid-deleting-windows))
+                #'window-extras--avoid-deleting-other))
 
   (with-eval-after-load 'ox
     (advice-add #'org-export--dispatch-ui :around
-                #'window-extras--avoid-deleting-windows))
+                #'window-extras--avoid-deleting-other))
 
   (with-eval-after-load 'org-src
     (advice-add #'org-src-switch-to-buffer :around
-                #'window-extras--pop-to-org-src-buffer)))
+                #'window-extras--quit-org-src)))
 
 ;;; Buffer display hack
 
