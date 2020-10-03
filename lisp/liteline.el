@@ -144,6 +144,14 @@ Return forms that can be passed directly to `format-mode-line'."
        (cl-pushnew (cons ',name #',symbol) liteline--segment-fns-alist
                    :test #'eq :key #'car))))
 
+(defun liteline--window-active-p ()
+  "Return t if the selected window is active."
+  (or (eq (selected-window) (old-selected-window))
+      (and (not (zerop (minibuffer-depth)))
+           (eq (selected-window)
+               (with-selected-window (minibuffer-window)
+                 (minibuffer-selected-window))))))
+
 (defvar liteline--mode-line-fns-alist nil "Functions of mode lines.")
 
 (defun liteline--prepare-mode-line (name)
@@ -195,25 +203,6 @@ If DEFAULT is non-nil, set the default value."
             (default-value 'mode-line-format)
           mode-line-format)
         (list "%e" (liteline--prepare-mode-line name))))
-
-;;; Active window
-
-(defvar liteline--active-window nil "Current active window.")
-
-(defun liteline--set-active-window (&rest _)
-  "Set `liteline--active-window' to the current active window."
-  (when-let* ((window (selected-window)))
-    (unless (minibuffer-window-active-p window)
-      (setf liteline--active-window window))))
-
-(defun liteline--active-p ()
-  "Return t if the selected window is active."
-  (eq (selected-window) liteline--active-window))
-
-(defun liteline--setup-active-window ()
-  "Setup the active window system."
-  (liteline--set-active-window)
-  (add-hook 'pre-redisplay-functions #'liteline--set-active-window))
 
 ;;; Basic segment
 
@@ -294,7 +283,7 @@ If DEFAULT is non-nil, set the default value."
 ;; Encoding
 (liteline-define-segment buffer-encoding
   "Show the encoding information."
-  (and (liteline--active-p)
+  (and (liteline--window-active-p)
        (concat
         " "
         (cl-case (coding-system-eol-type buffer-file-coding-system)
@@ -311,7 +300,7 @@ If DEFAULT is non-nil, set the default value."
 ;; Input method
 (liteline-define-segment input-method
   "Show the input method name."
-  (and (liteline--active-p)
+  (and (liteline--window-active-p)
        current-input-method
        (concat
         " "
@@ -432,7 +421,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment action
   "Show action status."
-  (when (liteline--active-p)
+  (when (liteline--window-active-p)
     (let (action)
       (dolist (fn '(liteline--get-selection-info
                     liteline--get-macro-indicator))
@@ -492,7 +481,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment flycheck
   "Show Flycheck status."
-  (and (liteline--active-p)
+  (and (liteline--window-active-p)
        liteline--flycheck
        (concat " " liteline--flycheck " ")))
 
@@ -528,14 +517,14 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment git
   "Show Git branch and state."
-  (and (liteline--active-p)
+  (and (liteline--window-active-p)
        liteline--git
        (concat " " liteline--git " ")))
 
 ;; Minor mode
 (liteline-define-segment minor-modes
   "Show some important minor modes."
-  (when (liteline--active-p)
+  (when (liteline--window-active-p)
     (let (modes)
       (dolist (mode liteline-important-minor-modes-alist)
         (let ((symbol (car mode)))
@@ -553,7 +542,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment misc
   "Show some misc but important information."
-  (when (liteline--active-p)
+  (when (liteline--window-active-p)
     (concat " " (liteline--get-org-timer) " ")))
 
 ;; Two-column
@@ -583,7 +572,6 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline-setup ()
   "Setup mode line."
-  (liteline--setup-active-window)
   (liteline--setup-conda)
   (liteline--setup-reftex)
   (liteline--setup-flycheck)
