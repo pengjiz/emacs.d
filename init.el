@@ -1,8 +1,8 @@
-;;; init.el --- Emacs configuration  -*- lexical-binding: t; -*-
+;;; init.el --- Main initialization  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
-;; My personal Emacs configuration.
+;; Main initialization file.
 
 ;;; Code:
 
