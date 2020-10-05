@@ -8,11 +8,11 @@ COMPILER = $(RUNNER) -f package-initialize -f batch-byte-compile
 all: init
 
 install:
-	$(RUNNER) -l init.el
+	$(RUNNER) -l early-init.el -l init.el
 
 compile:
 	rm -f *.elc lisp/*.elc
-	$(COMPILER) init.el lisp/*.el
+	$(COMPILER) early-init.el init.el lisp/*.el
 
 init: install compile
 

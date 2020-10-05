@@ -9,24 +9,13 @@
 ;;; Boot
 
 (progn ; fundamental
-  (setf gc-cons-threshold 100000000)
-  (defun my-set-gc-cons-threshold ()
-    "Set `gc-cons-threshold' to a normal value."
-    (setf gc-cons-threshold 10000000))
-  (add-hook 'emacs-startup-hook #'my-set-gc-cons-threshold)
-
-  (setf load-prefer-newer t
-        ad-redefinition-action 'accept
+  (setf ad-redefinition-action 'accept
         debugger-stack-frame-as-list t)
   (setf create-lockfiles nil
         delete-by-moving-to-trash t)
   (prefer-coding-system 'utf-8))
 
 (progn ; user interface
-  (when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
-  (when (fboundp #'scroll-bar-mode) (scroll-bar-mode 0))
-  (menu-bar-mode 0)
-
   (setf (default-value 'mode-line-format) nil
         mode-line-default-help-echo nil)
 
