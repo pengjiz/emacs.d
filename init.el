@@ -1149,6 +1149,21 @@
   (setf aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (setf aw-minibuffer-flag t))
 
+(use-package tab-bar
+  :defer t
+  :bind (("C-c s c" . tab-bar-new-tab)
+         ("C-c s k" . tab-bar-close-tab)
+         ("C-c s o" . tab-bar-close-other-tabs)
+         ("C-c s j" . tab-bar-select-tab-by-name)
+         ("C-c s s" . tab-bar-switch-to-recent-tab)
+         ("C-c s n" . tab-bar-switch-to-next-tab)
+         ("C-c s p" . tab-bar-switch-to-prev-tab)
+         ("C-c s m" . tab-bar-move-tab)
+         ("C-c s r" . tab-bar-rename-tab))
+  :config
+  (setf tab-bar-show nil)
+  (setf tab-bar-tab-name-function #'tab-bar-tab-name-all))
+
 ;;; Completion
 
 (progn ; recursive minibuffers
