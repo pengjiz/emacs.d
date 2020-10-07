@@ -2,43 +2,55 @@
 
 ;;; Commentary:
 
-;; An informative frame title format.
+;; An informative frame title configuration.
 
 ;;; Code:
 
+(require 'tab-bar)
+
+;;; Tab information
+
+(defun rich-title--get-tab-info ()
+  "Return tab information of the current frame."
+  (let* ((tabs (funcall tab-bar-tabs-function))
+         (num-tabs (length tabs))
+         (tab (tab-bar--current-tab))
+         (index (1+ (tab-bar--current-tab-index tabs))))
+    (format " [%s]"
+            (if (cdr (assq 'explicit-name tab))
+                (format "%s:%s/%s" index (cdr (assq 'name tab)) num-tabs)
+              (format "%s/%s" index num-tabs)))))
+
 ;;; File information
 
-(defun rich-title--get-file-name ()
-  "Return the file name or the default directory."
+(defun rich-title--get-file-info ()
+  "Return basic file information."
   (abbreviate-file-name (or buffer-file-name default-directory)))
 
-;;; Project information
+;;; Project
 
 (declare-function projectile-project-name "ext:projectile")
 (declare-function projectile-project-type "ext:projectile")
 
-(defvar-local rich-title--project-name nil "Current project name.")
+(defvar-local rich-title--project nil "Current project information.")
 
-(defun rich-title--get-project-name ()
-  "Return the project name."
+(defun rich-title--update-project ()
+  "Update `rich-title--project' and frame title."
   (let ((name (projectile-project-name))
         (type (projectile-project-type)))
-    (and name
-         (not (equal "-" name))
-         (concat " ["
-                 name
-                 (and type (format ":%s" type))
-                 "]"))))
-
-(defun rich-title--set-project-name ()
-  "Set project name and update frame title."
-  (when (bound-and-true-p projectile-mode)
-    (setf rich-title--project-name (rich-title--get-project-name))
-    (force-mode-line-update)))
+    (when (and (bound-and-true-p projectile-mode)
+               name
+               (not (equal "-" name)))
+      (setf rich-title--project
+            (format " [%s]"
+                    (if type
+                        (format "%s:%s" name type)
+                      name)))
+      (force-mode-line-update))))
 
 (defun rich-title--setup-project ()
   "Setup project system."
-  (add-hook 'find-file-hook #'rich-title--set-project-name))
+  (add-hook 'find-file-hook #'rich-title--update-project))
 
 ;;; Org clock
 
@@ -54,7 +66,7 @@
 (declare-function org-clock--mode-line-heading "org-clock")
 
 (defun rich-title--get-org-clock-string ()
-  "Form a clock string that will be shown in the frame title.
+  "Return Org clock string that will be shown in the frame title.
 
 This is a customized version of `org-clock-get-clock-string'."
   (let* ((clocked-time (org-clock-get-clocked-time))
@@ -75,7 +87,7 @@ This is a customized version of `org-clock-get-clock-string'."
       clock-string)))
 
 (defun rich-title--update-org-clock-mode-line (&optional refresh)
-  "Update frame title with clock information.
+  "Update `org-mode-line-string' with Org clock and frame title.
 When REFRESH is non-nil, refresh the cached heading first.
 
 This is a customized version of `org-clock-update-mode-line'."
@@ -100,16 +112,16 @@ This is a customized version of `org-clock-update-mode-line'."
 (defvar org-clock-frame-title-format)
 
 (defconst rich-title--base-format
-  '(""
-    invocation-name
-    "  "
-    (:eval (rich-title--get-file-name))
-    rich-title--project-name)
+  '("GNU Emacs"
+    (:eval (rich-title--get-tab-info))
+    " - "
+    (:eval (rich-title--get-file-info))
+    rich-title--project)
   "Base frame title format.")
 
-(defconst rich-title--format-with-clock
+(defconst rich-title--org-clock-format
   `(,@rich-title--base-format "  " org-mode-line-string)
-  "Frame title format with Org clock string.")
+  "Frame title format with Org clock.")
 
 (defun rich-title-setup ()
   "Setup frame title."
@@ -118,7 +130,7 @@ This is a customized version of `org-clock-update-mode-line'."
 
   (setf frame-title-format rich-title--base-format)
   (with-eval-after-load 'org-clock
-    (setf org-clock-frame-title-format rich-title--format-with-clock)))
+    (setf org-clock-frame-title-format rich-title--org-clock-format)))
 
 (provide 'rich-title)
 ;;; rich-title.el ends here
