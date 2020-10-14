@@ -804,7 +804,7 @@
 (use-package time-stamp
   :defer t
   :hook (before-save . time-stamp)
-  :config (setf time-stamp-format "%:y-%02m-%02d %02H:%02M:%02S %Z"))
+  :config (setf time-stamp-format "%Y-%02m-%02dT%02H:%02M:%02S%:z"))
 
 (use-package tramp
   :defer t
