@@ -2906,16 +2906,6 @@ When no input read, use DEFAULT value."
   :ensure t
   :defer t)
 
-;;; Docker
-
-(use-package dockerfile-mode
-  :ensure t
-  :defer t)
-
-(use-package docker-compose-mode
-  :ensure t
-  :defer t)
-
 ;;; SQL
 
 (use-package sql
