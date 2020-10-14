@@ -1582,41 +1582,6 @@
 
   (projectile-mode))
 
-(use-package counsel-projectile
-  :ensure t
-  :defer t
-  :after (projectile counsel)
-  :bind (;; -
-         :map projectile-mode-map
-         ([remap projectile-find-file] . counsel-projectile-find-file)
-         ([remap projectile-find-file-dwim] . counsel-projectile-find-file-dwim)
-         ([remap projectile-find-dir] . counsel-projectile-find-dir)
-         ([remap projectile-switch-to-buffer] . counsel-projectile-switch-to-buffer)
-         ([remap projectile-switch-project] . counsel-projectile-switch-project)
-         :map projectile-command-map
-         ("s" . counsel-projectile-rg)
-         ("SPC" . counsel-projectile)
-         :map counsel-projectile-switch-to-buffer-map
-         ("C-k" . ivy-switch-buffer-kill))
-  :init (setf counsel-projectile-switch-to-buffer-map (make-sparse-keymap))
-  :config
-  (setf counsel-projectile-switch-project-action
-        '(1
-          ("o" counsel-projectile-switch-project-action
-           "jump to a project buffer or file")
-          ("b" counsel-projectile-switch-project-action-switch-to-buffer
-           "jump to a project buffer")
-          ("f" counsel-projectile-switch-project-action-find-file
-           "jump to a project file")
-          ("d" counsel-projectile-switch-project-action-find-dir
-           "jump to a project directory")
-          ("D" counsel-projectile-switch-project-action-dired
-           "open project in dired")
-          ("m" counsel-projectile-switch-project-action-find-file-manually
-           "find file manually from project root")
-          ("k" counsel-projectile-switch-project-action-kill-buffers
-           "kill all project buffers"))))
-
 (use-package editorconfig
   :ensure t
   :config (editorconfig-mode))
