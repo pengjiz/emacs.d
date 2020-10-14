@@ -1364,12 +1364,8 @@
 (use-package word-complete
   :load-path "lisp"
   :defer t
-  :commands word-complete
   :bind (([remap ispell-complete-word] . word-complete)
-         ("C-c e d" . word-complete))
-  :init
-  (with-eval-after-load 'org
-    (bind-key [remap pcomplete] #'word-complete org-mode-map)))
+         ("C-c e d" . word-complete)))
 
 ;;; Expansion
 
