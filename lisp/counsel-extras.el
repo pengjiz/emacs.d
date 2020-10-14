@@ -147,6 +147,34 @@ directory is used."
  '(("j" find-file-other-window "other window")
    ("x" counsel-find-file-extern "open externally")))
 
+;; Search with ripgrep
+(declare-function projectile-acquire-root "ext:projectile")
+
+;; NOTE: The builtin command has some mechanisms to choose the root directory,
+;; which I do not like. This command instead will always fall back to the
+;; current directory if the root directory is not provided.
+(defun counsel-extras-rg (&optional initial-input directory)
+  "Search in files under a directory with ripgrep.
+INITIAL-INPUT is used as the initial minibuffer input. DIRECTORY
+is used as the root directory if given, otherwise the current
+directory is used.
+
+Internally it calls `counsel-rg'."
+  (interactive)
+  (counsel-rg initial-input (or directory default-directory)))
+
+(defun counsel-extras-rg-project (&optional initial-input directory)
+  "Search in files of a Projectile project with ripgrep.
+INITIAL-INPUT is used as the initial minibuffer input. DIRECTORY
+is used to start the project search if given, otherwise the
+current directory is used.
+
+Internally it calls `counsel-rg'."
+  (interactive)
+  (unless (bound-and-true-p projectile-mode)
+    (user-error "Projectile not enabled"))
+  (counsel-rg initial-input (projectile-acquire-root directory)))
+
 ;;; Entry point
 
 (defun counsel-extras-setup ()

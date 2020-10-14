@@ -1202,8 +1202,7 @@
   :ensure t
   :defer t
   :after ivy
-  :bind (("M-s s" . counsel-rg)
-         ("C-c e o" . counsel-colors-web)
+  :bind (("C-c e o" . counsel-colors-web)
          ("C-c e O" . counsel-colors-emacs)
          ("C-c o j" . counsel-org-goto-all)
          :map counsel-ag-map
@@ -1251,7 +1250,8 @@
 (use-package counsel-extras
   :load-path "lisp"
   :after counsel
-  :bind (("C-c f f" . counsel-extras-fd)
+  :bind (("M-s s" . counsel-extras-rg)
+         ("C-c f f" . counsel-extras-fd)
          ("C-c f j" . counsel-extras-fd))
   :config (counsel-extras-setup))
 
