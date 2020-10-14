@@ -258,17 +258,6 @@
     (bind-key [remap move-beginning-of-line] #'simple-extras-move-beginning-of-ess-line
               ess-roxy-mode-map)))
 
-(use-package simple-snippets
-  :load-path "lisp"
-  :defer t
-  :commands (simple-snippets-email simple-snippets-time)
-  :init
-  (with-eval-after-load 'text-mode
-    (define-abbrev text-mode-abbrev-table ";email"
-      "" #'simple-snippets-email :system t)
-    (define-abbrev text-mode-abbrev-table ";time"
-      "" #'simple-snippets-time :system t)))
-
 (use-package undo-propose
   :ensure t
   :defer t
