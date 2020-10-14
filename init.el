@@ -1250,11 +1250,12 @@
 (use-package counsel-extras
   :load-path "lisp"
   :after counsel
-  :bind (("M-s s" . counsel-extras-rg)
-         ("C-c f f" . counsel-extras-fd)
-         ("C-c f j" . counsel-extras-fd))
   :config
   (counsel-extras-setup)
+
+  (bind-keys ("M-s s" . counsel-extras-rg)
+             ("C-c f f" . counsel-extras-fd)
+             ("C-c f j" . counsel-extras-fd))
 
   (defvar projectile-command-map)
   (with-eval-after-load 'projectile
