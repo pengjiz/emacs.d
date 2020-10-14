@@ -187,12 +187,12 @@
   :ensure t
   :hook ((shell-mode eshell-mode) . my-export-editor)
   :init
+  (shell-command-with-editor-mode)
+
   (defun my-export-editor ()
     "Call `with-editor-export-editor' but suppress messages."
     (let ((inhibit-message t))
-      (with-editor-export-editor)))
-
-  (shell-command-with-editor-mode))
+      (with-editor-export-editor))))
 
 ;;; General utility
 
@@ -243,6 +243,8 @@
 (use-package simple-extras
   :load-path "lisp"
   :config
+  (simple-extras-setup)
+
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
@@ -254,9 +256,7 @@
   (defvar ess-roxy-mode-map)
   (with-eval-after-load 'ess-roxy
     (bind-key [remap move-beginning-of-line] #'simple-extras-move-beginning-of-ess-line
-              ess-roxy-mode-map))
-
-  (simple-extras-setup))
+              ess-roxy-mode-map)))
 
 (use-package simple-snippets
   :load-path "lisp"
@@ -1257,9 +1257,10 @@
              ("C-c f f" . counsel-extras-fd)
              ("C-c f j" . counsel-extras-fd))
 
-  (defvar projectile-command-map)
+  (defvar projectile-mode-map)
   (with-eval-after-load 'projectile
-    (bind-key "s" #'counsel-extras-rg-project projectile-command-map)))
+    (bind-key [remap projectile-ripgrep] #'counsel-extras-rg-project
+              projectile-mode-map)))
 
 (use-package amx
   :ensure t
@@ -1492,7 +1493,6 @@
   (setf magit-save-repository-buffers 'dontask)
   (setf magit-revision-show-gravatars nil
         magit-diff-refine-hunk t)
-
   ;; Show submodules in status buffer
   (magit-add-section-hook 'magit-status-sections-hook #'magit-insert-modules
                           #'magit-insert-stashes t))
@@ -1539,13 +1539,12 @@
   :hook (dired-mode . diff-hl-dired-mode)
   :init (global-diff-hl-mode)
   :config
-  ;; Magit integration
+  (unless (display-graphic-p)
+    (diff-hl-margin-mode))
+
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
-
-  (unless (display-graphic-p)
-    (diff-hl-margin-mode))
 
   (defhydra hydra-hunks ()
     "Hunks"
@@ -1578,15 +1577,15 @@
   (setf projectile-commander-methods nil
         (symbol-function 'projectile-commander-bindings) #'my-ignore
         (symbol-function 'projectile-commander) #'projectile-dired)
+  (projectile-mode)
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
   (dolist (key '("x" "m"))
     (unbind-key key projectile-command-map))
   (bind-keys :map projectile-command-map
+             ("s" . projectile-ripgrep)
              ("x e" . projectile-run-eshell)
-             ("x i" . projectile-run-ielm))
-
-  (projectile-mode))
+             ("x i" . projectile-run-ielm)))
 
 (use-package editorconfig
   :ensure t
@@ -1719,8 +1718,8 @@
   :config
   (eshell-extras-setup)
 
-  (bind-key [remap eshell-truncate-buffer] #'eshell-extras-clear-buffer)
-  (bind-keys :map eshell-extras-autosuggest-suggestion-map
+  (bind-keys ([remap eshell-truncate-buffer] . eshell-extras-clear-buffer)
+             :map eshell-extras-autosuggest-suggestion-map
              ([remap forward-char] . eshell-extras-accept-suggestion)
              ([remap move-end-of-line] . eshell-extras-accept-suggestion)
              ([remap forward-word] . eshell-extras-accept-suggestion-word)))

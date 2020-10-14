@@ -30,8 +30,8 @@ Return nil if FILE does not exist."
 
 (defun flycheck-npm-executable-find (executable)
   "Find an EXECUTABLE installed locally by NPM.
-Fallback to `flycheck-default-executable-find' if EXECUTABLE is
-not found locally."
+Fall back to `flycheck-default-executable-find' if EXECUTABLE
+cannot be found locally."
   (or (when-let* ((root (locate-dominating-file
                          (or buffer-file-name default-directory)
                          "package.json"))
