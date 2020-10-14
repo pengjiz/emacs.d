@@ -1253,7 +1253,12 @@
   :bind (("M-s s" . counsel-extras-rg)
          ("C-c f f" . counsel-extras-fd)
          ("C-c f j" . counsel-extras-fd))
-  :config (counsel-extras-setup))
+  :config
+  (counsel-extras-setup)
+
+  (defvar projectile-command-map)
+  (with-eval-after-load 'projectile
+    (bind-key "s" #'counsel-extras-rg-project projectile-command-map)))
 
 (use-package amx
   :ensure t
@@ -1574,7 +1579,7 @@
         (symbol-function 'projectile-commander) #'projectile-dired)
 
   (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (dolist (key '("s" "x" "m"))
+  (dolist (key '("x" "m"))
     (unbind-key key projectile-command-map))
   (bind-keys :map projectile-command-map
              ("x e" . projectile-run-eshell)
