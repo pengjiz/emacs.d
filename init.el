@@ -112,7 +112,7 @@
   (setf custom-file (my-expand-var-file-name "custom.el"))
   (load custom-file t t t)
 
-  (dolist (key '("M-`" "M-=" "M-$" "M-z" "M-m" "C-z" "C-x C-z"
+  (dolist (key '("M-`" "M-=" "M-$" "M-z" "C-z" "C-x C-z"
                  "C-x C-u" "C-x C-l" "C-x m" "C-x 4 m"))
     (unbind-key key)))
 
@@ -644,13 +644,10 @@
 (use-package avy
   :ensure t
   :defer t
-  :bind* (("C-'" . avy-goto-char)
-          ("C-;" . avy-goto-char-2))
-  :bind (("M-m" . avy-goto-char-in-line)
-         ("M-g g" . avy-goto-line)
-         ("C-z" . avy-resume)
+  :bind* (("C-;" . avy-goto-char-in-line)
+          ("C-'" . avy-goto-char-2))
+  :bind (("C-z" . avy-resume)
          :map isearch-mode-map
-         ([remap avy-goto-char] . avy-isearch)
          ([remap avy-goto-char-2] . avy-isearch))
   :config
   ;; Smart case search
@@ -690,7 +687,6 @@
   :defer t
   :bind (("M-s j" . swiper)
          :map swiper-map
-         ([remap avy-goto-char] . swiper-avy)
          ([remap avy-goto-char-2] . swiper-avy)
          :map isearch-mode-map
          ([remap swiper] . swiper-from-isearch)))
@@ -1182,10 +1178,7 @@
   :ensure t
   :defer t
   :after ivy
-  :bind (;; -
-         :map ivy-minibuffer-map
-         ([remap avy-goto-char] . ivy-avy)
-         ([remap avy-goto-char-2] . ivy-avy)))
+  :bind (:map ivy-minibuffer-map ([remap avy-goto-char-2] . ivy-avy)))
 
 (use-package counsel
   :ensure t
@@ -1195,10 +1188,8 @@
          ("C-c e O" . counsel-colors-emacs)
          ("C-c o j" . counsel-org-goto-all)
          :map counsel-ag-map
-         ([remap avy-goto-char] . swiper-avy)
          ([remap avy-goto-char-2] . swiper-avy)
          :map counsel-grep-map
-         ([remap avy-goto-char] . swiper-avy)
          ([remap avy-goto-char-2] . swiper-avy))
   :init
   (setf counsel-mode-override-describe-bindings t)
