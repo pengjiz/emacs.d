@@ -248,15 +248,7 @@
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
-  (bind-keys ("C-c e r" . simple-extras-eval-last-sexp-and-replace)
-             ([remap move-beginning-of-line] . simple-extras-move-beginning-of-line)
-             :map visual-line-mode-map
-             ([remap move-beginning-of-line] . simple-extras-move-beginning-of-visual-line))
-
-  (defvar ess-roxy-mode-map)
-  (with-eval-after-load 'ess-roxy
-    (bind-key [remap move-beginning-of-line] #'simple-extras-move-beginning-of-ess-line
-              ess-roxy-mode-map)))
+  (bind-key "C-c e r" #'simple-extras-eval-and-replace-last-sexp))
 
 (use-package undo-propose
   :ensure t
