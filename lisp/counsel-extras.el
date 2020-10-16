@@ -51,11 +51,9 @@
 ;; Execute key when listing key bindings
 ;;
 ;; NOTE: This does not work for calling because the key will be executed in the
-;; minibuffer. However it works for repeating. There is a similar action by
-;; default that works for calling but does not work for repeating. It seems that
-;; repeating is more useful here so we override the default.
-;;
-;; TODO: Find a way to solve the incompatibility with calling.
+;; minibuffer. However it works for repeating. There is a similar action builtin
+;; that works for calling but does not work for repeating. It seems that
+;; repeating is more useful here.
 (defun counsel-extras-execute-keys (candidate)
   "Execute the keys of CANDIDATE."
   (when-let* ((keys (cadr candidate))

@@ -53,10 +53,8 @@ If nil use value of `fill-column'."
 
 (defvar-local page-turner--face-remapping-cookies nil
   "Face remapping cookies added.")
-;; NOTE: This is a marker for whether prose styles have been applied. Here we do
-;; not use minor mode because we do not want an interactive command and instead
-;; we want a flexible function that can be used for advising or hooks. Also,
-;; with this marker we can avoid some unnecessary works.
+;; NOTE: Here we do not use minor mode because we do not want an interactive
+;; command but merely a function for hooks or advice.
 (defvar-local page-turner--in-prose-styles nil
   "Whether the current buffer is in prose styles.")
 
@@ -93,8 +91,7 @@ If nil use value of `fill-column'."
     (apply fn args)))
 
 ;; HACK: When rendering tables sometimes line truncating will be turned on,
-;; which is not desired in prose styles. So here we use a hack to avoid that
-;; behavior.
+;; which is undesirable in prose styles. So here we use a hack to avoid that.
 (defun page-turner--tag-shr-table (_)
   "Keep the original `shr-tag-table' function."
   nil)
@@ -149,11 +146,9 @@ If nil use value of `fill-column'."
 (declare-function eww-readable "eww")
 (declare-function eww-display-html "eww")
 
-;; NOTE: EWW readable do not create new buffer, instead it reuses the current
-;; buffer but replaces contents. That would cause problems when we want to leave
-;; readable mode. So here we clear styles before displaying documents. This
-;; applies for EWW readable as well because otherwise running readable in
-;; readable mode will not use visual line for some reason.
+;; NOTE: eww-readable does not create new buffer, instead it reuses the current
+;; buffer but replaces contents. Then the buffer will always be in prose styles
+;; afterwards. So here we clear styles before displaying documents.
 (defun page-turner--reset-eww-styles (&rest args)
   "Reset styles in buffer from ARGS."
   (let ((buffer (nth 4 args)))
@@ -212,10 +207,8 @@ If nil use value of `fill-column'."
 (declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 (defvar markdown-live-preview-window-function)
 
-;; NOTE: For some reason visual fill column and visual line does not work well
-;; with live previewing, so here we only set font and text width.
-;;
-;; TODO: Find a way to enable all prose styles.
+;; NOTE: Visual fill column and visual line do not play well with live
+;; previewing for some unknown reason, so here we only set font and text width.
 (defun page-turner--get-markdown-live-preview-buffer (file)
   "Get a buffer showing FILE with EWW."
   (let* ((shr-width (or page-turner-text-width fill-column))

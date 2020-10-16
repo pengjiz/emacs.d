@@ -789,7 +789,7 @@
   (setf tramp-persistency-file-name (my-expand-var-file-name "tramp/persistency")
         tramp-auto-save-directory (my-expand-var-file-name "tramp/auto-save/")
         tramp-backup-directory-alist backup-directory-alist
-        ;; Do not save tramp history
+        ;; Do not save history
         tramp-histfile-override t)
   (setf tramp-default-method "ssh"))
 
@@ -1880,12 +1880,11 @@
     (make-directory sync-directory t)
     (setf diary-file (expand-file-name "diary" sync-directory)))
   :config
-  (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
   (setf calendar-mark-holidays-flag t
         calendar-chinese-all-holidays-flag t)
+  (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
   (setf calendar-date-display-form calendar-iso-date-display-form)
   (calendar-set-date-style 'iso)
-  ;; Tweak the mode line
   (setf calendar-mode-line-format nil
         (symbol-function 'calendar-set-mode-line) #'my-ignore))
 
@@ -1935,8 +1934,8 @@
         (alert (concat msg " in " min " minutes")
                :title "Appt"))))
 
-  ;; NOTE: This is not a normal minor mode and the positive argument is
-  ;; essential to turn it on, not toggle.
+  ;; NOTE: This is not a minor mode and the positive argument is essential to
+  ;; turn it on, not toggle.
   (appt-activate 1))
 
 ;;; Emacs Lisp
@@ -2693,14 +2692,12 @@ When no input read, use DEFAULT value."
     (add-hook 'window-configuration-change-hook #'org-agenda-align-tags nil t))
   (add-hook 'org-agenda-mode-hook #'my-realign-tags-in-org-agenda)
 
-  ;; Add tasks to appt
+  ;; Add agenda entries to appt
   ;;
-  ;; NOTE: The delay is important. Otherwise it will throw an error occasionally
-  ;; when Org is loaded.
+  ;; NOTE: Without the delay errors may occur when loading Org.
   ;;
-  ;; NOTE: Do not refresh. Otherwise the manually added entries and the diary
-  ;; entries will be cleaned as well. Wrong notifications seem to be better than
-  ;; losing notifications.
+  ;; NOTE: Refreshing clears not only outdated entries but also manually added
+  ;; entries and diary entries. So do not refresh.
   (run-with-timer 1 3600 #'org-agenda-to-appt))
 
 ;; Clock

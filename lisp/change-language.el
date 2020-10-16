@@ -81,8 +81,7 @@ With non-nil ARG force changing to the language selected."
   (let ((input-method (cdr (assoc language
                                   change-language-input-methods-alist))))
     ;; NOTE: Do not use set-input-method because it changes the default input
-    ;; method globally. Also this function accepts nil as input method and will
-    ;; deactivate the current enabled input method in that case.
+    ;; method globally.
     (activate-input-method input-method)))
 
 ;;; Typography style

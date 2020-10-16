@@ -47,9 +47,9 @@
                 (erc-extras--search-nickserv-auth-source-password nickname))))
     (erc-nickserv-identify password)))
 
-;; NOTE: A hack to force identification. By default ERC will not identify
-;; nickname if both variables for prompting password and nickserv passwords are
-;; nil. Here we locally bind it to t to force identification.
+;; NOTE: By default ERC will not identify nickname if both variables for
+;; prompting password and nickserv passwords are nil. Here we locally bind it to
+;; t to force identification.
 (defun erc-extras--force-nickserv-identification (fn &rest args)
   "Apply FN on ARGS, but force NickServ identification."
   (let ((erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password)

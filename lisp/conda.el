@@ -30,22 +30,22 @@
 
 (defcustom conda-pre-activate-hook
   nil
-  "The hook run before activating an environment."
+  "The hook to run before activating an environment."
   :type 'hook)
 
 (defcustom conda-post-activate-hook
   nil
-  "The hook run after activating an environment."
+  "The hook to run after activating an environment."
   :type 'hook)
 
 (defcustom conda-pre-deactivate-hook
   nil
-  "The hook run before deactivating an environment."
+  "The hook to run before deactivating an environment."
   :type 'hook)
 
 (defcustom conda-post-deactivate-hook
   nil
-  "The hook run after deactivating an environment."
+  "The hook to run after deactivating an environment."
   :type 'hook)
 
 ;;; Find environments
@@ -80,7 +80,7 @@
 (defvar conda--previous-path-env nil
   "Previous value of the PATH environment variable.")
 (defvar conda--previous-exec-path nil
-  "Previous value of the `exec-path' variable.")
+  "Previous value of variable `exec-path'.")
 
 (defun conda-activate (environment &optional show-message)
   "Activate Conda ENVIRONMENT.

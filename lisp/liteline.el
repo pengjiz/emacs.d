@@ -328,7 +328,8 @@ If DEFAULT is non-nil, set the default value."
 (setf (symbol-function 'liteline--get-buffer-size)
       (symbol-function 'buffer-size))
 
-;; HACK: A big hack on preventing the mode line from being modified.
+;; HACK: buffer-size happens to be called right after modifying
+;; mode-line-format. So here we manipulate buffer-size to clear the mode line.
 (defun liteline--avoid-reftex-mode-line (fn &rest args)
   "Apply FN on ARGS with protection on the mode line."
   (cl-letf (((symbol-function 'buffer-size)
@@ -350,7 +351,7 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--get-major-mode-extra-info ()
   "Return the extra information for the current major mode."
   (cl-case major-mode
-    ;; Conda environment
+    ;; Python environment
     ((python-mode inferior-python-mode)
      (when (bound-and-true-p conda-current-environment)
        (format "[%s]" conda-current-environment)))
