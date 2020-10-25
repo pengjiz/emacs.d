@@ -647,11 +647,6 @@
   :bind ("M-g i" . imenu)
   :config (setf imenu-auto-rescan t))
 
-(use-package imenu-anywhere
-  :ensure t
-  :defer t
-  :bind ("M-g I" . imenu-anywhere))
-
 ;;; Search & replace
 
 (use-package isearch
