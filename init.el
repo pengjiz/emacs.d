@@ -707,7 +707,6 @@
          ("C-c C-o" . ibuffer-visit-buffer-1-window))
   :config
   (setf ibuffer-use-other-window t)
-  (setf ibuffer-expert t)
   (let ((state '(mark modified read-only locked " "))
         (info '((name 18 18 :left :elide) " "
                 (size 9 -1 :right) " "
@@ -717,7 +716,7 @@
 
 (use-package ibuf-ext
   :defer t
-  :config (setf (default-value 'ibuffer-show-empty-filter-groups) nil))
+  :config (setf ibuffer-show-empty-filter-groups nil))
 
 (use-package ibuffer-vc
   :ensure t
