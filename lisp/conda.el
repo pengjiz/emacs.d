@@ -1,8 +1,8 @@
-;;; conda.el --- Integration with Conda  -*- lexical-binding: t -*-
+;;; conda.el --- Integration with conda  -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Simple integration with the Python Conda tool.
+;; Simple integration with the conda environment system.
 
 ;;; Code:
 
@@ -13,20 +13,19 @@
 ;;; Option
 
 (defgroup conda nil
-  "Integration with Conda."
+  "Integration with conda."
   :group 'python)
 
 (defcustom conda-environment-directories
   `(,(expand-file-name (convert-standard-filename ".conda/envs/") "~"))
-  "A list of directories of the Conda environments."
+  "A list of directories of the conda environments."
   :type '(repeat directory))
 
 (defcustom conda-default-environment
   nil
-  "The default environment for a project."
+  "Name of the default environment."
   :type 'string
   :safe #'stringp)
-(make-variable-buffer-local 'conda-default-environment)
 
 (defcustom conda-pre-activate-hook
   nil
@@ -51,7 +50,7 @@
 ;;; Find environments
 
 (defun conda--get-environments ()
-  "Get all Conda environments."
+  "Get all conda environments."
   (mapcan (lambda (directory)
             (when (file-directory-p directory)
               (let (environments)
@@ -83,7 +82,7 @@
   "Previous value of variable `exec-path'.")
 
 (defun conda-activate (environment &optional show-message)
-  "Activate Conda ENVIRONMENT.
+  "Activate conda ENVIRONMENT.
 When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive
    (list (completing-read "Environment: "
@@ -97,7 +96,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
          (bin-path (expand-file-name "bin" path)))
     ;; Error when the environment is not found
     (unless path
-      (error "%s is not a valid Conda environment" environment))
+      (error "%s is not a valid conda environment" environment))
 
     (conda-deactivate show-message)
     (setf conda-current-environment environment)
