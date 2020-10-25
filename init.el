@@ -311,19 +311,6 @@
   (with-eval-after-load 'cc-mode
     (bind-key [remap c-fill-paragraph] #'unfill-toggle c-mode-base-map)))
 
-(use-package move-dup
-  :ensure t
-  :defer t
-  :bind (("M-<up>" . md-move-lines-up)
-         ("M-<down>" . md-move-lines-down)
-         ("C-M-<up>" . md-duplicate-up)
-         ("C-M-<down>" . md-duplicate-down)))
-
-(use-package swap-regions
-  :ensure t
-  :defer t
-  :bind ("C-c x t" . swap-regions))
-
 (use-package typo
   :ensure t
   :defer t
