@@ -473,12 +473,9 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--setup-flycheck ()
   "Setup Flycheck."
   (with-eval-after-load 'flycheck
-    (add-hook 'flycheck-status-changed-functions
-              #'liteline--update-flycheck)
+    (add-hook 'flycheck-status-changed-functions #'liteline--update-flycheck)
     ;; Reset status
-    (add-hook 'flycheck-mode-hook
-              #'liteline--update-flycheck)
-    (liteline--update-flycheck flycheck-last-status-change)))
+    (add-hook 'flycheck-mode-hook #'liteline--update-flycheck)))
 
 (liteline-define-segment flycheck
   "Show Flycheck status."
@@ -490,10 +487,10 @@ If DEFAULT is non-nil, set the default value."
 (defvar-local liteline--git nil "Current Git status.")
 (put 'liteline--git 'risky-local-variable t)
 
-(defun liteline--update-git ()
+(defun liteline--update-git (&rest _)
   "Update `liteline--git'."
   (setf liteline--git
-        (when (and vc-mode buffer-file-name)
+        (when (and vc-mode vc-display-status buffer-file-name)
           (concat
            (propertize (substring-no-properties vc-mode 5)
                        'face 'liteline-git-branch)
@@ -507,14 +504,13 @@ If DEFAULT is non-nil, set the default value."
              ((needs-update) (propertize "^" 'face 'liteline-git-warning))
              ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
              ((ignored) "~")
-             (otherwise (propertize "?" 'face 'liteline-git-error)))))))
+             (otherwise (propertize "?" 'face 'liteline-git-error))))))
+  (force-mode-line-update))
 
 (defun liteline--setup-git ()
   "Setup Git integration."
-  (add-hook 'after-save-hook #'liteline--update-git)
-  (add-hook 'find-file-hook #'liteline--update-git t)
   (with-eval-after-load 'vc-hooks
-    (advice-add #'vc-refresh-state :after #'liteline--update-git)))
+    (advice-add #'vc-mode-line :after #'liteline--update-git)))
 
 (liteline-define-segment git
   "Show Git branch and state."
