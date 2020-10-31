@@ -36,17 +36,18 @@
 
 (defun rich-title--update-project ()
   "Update `rich-title--project' and frame title."
-  (let ((name (projectile-project-name))
-        (type (projectile-project-type)))
-    (when (and (bound-and-true-p projectile-mode)
-               name
-               (not (equal "-" name)))
+  (when (and (bound-and-true-p projectile-mode)
+             (not (file-remote-p default-directory)))
+    (let ((name (projectile-project-name))
+          (type (projectile-project-type)))
       (setf rich-title--project
-            (format " [%s]"
-                    (if type
-                        (format "%s:%s" name type)
-                      name)))
-      (force-mode-line-update))))
+            (and name
+                 (not (equal name "-"))
+                 (format " [%s]"
+                         (if type
+                             (format "%s:%s" name type)
+                           name)))))
+    (force-mode-line-update)))
 
 (defun rich-title--setup-project ()
   "Setup project system."
