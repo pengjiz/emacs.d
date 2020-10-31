@@ -46,8 +46,9 @@ cannot be found locally."
 
 (defun flycheck-npm-setup ()
   "Setup Flycheck for NPM."
-  (make-local-variable 'flycheck-executable-find)
-  (setf flycheck-executable-find #'flycheck-npm-executable-find))
+  (unless (file-remote-p default-directory)
+    (make-local-variable 'flycheck-executable-find)
+    (setf flycheck-executable-find #'flycheck-npm-executable-find)))
 
 (provide 'flycheck-npm)
 ;;; flycheck-npm.el ends here
