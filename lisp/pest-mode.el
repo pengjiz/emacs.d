@@ -66,8 +66,7 @@
     (dolist (char '(?= ?~ ?| ?* ?+ ?? ?& ?!))
       (modify-syntax-entry char "." table))
     (modify-syntax-entry ?\" "\"" table)
-    ;; NOTE: Single quotes are for character literals, but there seems to be no
-    ;; such syntax class. So we use string quotes as what rust-mode does.
+    ;; FIXME: Single quotes are actually for character literals, not strings.
     (modify-syntax-entry ?' "\"" table)
     (modify-syntax-entry ?\\ "\\" table)
     (modify-syntax-entry ?/ ". 12" table)
