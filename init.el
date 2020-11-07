@@ -715,8 +715,7 @@
 ;;; File
 
 (use-package files
-  :bind (("C-c f g" . revert-buffer)
-         ("C-c b g" . revert-buffer)
+  :bind (("C-c b g" . revert-buffer)
          ("C-c b r" . rename-buffer)
          ("C-c b R" . rename-uniquely))
   :config
@@ -1207,8 +1206,7 @@
   (counsel-extras-setup)
 
   (bind-keys ("M-s s" . counsel-extras-rg)
-             ("C-c f f" . counsel-extras-fd)
-             ("C-c f j" . counsel-extras-fd))
+             ("C-c f f" . counsel-extras-fd))
 
   (defvar projectile-mode-map)
   (with-eval-after-load 'projectile
