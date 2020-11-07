@@ -1433,10 +1433,8 @@
   :ensure t
   :defer t
   :bind (("C-c g g" . magit-status)
-         ("C-c g s" . magit-status)
          ("C-c g d" . magit-dispatch)
          ("C-c g f" . magit-file-dispatch))
-  :init (setf magit-file-mode-map (make-sparse-keymap))
   :config
   (setf magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (setf magit-save-repository-buffers 'dontask)
