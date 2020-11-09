@@ -471,17 +471,15 @@
   :bind (("C-c t w" . whitespace-mode)
          ("C-c t W" . whitespace-toggle-options)
          ("C-c x w" . whitespace-cleanup))
-  :hook ((TeX-update-style . whitespace-mode)
-         ((prog-mode
-           protobuf-mode
-           text-mode
-           bibtex-mode
-           conf-mode)
-          . my-enable-whitespace))
+  :hook ((prog-mode
+          protobuf-mode
+          text-mode
+          bibtex-mode
+          conf-mode)
+         . my-enable-whitespace)
   :init
   (defun my-enable-whitespace ()
-    (unless (bound-and-true-p TeX-mode-p)
-      (add-hook 'hack-local-variables-hook #'whitespace-mode nil t)))
+    (add-hook 'hack-local-variables-hook #'whitespace-mode nil t))
   :config
   (setf whitespace-style '(face
                            indentation
@@ -592,7 +590,7 @@
   :defer t
   :hook ((prog-mode
           protobuf-mode
-          TeX-update-style
+          TeX-mode
           conf-mode
           yaml-mode)
          . hl-todo-mode))
