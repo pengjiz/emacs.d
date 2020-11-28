@@ -22,12 +22,6 @@
   "Major modes in which word count is shown."
   :type '(repeat symbol))
 
-(defcustom liteline-input-method-names-alist
-  '(("chinese-b5-tsangchi" . "TWc"))
-  "Alternative names of input methods."
-  :type '(alist :key-type string
-                :value-type string))
-
 (defcustom liteline-important-minor-modes-alist
   '((typo-mode . "t")
     (abbrev-mode . "r")
@@ -302,12 +296,7 @@ If DEFAULT is non-nil, set the default value."
   "Show the input method name."
   (and (liteline--window-active-p)
        current-input-method
-       (concat
-        " "
-        (or (cdr (assoc current-input-method
-                        liteline-input-method-names-alist))
-            current-input-method-title)
-        " ")))
+       (concat " " current-input-method-title " ")))
 
 ;; Major mode
 (declare-function reftex-offer-label-menu "reftex-ref")
@@ -393,7 +382,14 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--get-macro-indicator ()
   "Return an indicator when recording keyboard macros."
   (when defining-kbd-macro
-    "Macro>"))
+    "M>"))
+
+;; Recursive editing
+(defun liteline--get-recursive-editing-depth ()
+  "Return recursion depth when in recursive editing."
+  (let ((depth (- (recursion-depth) (minibuffer-depth))))
+    (when (> depth 0)
+      (format "@%d" depth))))
 
 ;; Selection
 (defsubst liteline--get-column (pos)
@@ -425,6 +421,7 @@ If DEFAULT is non-nil, set the default value."
   (when (liteline--window-active-p)
     (let (action)
       (dolist (fn '(liteline--get-selection-info
+                    liteline--get-recursive-editing-depth
                     liteline--get-macro-indicator))
         (when-let* ((string (funcall fn)))
           (push " " action)
