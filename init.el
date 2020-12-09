@@ -803,8 +803,7 @@
         dired-recursive-deletes 'top)
   (setf dired-auto-revert-buffer t)
   (setf dired-dwim-target t)
-  (setf dired-listing-switches "-alhFv --group-directories-first"
-        dired-ls-F-marks-symlinks t)
+  (setf dired-listing-switches "-AlhFv --group-directories-first")
   (setf dired-garbage-files-regexp
         (rx bos
             (or (and (1+ nonl)
@@ -820,9 +819,8 @@
                 "ltxpng"
                 (and "__minted" (1+ nonl)))
             eos))
-  (put #'dired-find-alternate-file 'disabled nil)
 
-  (dolist (key '("c" "Z" "P"))
+  (dolist (key '("a" "c" "Z" "P"))
     (unbind-key key dired-mode-map)))
 
 ;; Writable Dired
