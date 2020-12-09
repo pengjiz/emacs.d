@@ -26,32 +26,32 @@
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-python-env
-  '((t (:inherit eshell-ls-executable)))
+  '((t :inherit eshell-ls-executable))
   "Face used by Python environment name in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-directory
-  '((t (:inherit eshell-ls-directory)))
+  '((t :inherit eshell-ls-directory))
   "Face used by the current directory in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-git-branch
-  '((t (:inherit eshell-ls-special)))
+  '((t :inherit eshell-ls-special))
   "Face used by the current Git branch name in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-git-status
-  '((t (:inherit (bold warning))))
+  '((t :inherit (bold warning)))
   "Face used by the Git working tree status."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-success
-  '((t (:inherit success)))
+  '((t :inherit success))
   "Face used by the prompt when the last command succeeds."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-error
-  '((t (:inherit (bold error))))
+  '((t :inherit (bold error)))
   "Face used by the prompt when the last command fails."
   :group 'eshell-prompt)
 
