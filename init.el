@@ -1115,6 +1115,7 @@
          ("C-c s r" . tab-bar-rename-tab))
   :config
   (setf tab-bar-show nil)
+  (setf tab-bar-new-tab-choice "*scratch*")
   (setf tab-bar-tab-name-function #'tab-bar-tab-name-all))
 
 ;;; Completion
