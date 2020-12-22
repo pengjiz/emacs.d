@@ -1449,25 +1449,6 @@
   (add-hook 'git-commit-mode-hook #'my-setup-git-commit-mode)
   (add-hook 'git-commit-setup-hook #'git-commit-turn-on-flyspell))
 
-;; Browse other versions
-(use-package git-timemachine
-  :ensure t
-  :defer t
-  :bind (("C-c g t" . git-timemachine)
-         :map git-timemachine-mode-map
-         ("SPC" . scroll-up-command)
-         ("S-SPC" . scroll-down-command)
-         ("DEL" . scroll-down-command))
-  :config
-  (defun my-show-git-timemachine-details-in-header-line (fn &rest args)
-    "Apply FN on ARGS but use header line to display details."
-    (cl-letf (((symbol-function 'message)
-               (lambda (string &rest objects)
-                 (setf header-line-format (apply #'format string objects)))))
-      (apply fn args)))
-  (advice-add #'git-timemachine--show-minibuffer-details :around
-              #'my-show-git-timemachine-details-in-header-line))
-
 ;; Show edits
 (use-package diff-hl
   :ensure t
