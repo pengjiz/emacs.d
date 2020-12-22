@@ -18,7 +18,7 @@
          (index (1+ (tab-bar--current-tab-index tabs))))
     (format " [%s]"
             (if (cdr (assq 'explicit-name tab))
-                (format "%s:%s/%s" index (cdr (assq 'name tab)) num-tabs)
+                (format "%s/%s:%s" index num-tabs (cdr (assq 'name tab)))
               (format "%s/%s" index num-tabs)))))
 
 ;;; File information
