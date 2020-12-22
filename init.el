@@ -2896,7 +2896,8 @@ When no input read, use DEFAULT value."
   :config
   (defun my-setup-yaml-mode ()
     (flyspell-mode 0)
-    (auto-fill-mode 0))
+    (auto-fill-mode 0)
+    (abbrev-mode 0))
   (add-hook 'yaml-mode-hook #'my-setup-yaml-mode))
 
 ;;; CSV
