@@ -820,7 +820,7 @@
                 (and "__minted" (1+ nonl)))
             eos))
 
-  (dolist (key '("a" "c" "Z" "P"))
+  (dolist (key '("c" "Z" "P"))
     (unbind-key key dired-mode-map)))
 
 ;; Writable Dired
@@ -1430,6 +1430,7 @@
   :bind (("C-c g g" . magit-status)
          ("C-c g d" . magit-dispatch)
          ("C-c g f" . magit-file-dispatch))
+  :init (setf magit-define-global-key-bindings nil)
   :config
   (setf magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (setf magit-save-repository-buffers 'dontask)
