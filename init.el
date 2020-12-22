@@ -2631,11 +2631,6 @@ When no input read, use DEFAULT value."
   :after org
   :bind (:map org-mode-map ("M-g L" . org-lint)))
 
-(use-package org-radiobutton
-  :ensure t
-  :defer t
-  :hook (org-mode . org-radiobutton-mode))
-
 ;; Capture
 (use-package org-capture
   :defer t
