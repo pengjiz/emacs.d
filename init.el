@@ -323,6 +323,10 @@
   :bind ("C-c t i" . toggle-input-method)
   :init (setf default-input-method "TeX"))
 
+(use-package kkc
+  :defer t
+  :init (setf kkc-init-file-name (my-expand-var-file-name "kkcrc")))
+
 (use-package change-language
   :load-path "lisp"
   :defer t
