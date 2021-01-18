@@ -2552,12 +2552,10 @@ When no input read, use DEFAULT value."
 
 (use-package org
   :defer t
-  :bind ("C-c o l" . org-store-link)
   :init
   (make-directory (my-expand-var-file-name "org/") t)
   (setf org-babel-load-languages nil)
   :config
-  ;; File
   (setf org-directory (my-expand-sync-file-name "org/"))
   (make-directory org-directory t)
 
@@ -2565,7 +2563,6 @@ When no input read, use DEFAULT value."
         org-agenda-files `(,org-directory))
   (setf org-archive-location "::* Archived")
 
-  ;; General
   (setf org-adapt-indentation nil
         org-startup-indented t)
   (setf org-fontify-done-headline t
@@ -2579,20 +2576,17 @@ When no input read, use DEFAULT value."
   (setf org-file-apps '((auto-mode . emacs)
                         (directory . emacs)))
 
-  ;; LaTeX fragment and entity
   (setf org-highlight-latex-and-related '(latex entities))
   (setf org-use-sub-superscripts '{})
   (setf org-format-latex-options (plist-put org-format-latex-options
                                             :scale 1.2))
 
-  ;; Refile
   (setf org-refile-targets '((nil . (:maxlevel . 5))
                              (org-agenda-files . (:maxlevel . 5)))
         org-refile-use-outline-path 'file
         org-refile-allow-creating-parent-nodes 'confirm
         org-outline-path-complete-in-steps nil)
 
-  ;; Task management
   (setf org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
           (sequence "WAITING(w)" "|" "CANCELLED(c)")))
@@ -2601,8 +2595,16 @@ When no input read, use DEFAULT value."
   (setf org-log-into-drawer t
         org-log-done 'time)
 
-  ;; Tag
-  (setf org-tag-persistent-alist '(("note" . ?n))))
+  (setf org-tag-persistent-alist '(("note" . ?n)
+                                   ("project" . ?p)))
+  (setf org-tags-exclude-from-inheritance '("project"))
+
+  (defun my-load-org-babel-languages ()
+    "Load all Org Babel languages once."
+    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+    ;; Only load languages once
+    (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
+  (add-hook 'org-mode-hook #'my-load-org-babel-languages))
 
 (use-package org-goto
   :defer t
@@ -2612,10 +2614,19 @@ When no input read, use DEFAULT value."
   :defer t
   :init (setf org-id-locations-file (my-expand-var-file-name "org/id-locations")))
 
+(use-package org-duration
+  :defer t
+  :config (setf org-duration-format 'h:mm))
+
 (use-package org-lint
   :defer t
   :after org
   :bind (:map org-mode-map ("M-g L" . org-lint)))
+
+;; Link
+(use-package ol
+  :defer t
+  :bind ("C-c o l" . org-store-link))
 
 ;; Capture
 (use-package org-capture
@@ -2637,29 +2648,16 @@ When no input read, use DEFAULT value."
   :config
   (setf org-agenda-window-setup 'only-window
         org-agenda-restore-windows-after-quit t)
-  (setf org-agenda-start-with-log-mode t
-        org-agenda-block-separator "")
+  (setf org-agenda-block-separator "")
   (setf org-agenda-span 'day
         org-agenda-start-on-weekday 0)
+  (setf org-stuck-projects '("+project/-DONE-CANCELLED" ("NEXT") nil ""))
 
-  (defun my-realign-tags-in-org-agenda ()
-    "Realign tags after changing the layout in Org agenda buffers."
-    (add-hook 'window-configuration-change-hook #'org-agenda-align-tags nil t))
-  (add-hook 'org-agenda-mode-hook #'my-realign-tags-in-org-agenda)
-
-  ;; Add agenda entries to appt
-  ;;
-  ;; NOTE: Without the delay errors may occur when loading Org.
-  ;;
-  ;; NOTE: Refreshing clears not only outdated entries but also manually added
-  ;; entries and diary entries. So do not refresh.
+  ;; NOTE: Refreshing will remove appointments from other sources, so we do not
+  ;; refresh even though that may leave finished items in the list.
   (run-with-timer 1 3600 #'org-agenda-to-appt))
 
 ;; Clock
-(use-package org-duration
-  :defer t
-  :config (setf org-duration-format 'h:mm))
-
 (use-package org-clock
   :defer t
   :init
@@ -2672,13 +2670,13 @@ When no input read, use DEFAULT value."
   (setf org-clock-task-overrun-text "*"
         org-clock-clocked-in-display 'frame-title)
 
-  (defun my-confirm-quitting-when-clocking ()
-    "Confirm quitting when clocking."
+  (defun my-confirm-exit-when-clocking ()
+    "Ask for confirmation on exit with a running clock."
     (or (not (org-clocking-p))
         (progn
           (org-clock-goto)
-          (yes-or-no-p "There is a running clock. Still quit? "))))
-  (add-hook 'kill-emacs-query-functions #'my-confirm-quitting-when-clocking))
+          (yes-or-no-p "A running clock exists; exit anyway? "))))
+  (add-hook 'kill-emacs-query-functions #'my-confirm-exit-when-clocking))
 
 (use-package org-mru-clock
   :ensure t
@@ -2686,7 +2684,7 @@ When no input read, use DEFAULT value."
   :bind (("C-c o i" . org-mru-clock-in)
          ("C-c o u" . org-mru-clock-select-recent-task)))
 
-;; Source code and Babel
+;; Source code
 (use-package org-src
   :defer t
   :config
@@ -2695,27 +2693,9 @@ When no input read, use DEFAULT value."
         org-src-preserve-indentation t)
   (setf org-src-window-setup 'other-window))
 
-(use-package ob
-  :defer t
-  :hook (org-mode . my-load-org-babel-languages)
-  :init
-  (defun my-load-org-babel-languages ()
-    "Load all Org Babel languages once."
-    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
-    ;; Only load languages once
-    (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
-  :config
-  (setf org-confirm-babel-evaluate nil)
-
-  (defun my-redisplay-org-inline-images ()
-    "Redisplay Org inline images."
-    (when org-inline-image-overlays
-      (org-redisplay-inline-images)))
-  (add-hook 'org-babel-after-execute-hook #'my-redisplay-org-inline-images))
-
 (use-package ob-async
   :ensure t
-  :after ob)
+  :after org)
 
 (use-package ob-http
   :ensure t
@@ -2734,12 +2714,10 @@ When no input read, use DEFAULT value."
   (setf org-latex-compiler "lualatex"
         org-latex-pdf-process '("latexmk %f"))
 
-  ;; Source code
   (setf org-latex-listings t)
   (push '("" "listings") org-latex-packages-alist)
   (push '("" "color") org-latex-packages-alist)
 
-  ;; KOMA-Script
   (push '("koma-article"
           "\\documentclass[11pt]{scrartcl}"
           ("\\section{%s}" . "\\section*{%s}")
@@ -2754,7 +2732,7 @@ When no input read, use DEFAULT value."
   :config
   (setf org-html-doctype "html5"
         org-html-html5-fancy t
-        org-html-validation-link nil
+        org-html-preamble nil
         org-html-postamble nil
         org-html-htmlize-output-type 'css
         org-html-head-include-default-style nil
