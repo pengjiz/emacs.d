@@ -250,6 +250,13 @@
 
   (bind-key "C-c e r" #'simple-extras-eval-and-replace-last-sexp))
 
+(use-package savehist
+  :init (setf savehist-file (my-expand-var-file-name "savehist"))
+  :config
+  (setf savehist-additional-variables '(search-ring regexp-search-ring))
+  (setf savehist-autosave-interval 60)
+  (savehist-mode))
+
 (use-package undo-propose
   :ensure t
   :defer t
@@ -257,6 +264,11 @@
 
 (use-package delsel
   :config (delete-selection-mode))
+
+(use-package expand-region
+  :ensure t
+  :defer t
+  :bind* ("C-=" . er/expand-region))
 
 (use-package bug-reference
   :defer t
@@ -332,33 +344,6 @@
   :defer t
   :bind ("C-c t m" . change-language))
 
-(use-package expand-region
-  :ensure t
-  :defer t
-  :bind* ("C-=" . er/expand-region))
-
-(use-package wgrep
-  :ensure t
-  :defer t
-  :config (setf wgrep-auto-save-buffer t))
-
-(use-package autorevert
-  :config
-  (setf global-auto-revert-non-file-buffers t)
-  (setf auto-revert-verbose nil)
-  (global-auto-revert-mode))
-
-(use-package saveplace
-  :init (setf save-place-file (my-expand-var-file-name "places"))
-  :config (save-place-mode))
-
-(use-package savehist
-  :init (setf savehist-file (my-expand-var-file-name "savehist"))
-  :config
-  (setf savehist-additional-variables '(search-ring regexp-search-ring))
-  (setf savehist-autosave-interval 60)
-  (savehist-mode))
-
 (use-package re-builder
   :defer t
   :bind ("C-c m r" . re-builder)
@@ -400,6 +385,10 @@
   :bind ("C-c m k" . man)
   :config (setf Man-notify-method 'aggressive))
 
+(use-package htmlize
+  :ensure t
+  :defer t)
+
 (use-package edit-indirect
   :ensure t
   :defer t)
@@ -408,23 +397,6 @@
   :ensure t
   :defer t
   :bind ("C-c x o" . poporg-dwim))
-
-(use-package interleave
-  :ensure t
-  :defer t
-  :init
-  (setf interleave-org-notes-dir-list '("."))
-
-  (with-eval-after-load 'org
-    (bind-key "C-c o p" #'interleave-mode org-mode-map))
-
-  (with-eval-after-load 'doc-view
-    (bind-key "C-c o p" #'interleave-open-notes-file-for-pdf
-              doc-view-mode-map)))
-
-(use-package htmlize
-  :ensure t
-  :defer t)
 
 (use-package diff
   :defer t
@@ -666,6 +638,11 @@
          :map isearch-mode-map
          ([remap swiper] . swiper-from-isearch)))
 
+(use-package wgrep
+  :ensure t
+  :defer t
+  :config (setf wgrep-auto-save-buffer t))
+
 ;;; Buffer
 
 ;; Protect a few special buffers
@@ -677,7 +654,12 @@
         (ignore (bury-buffer))))
   (add-hook 'kill-buffer-query-functions #'my-protect-special-buffers))
 
-;; Unique buffer name
+(use-package autorevert
+  :config
+  (setf global-auto-revert-non-file-buffers t)
+  (setf auto-revert-verbose nil)
+  (global-auto-revert-mode))
+
 (use-package uniquify
   :config
   (setf uniquify-buffer-name-style 'forward)
@@ -773,6 +755,10 @@
         ;; Do not save history
         tramp-histfile-override t)
   (setf tramp-default-method "ssh"))
+
+(use-package saveplace
+  :init (setf save-place-file (my-expand-var-file-name "places"))
+  :config (save-place-mode))
 
 (use-package recentf
   :init
@@ -1190,6 +1176,7 @@
   (with-eval-after-load 'outline
     (bind-key "M-g o" #'counsel-outline outline-minor-mode-map))
 
+  (defvar org-mode-map)
   (with-eval-after-load 'org
     (bind-keys :map org-mode-map
                ("M-g o" . counsel-outline)
@@ -2745,6 +2732,19 @@ When no input read, use DEFAULT value."
         org-html-head-include-default-style nil
         org-html-head (format "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
                               (concat "file://" (my-expand-etc-file-name "css/org.css")))))
+
+(use-package interleave
+  :ensure t
+  :defer t
+  :init
+  (setf interleave-org-notes-dir-list '("."))
+
+  (with-eval-after-load 'org
+    (bind-key "C-c o p" #'interleave-mode org-mode-map))
+
+  (with-eval-after-load 'doc-view
+    (bind-key "C-c o p" #'interleave-open-notes-file-for-pdf
+              doc-view-mode-map)))
 
 ;;; Markdown
 
