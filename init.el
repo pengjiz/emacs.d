@@ -1198,7 +1198,14 @@
   (defvar markdown-mode-map)
   (with-eval-after-load 'markdown-mode
     (bind-key "M-g o" #'counsel-outline markdown-mode-map))
-  :config (setf counsel-find-file-ignore-regexp "\\`[#.]\\|[#~]\\'"))
+  :config
+  (setf counsel-find-file-ignore-regexp "\\`[#.]\\|[#~]\\'")
+  (ivy-add-actions
+   'counsel-find-file
+   '(("a" find-alternate-file "open alternatively")))
+
+  (ivy-configure 'counsel-company
+    :display-fn #'ivy-display-function-overlay))
 
 (use-package counsel-extras
   :load-path "lisp"
