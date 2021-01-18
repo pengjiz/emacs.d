@@ -107,16 +107,17 @@ If OCCUR is non-nil return a command for `ivy-occur'."
   "Find a file under a directory with fd.
 INITIAL-INPUT is used as initial minibuffer input. DIRECTORY is
 used as the root directory if given, otherwise the current
-directory is used."
+directory is used. With \\[universal-argument] prompt the user
+for the root directory."
   (interactive
    (list nil
-         (when current-prefix-arg
-           (counsel-read-directory-name "From directory: "))))
+         (and current-prefix-arg
+              (counsel-read-directory-name "fd in directory: "))))
   (let ((default-directory (or directory default-directory)))
     (when (file-remote-p default-directory)
       (user-error "Remote hosts not supported"))
     (counsel-require-program counsel-extras-fd-program)
-    (ivy-read "Find file: "
+    (ivy-read "fd: "
               #'counsel-extras--get-fd-files
               :initial-input initial-input
               :dynamic-collection t
@@ -146,7 +147,11 @@ directory is used."
    ("x" counsel-find-file-extern "open externally")))
 
 ;; Search with ripgrep
+(defvar projectile-globally-ignored-file-suffixes)
+(declare-function projectile-ignored-files-rel "ext:projectile")
+(declare-function projectile-ignored-directories-rel "ext:projectile")
 (declare-function projectile-acquire-root "ext:projectile")
+(declare-function projectile-prepend-project-name "ext:projectile")
 
 ;; NOTE: The builtin command has some mechanisms to choose the root directory,
 ;; which I do not like. This command instead will always fall back to the
@@ -155,11 +160,38 @@ directory is used."
   "Search in files under a directory with ripgrep.
 INITIAL-INPUT is used as the initial minibuffer input. DIRECTORY
 is used as the root directory if given, otherwise the current
-directory is used.
+directory is used. With \\[universal-argument] prompt the user
+for the root directory.
 
-Internally it calls `counsel-rg'."
-  (interactive)
-  (counsel-rg initial-input (or directory default-directory)))
+Extra arguments to ripgrep can be specified interactively in the
+input using the same way as `counsel-rg'."
+  (interactive
+   (list nil
+         (and current-prefix-arg
+              (counsel-read-directory-name "rg in directory: "))))
+  (let (current-prefix-arg)
+    (counsel-rg initial-input
+                (or directory default-directory)
+                nil
+                "rg: ")))
+
+(defun counsel-extras--get-project-ignored-globs ()
+  "Return a list of ignored globs in Projectile projects."
+  (let (globs)
+    (dolist (suffix projectile-globally-ignored-file-suffixes)
+      (push (concat "*" suffix) globs))
+    (append globs
+            (projectile-ignored-files-rel)
+            (projectile-ignored-directories-rel))))
+
+(defun counsel-extras--get-rg-project-command ()
+  "Return a command for running ripgrep in a Projectile project."
+  (let* ((counsel-ag-command counsel-rg-base-command)
+         (filter (mapconcat (lambda (x)
+                              (concat "--glob !" (shell-quote-argument x)))
+                            (counsel-extras--get-project-ignored-globs)
+                            " ")))
+    (counsel--format-ag-command filter "%s")))
 
 (defun counsel-extras-rg-project (&optional initial-input directory)
   "Search in files of a Projectile project with ripgrep.
@@ -167,11 +199,17 @@ INITIAL-INPUT is used as the initial minibuffer input. DIRECTORY
 is used to start the project search if given, otherwise the
 current directory is used.
 
-Internally it calls `counsel-rg'."
+Extra arguments to ripgrep can be specified interactively in the
+input using the same way as `counsel-rg'."
   (interactive)
   (unless (bound-and-true-p projectile-mode)
     (user-error "Projectile not enabled"))
-  (counsel-rg initial-input (projectile-acquire-root directory)))
+  (let ((counsel-rg-base-command (counsel-extras--get-rg-project-command))
+        current-prefix-arg)
+    (counsel-rg initial-input
+                (projectile-acquire-root directory)
+                nil
+                (projectile-prepend-project-name "rg: "))))
 
 ;;; Entry point
 
