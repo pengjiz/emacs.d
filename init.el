@@ -636,7 +636,8 @@
          :map swiper-map
          ([remap avy-goto-char-2] . swiper-avy)
          :map isearch-mode-map
-         ([remap swiper] . swiper-from-isearch)))
+         ([remap swiper] . swiper-from-isearch))
+  :config (unbind-key "C-7" swiper-map))
 
 (use-package wgrep
   :ensure t
@@ -1156,8 +1157,9 @@
 
   (defvar company-active-map)
   (with-eval-after-load 'company
-    (bind-key [remap company-filter-candidates] #'counsel-company
-              company-active-map))
+    (bind-keys :map company-active-map
+               ([remap company-search-candidates] . counsel-company)
+               ([remap company-filter-candidates] . counsel-company)))
 
   (with-eval-after-load 'comint
     (bind-keys :map comint-mode-map
@@ -1192,7 +1194,9 @@
    '(("a" find-alternate-file "open alternatively")))
 
   (ivy-configure 'counsel-company
-    :display-fn #'ivy-display-function-overlay))
+    :display-fn #'ivy-display-function-overlay)
+
+  (unbind-key "C-`" counsel-find-file-map))
 
 (use-package counsel-extras
   :load-path "lisp"
