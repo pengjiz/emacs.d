@@ -2530,9 +2530,9 @@ When no input read, use DEFAULT value."
         ledger-report-use-header-line t)
   (setf ledger-reports
         (mapcar
-         (lambda (x)
-           (list (car x)
-                 (format "%s %s" "%(binary) -f %(ledger-file)" (cdr x))))
+         (lambda (report)
+           (list (car report)
+                 (format "%s %s" "%(binary) -f %(ledger-file)" (cdr report))))
          '(("On hand" . "balance Assets Liabilities")
            ("Account" . "register %(account)")
            ("Expenses (weekly)" . "register Expenses -W")

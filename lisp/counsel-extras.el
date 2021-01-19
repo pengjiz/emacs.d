@@ -187,8 +187,8 @@ input using the same way as `counsel-rg'."
 (defun counsel-extras--get-rg-project-command ()
   "Return a command for running ripgrep in a Projectile project."
   (let* ((counsel-ag-command counsel-rg-base-command)
-         (filter (mapconcat (lambda (x)
-                              (concat "--glob !" (shell-quote-argument x)))
+         (filter (mapconcat (lambda (glob)
+                              (concat "--glob !" (shell-quote-argument glob)))
                             (counsel-extras--get-project-ignored-globs)
                             " ")))
     (counsel--format-ag-command filter "%s")))
