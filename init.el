@@ -1130,9 +1130,10 @@
   (setf ivy-count-format "(%d/%d) ")
   (setf ivy-use-selectable-prompt t
         ivy-wrap t)
+  (setf ivy-on-del-error-function #'ignore)
+  (setf ivy-read-action-format-function #'ivy-read-action-format-columns)
   (setf ivy-use-virtual-buffers t
-        ivy-virtual-abbreviate 'abbreviate)
-  (setf ivy-read-action-function #'ivy-read-action-ivy))
+        ivy-virtual-abbreviate 'abbreviate))
 
 (use-package ivy-avy
   :ensure t
