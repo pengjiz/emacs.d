@@ -65,7 +65,9 @@ files or directories."
 (defsubst dired-atool--flatten (args)
   "Flatten ARGS by one level."
   (apply #'append
-         (mapcar (lambda (arg) (if (listp arg) arg (list arg)))
+         (mapcar (lambda (arg) (if (listp arg)
+                                   arg
+                                 (list arg)))
                  args)))
 
 (defun dired-atool--run (program &rest args)

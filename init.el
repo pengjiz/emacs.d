@@ -1878,14 +1878,14 @@
           appt-disp-window-function #'my-display-appt-message
           appt-delete-window-function #'ignore)
 
-    (defun my-display-appt-message (min _ msg)
-      "Display MSG due in MIN minutes with `alert'."
-      (if (listp min)
-          (dotimes (i (length msg))
-            (alert (concat (nth i msg) " in " (nth i min) " minutes")
-                   :title "Appt"))
-        (alert (concat msg " in " min " minutes")
-               :title "Appt"))))
+    (defun my-display-appt-message (time _ message)
+      "Display MESSAGE due in TIME minutes with `alert'."
+      (let ((template "%s in %s minutes"))
+        (if (listp message)
+            (dotimes (index (length message))
+              (alert (format template (nth index message) (nth index time))
+                     :title "Appt"))
+          (alert (format template message time) :title "Appt")))))
 
   ;; NOTE: This is not a minor mode and the positive argument is essential to
   ;; turn it on, not toggle.
