@@ -1205,8 +1205,7 @@
   :config
   (counsel-extras-setup)
 
-  (bind-keys ("M-s s" . counsel-extras-rg)
-             ("C-c f f" . counsel-extras-fd))
+  (bind-key "M-s s" #'counsel-extras-rg)
 
   (defvar projectile-mode-map)
   (with-eval-after-load 'projectile
