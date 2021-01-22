@@ -1205,7 +1205,12 @@
   (defvar projectile-mode-map)
   (with-eval-after-load 'projectile
     (bind-key [remap projectile-ripgrep] #'counsel-extras-rg-project
-              projectile-mode-map)))
+              projectile-mode-map))
+
+  (with-eval-after-load 'calc
+    (bind-key [remap calc-execute-extended-command]
+              #'counsel-extras-execute-calc-command
+              calc-mode-map)))
 
 (use-package amx
   :ensure t

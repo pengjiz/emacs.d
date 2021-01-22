@@ -135,6 +135,12 @@ input using the same way as `counsel-rg'."
                 nil
                 (projectile-prepend-project-name "rg: "))))
 
+;; Execute Calc commands
+(defun counsel-extras-execute-calc-command ()
+  "Execute a Calc command with completion."
+  (interactive)
+  (counsel-M-x "^calc-"))
+
 ;;; Entry point
 
 (defun counsel-extras-setup ()
