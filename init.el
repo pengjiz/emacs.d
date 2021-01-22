@@ -1185,12 +1185,16 @@
     (bind-key "M-g o" #'counsel-outline markdown-mode-map))
   :config
   (setf counsel-find-file-ignore-regexp "\\`[#.]\\|[#~]\\'")
+  (ivy-configure 'counsel-company
+    :display-fn #'ivy-display-function-overlay)
+
   (ivy-add-actions
    'counsel-find-file
    '(("a" find-alternate-file "open alternatively")))
-
-  (ivy-configure 'counsel-company
-    :display-fn #'ivy-display-function-overlay)
+  (ivy-add-actions
+   'counsel-file-jump
+   '(("j" find-file-other-window "other window")
+     ("x" counsel-find-file-extern "open externally")))
 
   (unbind-key "C-`" counsel-find-file-map))
 
