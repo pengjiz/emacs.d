@@ -66,7 +66,7 @@
 ;;; Command
 
 ;; Common
-(defun eshell/take (directory)
+(defun eshell/mkcd (directory)
   "Make DIRECTORY and cd to it."
   (eshell/mkdir "-p" directory)
   (eshell/cd directory))
