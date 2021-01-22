@@ -18,7 +18,7 @@
   :group 'mode-line)
 
 (defcustom liteline-word-count-modes
-  '(text-mode)
+  '(text-mode bibtex-mode)
   "Major modes in which word count is shown."
   :type '(repeat symbol))
 
