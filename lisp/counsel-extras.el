@@ -8,27 +8,38 @@
 
 (require 'counsel)
 (eval-when-compile
-  (require 'subr-x))
+  (require 'subr-x)
+  (require 'rx))
 
 ;;; Display transformer
 
-;; Show the first line of the docstring for commands
+;; Show documentation summary for commands
+(defconst counsel-extras--doc-advice-regexp
+  (rx bos
+      (1+ (and (opt "This function has ")
+               ":" (1+ letter) " advice: "
+               (0+ nonl) "\n"))
+      "\n")
+  "Pattern for the advice part in function documentation.")
+
+(defun counsel-extras--get-clean-doc (command)
+  "Return the clean documentation string for COMMAND."
+  (if-let* ((symbol (intern command))
+            (doc (and (fboundp symbol)
+                      (documentation symbol))))
+      (save-match-data
+        (if (string-match counsel-extras--doc-advice-regexp doc)
+            (substring doc (match-end 0))
+          doc))
+    ""))
+
 (defun counsel-extras--display-command (command)
   "Return the formatted string of COMMAND for display."
-  (let* ((symbol (intern command))
-         (doc (and (fboundp symbol)
-                   (documentation symbol)))
-         (doc-clean (and doc
-                         (replace-regexp-in-string
-                          ":[a-z]+ advice:.+[\n\r]+" ""
-                          doc)))
-         (doc-short (if doc-clean
-                        (substring doc-clean
-                                   0 (string-match "[\n\r]" doc-clean))
-                      "")))
+  (let* ((doc (counsel-extras--get-clean-doc command))
+         (summary (substring doc 0 (string-match-p "\n" doc))))
     (format "%-30s %s"
             (counsel-M-x-transformer command)
-            (propertize doc-short 'face 'counsel-variable-documentation))))
+            (propertize summary 'face 'counsel-variable-documentation))))
 
 ;; Format directory part for filenames
 (defun counsel-extras--display-filename (filename)
