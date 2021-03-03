@@ -624,16 +624,6 @@
   (setf isearch-allow-scroll t)
   (setf isearch-lazy-count t))
 
-(use-package swiper
-  :ensure t
-  :defer t
-  :bind (("M-s j" . swiper)
-         :map swiper-map
-         ([remap avy-goto-char-2] . swiper-avy)
-         :map isearch-mode-map
-         ([remap swiper] . swiper-from-isearch))
-  :config (unbind-key "C-7" swiper-map))
-
 (use-package wgrep
   :ensure t
   :defer t
@@ -974,7 +964,6 @@
           (,(rx bos (or "Trash Can"
                         "*eshell"
                         "*Occur"
-                        "*ivy-occur"
                         " *Agenda Commands*"
                         " *Org todo*"
                         "*Org Select*"
@@ -1114,120 +1103,21 @@
   :defer t
   :bind ([remap complete-symbol] . completion-at-point))
 
-(use-package ivy
+(use-package selectrum
   :ensure t
   :defer t
-  :bind (("M-z" . ivy-resume)
-         :map ivy-minibuffer-map
-         ([remap hydra-ivy/body] . ivy-dispatching-done))
-  :init (ivy-mode)
+  :bind ("M-z" . selectrum-repeat)
+  :init (selectrum-mode)
   :config
-  (setf ivy-count-format "(%d/%d) ")
-  (setf ivy-use-selectable-prompt t
-        ivy-wrap t)
-  (setf ivy-on-del-error-function #'ignore)
-  (setf ivy-read-action-format-function #'ivy-read-action-format-columns)
-  (setf ivy-use-virtual-buffers t
-        ivy-virtual-abbreviate 'abbreviate))
+  (setf selectrum-display-style '(horizontal)
+        selectrum-count-style 'current/matches))
 
-(use-package ivy-avy
+(use-package orderless
   :ensure t
-  :defer t
-  :after ivy
-  :bind (:map ivy-minibuffer-map ([remap avy-goto-char-2] . ivy-avy)))
-
-(use-package counsel
-  :ensure t
-  :defer t
-  :after ivy
-  :bind (("C-c e o" . counsel-colors-web)
-         ("C-c e O" . counsel-colors-emacs)
-         ("C-c o j" . counsel-org-goto-all)
-         :map counsel-ag-map
-         ([remap avy-goto-char-2] . swiper-avy)
-         :map counsel-grep-map
-         ([remap avy-goto-char-2] . swiper-avy))
-  :init
-  (setf counsel-mode-override-describe-bindings t)
-  (counsel-mode)
-
-  (defvar company-active-map)
-  (with-eval-after-load 'company
-    (bind-keys :map company-active-map
-               ([remap company-search-candidates] . counsel-company)
-               ([remap company-filter-candidates] . counsel-company)))
-
-  (with-eval-after-load 'comint
-    (bind-keys :map comint-mode-map
-               ([remap comint-history-isearch-backward-regexp] . counsel-shell-history)
-               ([remap comint-dynamic-list-input-ring] . counsel-shell-history)))
-
-  (defvar inferior-ess-mode-map)
-  (with-eval-after-load 'ess-inf
-    (bind-key [remap ess-msg-and-comint-dynamic-list-input-ring] #'counsel-shell-history
-              inferior-ess-mode-map))
-
-  (with-eval-after-load 'esh-mode
-    (bind-keys ([remap eshell-previous-matching-input] . counsel-esh-history)
-               ([remap eshell-list-history] . counsel-esh-history)))
-
-  (with-eval-after-load 'outline
-    (bind-key "M-g o" #'counsel-outline outline-minor-mode-map))
-
-  (defvar org-mode-map)
-  (with-eval-after-load 'org
-    (bind-keys :map org-mode-map
-               ("M-g o" . counsel-outline)
-               ([remap org-goto] . counsel-outline)))
-
-  (defvar markdown-mode-map)
-  (with-eval-after-load 'markdown-mode
-    (bind-key "M-g o" #'counsel-outline markdown-mode-map))
+  :after selectrum
   :config
-  (setf counsel-find-file-ignore-regexp "\\`[#.]\\|[#~]\\'")
-  (ivy-configure 'counsel-company
-    :display-fn #'ivy-display-function-overlay)
-
-  (ivy-add-actions
-   'counsel-find-file
-   '(("a" find-alternate-file "open alternatively")))
-  (ivy-add-actions
-   'counsel-file-jump
-   '(("j" find-file-other-window "other window")
-     ("x" counsel-find-file-extern "open externally")))
-
-  (unbind-key "C-`" counsel-find-file-map))
-
-(use-package counsel-extras
-  :load-path "lisp"
-  :after counsel
-  :config
-  (counsel-extras-setup)
-
-  (bind-key "M-s s" #'counsel-extras-rg)
-
-  (defvar projectile-mode-map)
-  (with-eval-after-load 'projectile
-    (bind-key [remap projectile-ripgrep] #'counsel-extras-rg-project
-              projectile-mode-map))
-
-  (with-eval-after-load 'calc
-    (bind-key [remap calc-execute-extended-command]
-              #'counsel-extras-execute-calc-command
-              calc-mode-map)))
-
-(use-package amx
-  :ensure t
-  :defer t
-  :init (setf amx-save-file (my-expand-var-file-name "amx-items")))
-
-(use-package ivy-xref
-  :ensure t
-  :defer t
-  :after ivy
-  :init
-  (setf xref-show-definitions-function #'ivy-xref-show-defs
-        xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  (setf selectrum-refine-candidates-function #'orderless-filter
+        selectrum-highlight-candidates-function #'orderless-highlight-matches))
 
 (use-package company
   :ensure t
@@ -1418,10 +1308,6 @@
   :after flyspell
   :bind (:map flyspell-mode-map ("M-$" . flyspell-correct-at-point)))
 
-(use-package flyspell-correct-ivy
-  :ensure t
-  :after (flyspell-correct ivy))
-
 ;;; VCS
 
 (use-package vc-hooks
@@ -1503,7 +1389,7 @@
         projectile-known-projects-file (my-expand-var-file-name "projectile/bookmarks.eld"))
   :config
   (setf projectile-dynamic-mode-line nil)
-  (setf projectile-completion-system (if (fboundp #'ivy-read) 'ivy 'default))
+  (setf projectile-completion-system 'default)
   (setf projectile-commander-methods nil
         (symbol-function 'projectile-commander-bindings) #'my-ignore
         (symbol-function 'projectile-commander) #'projectile-dired)

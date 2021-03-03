@@ -221,22 +221,9 @@ Return the overlay made."
   (add-hook 'post-command-hook #'eshell-extras--update-suggestion
             nil t))
 
-;; HACK: Hide suggestion when using Ivy overlay display.
-(declare-function ivy-overlay-show-after "ext:ivy-overlay")
-
-(defun eshell-extras--hide-suggestion-for-ivy-overlay (&rest _)
-  "Hide suggestion when using Ivy overlay display."
-  (when eshell-extras--autosuggest-suggestion-overlay
-    (delete-overlay eshell-extras--autosuggest-suggestion-overlay)
-    (setf eshell-extras--autosuggest-suggestion-overlay nil)
-    (setf eshell-extras--autosuggest-previous-input nil)))
-
 (defun eshell-extras--setup-autosuggest ()
   "Setup Eshell autosuggest."
-  (add-hook 'eshell-mode-hook #'eshell-extras--turn-on-autosuggest)
-  (with-eval-after-load 'ivy-overlay
-    (advice-add #'ivy-overlay-show-after :before
-                #'eshell-extras--hide-suggestion-for-ivy-overlay)))
+  (add-hook 'eshell-mode-hook #'eshell-extras--turn-on-autosuggest))
 
 ;;; Entry point
 
