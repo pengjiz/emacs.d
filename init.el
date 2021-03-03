@@ -247,10 +247,7 @@
 
 (use-package savehist
   :init (setf savehist-file (my-expand-var-file-name "savehist"))
-  :config
-  (setf savehist-additional-variables '(search-ring regexp-search-ring))
-  (setf savehist-autosave-interval 60)
-  (savehist-mode))
+  :config (savehist-mode))
 
 (use-package undo-propose
   :ensure t
