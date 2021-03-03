@@ -650,8 +650,8 @@
 
 (use-package uniquify
   :config
-  (setf uniquify-buffer-name-style 'forward)
-  (setf uniquify-after-kill-buffer-p t))
+  (setf uniquify-buffer-name-style 'forward
+        uniquify-trailing-separator-p t))
 
 (use-package ibuffer
   :defer t
