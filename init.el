@@ -624,6 +624,10 @@
   (setf isearch-allow-scroll t)
   (setf isearch-lazy-count t))
 
+(use-package ripgrep
+  :ensure t
+  :defer t)
+
 (use-package wgrep
   :ensure t
   :defer t
@@ -964,6 +968,7 @@
           (,(rx bos (or "Trash Can"
                         "*eshell"
                         "*Occur"
+                        "*ripgrep-search*"
                         " *Agenda Commands*"
                         " *Org todo*"
                         "*Org Select*"
