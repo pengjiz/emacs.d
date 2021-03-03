@@ -229,6 +229,7 @@
     ("n" next-error "next")
     ("<" first-error "first"))
   :config
+  (setf extended-command-suggest-shorter nil)
   (setf kill-do-not-save-duplicates t
         save-interprogram-paste-before-kill t)
   (setf set-mark-command-repeat-pop t)
