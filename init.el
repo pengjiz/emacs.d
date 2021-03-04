@@ -622,10 +622,6 @@
   (setf isearch-allow-scroll t)
   (setf isearch-lazy-count t))
 
-(use-package ripgrep
-  :ensure t
-  :defer t)
-
 (use-package wgrep
   :ensure t
   :defer t
@@ -969,7 +965,6 @@
                         "*Occur"
                         "*xref*"
                         "*grep"
-                        "*ripgrep-search*"
                         " *Agenda Commands*"
                         " *Org todo*"
                         "*Org Select*"
