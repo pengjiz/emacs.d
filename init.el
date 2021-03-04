@@ -622,11 +622,6 @@
   (setf isearch-allow-scroll t)
   (setf isearch-lazy-count t))
 
-(use-package wgrep
-  :ensure t
-  :defer t
-  :config (setf wgrep-auto-save-buffer t))
-
 ;;; Buffer
 
 ;; Protect a few special buffers
