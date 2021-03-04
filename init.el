@@ -42,7 +42,9 @@
 
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package)))
+    (package-install 'use-package)
+    ;; Install new versions of some builtin packages
+    (package-install 'project)))
 
 (progn ; requires
   (eval-when-compile
@@ -1377,27 +1379,18 @@
 
 ;;; Project
 
-(use-package projectile
-  :ensure t
-  :init
-  (make-directory (my-expand-var-file-name "projectile/") t)
-  (setf projectile-cache-file (my-expand-var-file-name "projectile/cache")
-        projectile-known-projects-file (my-expand-var-file-name "projectile/bookmarks.eld"))
+(use-package project
+  :defer t
+  :init (setf project-list-file (my-expand-var-file-name "projects"))
   :config
-  (setf projectile-dynamic-mode-line nil)
-  (setf projectile-completion-system 'default)
-  (setf projectile-commander-methods nil
-        (symbol-function 'projectile-commander-bindings) #'my-ignore
-        (symbol-function 'projectile-commander) #'projectile-dired)
-  (projectile-mode)
+  (setf project-vc-merge-submodules nil)
+  (setf project-switch-commands '((project-find-file "Find file")
+                                  (project-find-regexp "Find regexp")
+                                  (project-dired "Dired")
+                                  (project-eshell "Eshell")))
 
-  (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (dolist (key '("x" "m"))
-    (unbind-key key projectile-command-map))
-  (bind-keys :map projectile-command-map
-             ("s" . projectile-grep)
-             ("x e" . projectile-run-eshell)
-             ("x i" . projectile-run-ielm)))
+  (dolist (key '("s" "v"))
+    (unbind-key key project-prefix-map)))
 
 (use-package editorconfig
   :ensure t

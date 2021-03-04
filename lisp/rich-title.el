@@ -7,6 +7,7 @@
 ;;; Code:
 
 (require 'tab-bar)
+(require 'project)
 
 ;;; Tab information
 
@@ -29,24 +30,16 @@
 
 ;;; Project
 
-(declare-function projectile-project-name "ext:projectile")
-(declare-function projectile-project-type "ext:projectile")
-
 (defvar-local rich-title--project nil "Current project information.")
 
 (defun rich-title--update-project ()
   "Update `rich-title--project' and frame title."
-  (when (and (bound-and-true-p projectile-mode)
-             (not (file-remote-p default-directory)))
-    (let ((name (projectile-project-name))
-          (type (projectile-project-type)))
-      (setf rich-title--project
-            (and name
-                 (not (equal name "-"))
-                 (format " [%s]"
-                         (if type
-                             (format "%s:%s" name type)
-                           name)))))
+  (unless (file-remote-p default-directory)
+    (if-let* ((project (project-current))
+              (root (file-name-directory (project-root project)))
+              (name (file-name-nondirectory (directory-file-name root))))
+        (setf rich-title--project (format " [%s]" name))
+      (setf rich-title--project nil))
     (force-mode-line-update)))
 
 (defun rich-title--setup-project ()
