@@ -1400,7 +1400,7 @@
   (dolist (key '("x" "m"))
     (unbind-key key projectile-command-map))
   (bind-keys :map projectile-command-map
-             ("s" . projectile-ripgrep)
+             ("s" . projectile-grep)
              ("x e" . projectile-run-eshell)
              ("x i" . projectile-run-ielm)))
 
@@ -2112,6 +2112,8 @@
 
 (use-package css-mode
   :defer t
+  :bind (:map css-mode-map ("C-c C-f" . css-cycle-color-format))
+  :init (setf css-mode-map (make-sparse-keymap))
   :config (setf css-indent-offset 2))
 
 ;;; JavaScript & TypeScript
