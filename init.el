@@ -966,6 +966,8 @@
           (,(rx bos (or "Trash Can"
                         "*eshell"
                         "*Occur"
+                        "*xref*"
+                        "*grep"
                         "*ripgrep-search*"
                         " *Agenda Commands*"
                         " *Org todo*"
