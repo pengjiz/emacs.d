@@ -55,18 +55,26 @@ The dictionary file is specified by `word-complete-dictionary'."
       (list start end
             (lambda (string pred action)
               (if (eq action 'metadata)
-                  '(metadata
-                    (category . word))
+                  '(metadata (category . word))
                 (complete-with-action
                  action
-                 (word-complete--get-words
-                  word-complete-dictionary)
+                 (word-complete--get-words word-complete-dictionary)
                  string
                  pred)))))))
 
 (with-eval-after-load 'minibuffer
-  (cl-pushnew '(word (styles basic substring)) completion-category-overrides
+  (cl-pushnew '(word (styles basic substring)) completion-category-defaults
               :test #'eq :key #'car))
+
+(defun word-complete--get-completion-override ()
+  "Return alternative completion settings for words."
+  (let (settings)
+    (dolist (setting (cdr (or (assq 'word completion-category-overrides)
+                              (assq 'word completion-category-defaults))))
+      (unless (eq (car setting) 'styles)
+        (push setting settings)))
+    (push '(styles substring) settings)
+    (cons 'word settings)))
 
 ;;; Command
 
@@ -75,16 +83,12 @@ The dictionary file is specified by `word-complete-dictionary'."
 If ARG is non-nil, consider the characters at point form a
 substring of other words."
   (interactive "P")
-  (let ((completion-at-point-functions '(word-complete--completion-at-point)))
-    (if arg
-        (let* ((original-style (cdr (assq 'word completion-category-overrides)))
-               (cycle (assq 'cycle original-style))
-               (style (if cycle
-                          `(word (styles substring) ,cycle)
-                        '(word (styles substring))))
-               (completion-category-overrides `(,style)))
-          (completion-at-point))
-      (completion-at-point))))
+  (let* ((overrides (if arg
+                        `(,(word-complete--get-completion-override))
+                      completion-category-overrides))
+         (completion-category-overrides overrides)
+         (completion-at-point-functions '(word-complete--completion-at-point)))
+    (completion-at-point)))
 
 (provide 'word-complete)
 ;;; word-complete.el ends here
