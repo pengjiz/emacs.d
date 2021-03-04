@@ -717,7 +717,8 @@
   :load-path "lisp"
   :defer t
   :bind (("C-c f w" . files-extras-copy-filename)
-         ("C-c f l" . files-extras-list-files)))
+         ("C-c f l" . files-extras-list-files)
+         ("C-c f r" . files-extras-find-recent-file)))
 
 (use-package ffap
   :defer t
