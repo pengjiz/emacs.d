@@ -6,13 +6,15 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl-lib))
-
-;;; Visit recent file
+;;; Visit recent files
 
 (defvar recentf-list)
-(defvar selectrum--minibuffer-local-filename-syntax)
+
+(defvar files-extras--selectrum-filename-syntax-table
+  (let ((table (copy-syntax-table minibuffer-local-filename-syntax)))
+    (modify-syntax-entry ?\s "_" table)
+    table)
+  "Syntax table for reading filenames with Selectrum.")
 
 (defun files-extras-find-recent-file ()
   "Visit a recent file with completion."
@@ -21,7 +23,7 @@
                recentf-list)
     (user-error "No recent files"))
   (let ((table (if (bound-and-true-p selectrum-mode)
-                   selectrum--minibuffer-local-filename-syntax
+                   files-extras--selectrum-filename-syntax-table
                  minibuffer-local-filename-syntax)))
     (find-file (minibuffer-with-setup-hook
                    (:append (lambda () (set-syntax-table table)))
