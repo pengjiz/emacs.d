@@ -43,7 +43,6 @@
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package)
-    ;; Install new versions of some builtin packages
     (package-install 'project)))
 
 (progn ; requires
@@ -1411,6 +1410,11 @@
   (when (executable-find "rg")
     (setf xref-search-program 'ripgrep)))
 
+(use-package etags
+  :defer t
+  :bind ("C-c c t" . visit-tags-table)
+  :config (setf tags-revert-without-query t))
+
 ;;; Compile
 
 (use-package compile
@@ -1859,11 +1863,6 @@
   :ensure t
   :after cc-mode
   :config (cmake-ide-setup))
-
-(use-package etags
-  :defer t
-  :bind ("C-c c t" . visit-tags-table)
-  :config (setf tags-revert-without-query t))
 
 ;;; Clojure
 
