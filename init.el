@@ -1424,18 +1424,7 @@
   :config
   (setf compilation-ask-about-save nil
         compilation-always-kill t)
-  (setf compilation-disable-input t)
-  (setf compilation-scroll-output 'first-error
-        compilation-skip-threshold 2
-        compilation-context-lines 3)
-
-  (require 'ansi-color)
-  (defun my-apply-ansi-colors-for-compilation ()
-    "Apply ANSI colors on compilation results."
-    (when (eq major-mode 'compilation-mode)
-      (let ((inhibit-read-only t))
-        (ansi-color-apply-on-region compilation-filter-start (point-max)))))
-  (add-hook 'compilation-filter-hook #'my-apply-ansi-colors-for-compilation))
+  (setf compilation-scroll-output 'first-error))
 
 (use-package firestarter
   :ensure t
