@@ -956,10 +956,8 @@
            (reusable-frames . nil))
           ;; Application
           (,(rx bos (or "Trash Can"
-                        "*eshell"
                         "*Occur"
                         "*xref*"
-                        "*grep"
                         " *Agenda Commands*"
                         " *Org todo*"
                         "*Org Select*"
@@ -982,7 +980,8 @@
                         "*BibTeX validation errors*"
                         "*R dired*"
                         "*Ibuffer*"
-                        (and (1+ nonl) "Buffers*")))
+                        "*eshell"
+                        (and (1+ nonl) "-eshell*")))
            (display-buffer-reuse-window
             display-buffer-at-bottom)
            (window-height . 15)
