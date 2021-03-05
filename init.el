@@ -1403,6 +1403,14 @@
   ;; Describe the character at point by default
   (setf eldoc-documentation-function #'describe-char-eldoc))
 
+;;; Cross reference
+
+(use-package xref
+  :defer t
+  :config
+  (when (executable-find "rg")
+    (setf xref-search-program 'ripgrep)))
+
 ;;; Compile
 
 (use-package compile
