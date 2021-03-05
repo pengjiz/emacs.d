@@ -742,9 +742,9 @@
 (use-package recentf
   :init
   (setf recentf-save-file (my-expand-var-file-name "recentf"))
-  (setf recentf-auto-cleanup 120)
+  (setf recentf-auto-cleanup 300)
   :config
-  (setf recentf-max-saved-items 50)
+  (setf recentf-max-saved-items 100)
   (setf recentf-exclude '("/elpa/" "/var/" "/\\.git/" "/Trash/"))
   (recentf-mode))
 
