@@ -118,7 +118,7 @@ ARG is directly passed to `dired-get-marked-files'."
       (delete-file destination dired-atool-using-trash))
     (dired-atool--run dired-atool-apack-program
                       dired-atool-apack-extra-options
-                      destination
+                      (expand-file-name destination)
                       files)))
 
 (provide 'dired-atool)
