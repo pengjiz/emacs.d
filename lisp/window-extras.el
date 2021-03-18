@@ -10,20 +10,23 @@
   (require 'cl-lib)
   (require 'subr-x))
 
-;;; Window display management integration
+;;; Buffer display hack
+
+;; Minibuffer
+(defun window-extras--avoid-fitting-to-buffer (fn &rest args)
+  "Apply FN on ARGS but avoid fitting window to buffer."
+  (cl-letf (((symbol-function 'fit-window-to-buffer) #'ignore))
+    (apply fn args)))
+
+(defun window-extras--setup-minibuffer ()
+  "Setup minibuffer integration."
+  (with-eval-after-load 'minibuffer
+    (advice-add #'minibuffer-completion-help :around
+                #'window-extras--avoid-fitting-to-buffer)))
 
 ;; Org mode
 (defvar org-src-window-setup)
-(declare-function org-add-log-note "org")
-(declare-function org-agenda-get-restriction-and-command "org-agenda")
-(declare-function org-capture-place-template "org-capture")
 (declare-function org-src-switch-to-buffer "org-src")
-(declare-function org-export--dispatch-ui "ox")
-
-(defun window-extras--avoid-deleting-other (fn &rest args)
-  "Avoid deleting other windows and apply FN on ARGS."
-  (cl-letf (((symbol-function 'delete-other-windows) #'ignore))
-    (apply fn args)))
 
 (defun window-extras--quit-org-src (fn &rest args)
   "Apply FN on ARGS but quit window appropriately."
@@ -37,27 +40,11 @@
   "Setup Org mode integration."
   (with-eval-after-load 'org
     (setf (symbol-function 'org-switch-to-buffer-other-window)
-          #'switch-to-buffer-other-window)
-    (advice-add #'org-add-log-note :around
-                #'window-extras--avoid-deleting-other))
-
-  (with-eval-after-load 'org-agenda
-    (advice-add #'org-agenda-get-restriction-and-command :around
-                #'window-extras--avoid-deleting-other))
-
-  (with-eval-after-load 'org-capture
-    (advice-add #'org-capture-place-template :around
-                #'window-extras--avoid-deleting-other))
-
-  (with-eval-after-load 'ox
-    (advice-add #'org-export--dispatch-ui :around
-                #'window-extras--avoid-deleting-other))
+          #'switch-to-buffer-other-window))
 
   (with-eval-after-load 'org-src
     (advice-add #'org-src-switch-to-buffer :around
                 #'window-extras--quit-org-src)))
-
-;;; Buffer display hack
 
 ;; Calc
 (declare-function calc "calc")
@@ -127,6 +114,7 @@
 
 (defun window-extras-setup ()
   "Setup window extensions."
+  (window-extras--setup-minibuffer)
   (window-extras--setup-org)
   (window-extras--setup-calc)
   (window-extras--setup-ielm)
