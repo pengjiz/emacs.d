@@ -231,6 +231,7 @@
     ("<" first-error "first"))
   :config
   (setf extended-command-suggest-shorter nil)
+  (setf completion-show-help nil)
   (setf kill-do-not-save-duplicates t
         save-interprogram-paste-before-kill t)
   (setf set-mark-command-repeat-pop t)
@@ -1022,6 +1023,7 @@
                         "*Fancy Diary Entries*"
                         "*Holidays*"
                         "*Phases of Moon*"
+                        "*Completions*"
                         "*Quail Completions*"
                         "*Gnuplot Commands*"))
            (display-buffer-reuse-window
@@ -1095,23 +1097,23 @@
 
 (use-package minibuffer
   :defer t
-  :bind ([remap complete-symbol] . completion-at-point))
-
-(use-package selectrum
-  :ensure t
-  :defer t
-  :bind ("M-z" . selectrum-repeat)
-  :init (selectrum-mode)
+  :bind ([remap complete-symbol] . completion-at-point)
   :config
-  (setf selectrum-display-style '(horizontal)
-        selectrum-count-style 'current/matches))
+  (setf completion-ignore-case t
+        read-file-name-completion-ignore-case t
+        read-buffer-completion-ignore-case t)
+  (setf completion-styles '(basic partial-completion substring initials)
+        completion-cycle-threshold 5))
 
-(use-package orderless
-  :ensure t
-  :after selectrum
+(use-package icomplete
   :config
-  (setf selectrum-refine-candidates-function #'orderless-filter
-        selectrum-highlight-candidates-function #'orderless-highlight-matches))
+  (setf icomplete-prospects-height 1)
+  (setf icomplete-show-matches-on-no-input t)
+  (icomplete-mode))
+
+(use-package minibuf-eldef
+  :init (setf minibuffer-eldef-shorten-default t)
+  :config (minibuffer-electric-default-mode))
 
 (use-package company
   :ensure t
@@ -1181,7 +1183,7 @@
   :defer t
   :after company
   :config
-  (setf company-dabbrev-ignore-case nil
+  (setf company-dabbrev-ignore-case t
         company-dabbrev-downcase nil)
   (setf company-dabbrev-ignore-buffers
         (lambda (buffer)
