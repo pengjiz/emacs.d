@@ -1439,7 +1439,6 @@
   :defer t
   :bind (;; -
          :map comint-mode-map
-         ("TAB" . completion-at-point)
          ([remap comint-delchar-or-maybe-eof] . delete-char)
          ("C-c a a" . comint-send-eof))
   :config
@@ -1460,11 +1459,7 @@
   (setf eshell-scroll-to-bottom-on-input 'this)
 
   (defun my-setup-eshell-mode ()
-    (dolist (key '("M-s" "M-?" "<backtab>"))
-      (unbind-key key eshell-mode-map))
     (bind-keys :map eshell-mode-map
-               ([remap pcomplete-expand-and-complete] . completion-at-point)
-               ([remap pcomplete-expand] . completion-at-point)
                ("C-x m" . eshell-life-is-too-much)
                ("C-c a a" . eshell-life-is-too-much)))
   (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
@@ -2045,8 +2040,7 @@
 (use-package ess-inf
   :defer t
   :after ess
-  :bind (:map inferior-ess-mode-map ("C-c a a" . ess-quit))
-  :config (unbind-key "M-?" inferior-ess-mode-map))
+  :bind (:map inferior-ess-mode-map ("C-c a a" . ess-quit)))
 
 (use-package ess-r-mode
   :defer t
