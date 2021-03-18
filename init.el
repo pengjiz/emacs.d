@@ -22,8 +22,7 @@
   (tooltip-mode 0)
   (setf ring-bell-function #'ignore
         use-dialog-box nil
-        (symbol-function 'yes-or-no-p) #'y-or-n-p
-        echo-keystrokes 0.25)
+        (symbol-function 'yes-or-no-p) #'y-or-n-p)
 
   (blink-cursor-mode 0)
   (setf (default-value 'cursor-in-non-selected-windows) nil
