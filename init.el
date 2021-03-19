@@ -1873,7 +1873,8 @@
 (use-package cider-repl
   :defer t
   :after cider
-  :bind (:map cider-repl-mode-map ("C-c a a" . cider-quit)))
+  :bind (:map cider-repl-mode-map ("C-c a a" . cider-quit))
+  :config (setf cider-repl-display-help-banner nil))
 
 (use-package nrepl-client
   :defer t
