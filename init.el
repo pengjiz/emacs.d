@@ -2349,17 +2349,9 @@
   (setf reftex-insert-label-flags '(t t))
   (setf reftex-cite-format 'biblatex))
 
-(use-package reftex-cite
+(use-package reftex-toc
   :defer t
-  :config
-  (defun my-read-reftex-search-regexps (default)
-    "Read regular expressions for searching.
-When no input read, use DEFAULT value."
-    (split-string (read-string (format "Regex [&& Regex...] (%s): " default)
-                               nil 'reftex-cite-regexp-hist default)
-                  "[ \t]*&&[ \t]*"))
-  (setf (symbol-function 'reftex--query-search-regexps)
-        #'my-read-reftex-search-regexps))
+  :config (unbind-key "d" reftex-toc-mode-map))
 
 (use-package bibtex
   :defer t
