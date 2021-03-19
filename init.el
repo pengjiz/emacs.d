@@ -214,6 +214,7 @@
          ("C-c t v" . visual-line-mode)
          ("C-c t l" . toggle-truncate-lines)
          ("C-c t q" . auto-fill-mode)
+         ("C-c t p" . visible-mode)
          ("C-c a l" . list-processes)
          ("M-g n" . hydra-errors/next-error)
          ("M-g p" . hydra-errors/previous-error))

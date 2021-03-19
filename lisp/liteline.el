@@ -27,6 +27,7 @@
     (abbrev-mode . "r")
     (auto-fill-function . "q")
     (visual-line-mode . "v")
+    (visible-mode . "p")
     (whitespace-mode . "w")
     (flyspell-mode . "s"))
   "Minor modes that should be shown in the mode line."
