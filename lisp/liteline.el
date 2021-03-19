@@ -204,21 +204,23 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--get-buffer-modification ()
   "Return buffer modification status."
   (cond (buffer-read-only
-         (propertize "%%"
-                     'face 'liteline-buffer-read-only))
+         (propertize "%%" 'face 'liteline-buffer-read-only))
         ((buffer-modified-p)
-         (propertize "*"
-                     'face 'liteline-buffer-modified))
+         (propertize "*" 'face 'liteline-buffer-modified))
         (t "-")))
 
 (defun liteline--get-buffer-name ()
   "Return buffer name."
-  (let* ((face (if (and buffer-file-name
-                        (not (file-exists-p buffer-file-name)))
-                   'liteline-buffer-file-non-existent
-                 'liteline-buffer-name))
-         (name (propertize (buffer-name)
-                           'face face))
+  (let* ((face (cond ((not buffer-file-name)
+                      'liteline-buffer-name)
+                     ((and (file-remote-p buffer-file-name)
+                           (not (file-remote-p buffer-file-name nil t)))
+                      'liteline-buffer-file-non-existent)
+                     ((not (file-exists-p buffer-file-name))
+                      'liteline-buffer-file-non-existent)
+                     (t
+                      'liteline-buffer-name)))
+         (name (propertize (buffer-name) 'face face))
          (narrowed (buffer-narrowed-p)))
     (concat
      (and narrowed
@@ -403,18 +405,17 @@ If DEFAULT is non-nil, set the default value."
     (let* ((start (region-beginning))
            (end (region-end))
            (lines (count-lines start end)))
-      (propertize
-       (concat (cond ((bound-and-true-p rectangle-mark-mode)
-                      (format "%dx%dB"
-                              lines
-                              (abs (- (liteline--get-column end)
-                                      (liteline--get-column start)))))
-                     ((> lines 1)
-                      (format "%dC %dL" (- end start) lines))
-                     (t
-                      (format "%dC" (- end start))))
-               (when (apply #'derived-mode-p liteline-word-count-modes)
-                 (format " %dW" (count-words start end))))))))
+      (concat (cond ((bound-and-true-p rectangle-mark-mode)
+                     (format "%dx%dB"
+                             lines
+                             (abs (- (liteline--get-column end)
+                                     (liteline--get-column start)))))
+                    ((> lines 1)
+                     (format "%dC %dL" (- end start) lines))
+                    (t
+                     (format "%dC" (- end start))))
+              (when (apply #'derived-mode-p liteline-word-count-modes)
+                (format " %dW" (count-words start end)))))))
 
 (liteline-define-segment action
   "Show action status."
@@ -441,28 +442,25 @@ If DEFAULT is non-nil, set the default value."
   "Update `liteline--flycheck' according to STATUS."
   (setf liteline--flycheck
         (cl-case status
-          ((no-checker) (propertize "No checker"
-                                    'face 'liteline-flycheck-message))
-          ((running) (propertize "Running"
-                                 'face 'liteline-flycheck-message))
-          ((errored) (propertize "Errored"
-                                 'face 'liteline-flycheck-message-urgent))
-          ((interrupted) (propertize "Interrupted"
-                                     'face 'liteline-flycheck-message))
-          ((suspicious) (propertize "Unknown"
-                                    'face 'liteline-flycheck-message-urgent))
+          ((no-checker)
+           (propertize "No checker" 'face 'liteline-flycheck-message))
+          ((running)
+           (propertize "Running" 'face 'liteline-flycheck-message))
+          ((errored)
+           (propertize "Errored" 'face 'liteline-flycheck-message-urgent))
+          ((interrupted)
+           (propertize "Interrupted" 'face 'liteline-flycheck-message))
+          ((suspicious)
+           (propertize "Unknown" 'face 'liteline-flycheck-message-urgent))
           ((finished)
            (let-alist (flycheck-count-errors flycheck-current-errors)
              (if (or .error .warning .info)
                  (concat
-                  (propertize (format "%dE "
-                                      (or .error 0))
+                  (propertize (format "%dE " (or .error 0))
                               'face 'liteline-flycheck-error-error)
-                  (propertize (format "%dW "
-                                      (or .warning 0))
+                  (propertize (format "%dW " (or .warning 0))
                               'face 'liteline-flycheck-error-warning)
-                  (propertize (format "%dI"
-                                      (or .info 0))
+                  (propertize (format "%dI" (or .info 0))
                               'face 'liteline-flycheck-error-info))
                (propertize "No issues"
                            'face 'liteline-flycheck-error-clean)))))))
