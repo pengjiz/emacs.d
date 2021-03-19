@@ -708,7 +708,8 @@
 (use-package files-extras
   :load-path "lisp"
   :defer t
-  :bind ("C-c f r" . files-extras-find-recent-file))
+  :bind (("C-c f r" . files-extras-find-recent-file)
+         ("C-c f R" . files-extras-find-recent-file-other-window)))
 
 (use-package ffap
   :defer t
