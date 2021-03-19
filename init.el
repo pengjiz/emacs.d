@@ -940,6 +940,7 @@
           (,(rx bos (or "*Man"
                         "*Help*"
                         "*help"
+                        "*Org Help*"
                         "*TeX Help*"
                         "*Anaconda*"
                         "*tide-documentation*"
@@ -1023,9 +1024,11 @@
                         "*Fancy Diary Entries*"
                         "*Holidays*"
                         "*Phases of Moon*"
+                        "*Gnuplot Commands*"
                         "*Completions*"
                         "*Quail Completions*"
-                        "*Gnuplot Commands*"))
+                        " *Input History*"
+                        "*cider-repl-history*"))
            (display-buffer-reuse-window
             display-buffer-in-side-window)
            (side . bottom)
