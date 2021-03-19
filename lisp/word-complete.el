@@ -53,42 +53,70 @@ The dictionary file is specified by `word-complete-dictionary'."
            (start (or (car bounds) (point)))
            (end (or (cdr bounds) (point))))
       (list start end
-            (lambda (string pred action)
+            (lambda (input predicate action)
               (if (eq action 'metadata)
                   '(metadata (category . word))
-                (complete-with-action
-                 action
-                 (word-complete--get-words word-complete-dictionary)
-                 string
-                 pred)))))))
+                (let* ((dictionary word-complete-dictionary)
+                       (words (word-complete--get-words dictionary)))
+                  (complete-with-action action words input predicate))))))))
 
 (with-eval-after-load 'minibuffer
   (cl-pushnew '(word (styles basic substring)) completion-category-defaults
               :test #'eq :key #'car))
 
-(defun word-complete--get-completion-override ()
+(defun word-complete--get-completion-settings ()
   "Return alternative completion settings for words."
   (let (settings)
-    (dolist (setting (cdr (or (assq 'word completion-category-overrides)
-                              (assq 'word completion-category-defaults))))
+    (dolist (setting (cdr (assq 'word completion-category-overrides)))
       (unless (eq (car setting) 'styles)
         (push setting settings)))
     (push '(styles substring) settings)
-    (cons 'word settings)))
+    `((word . ,settings))))
 
 ;;; Command
+
+(defvar word-complete--pre-completion-buffer nil
+  "Current buffer before completing word.")
+(defvar word-complete--pre-completion-settings nil
+  "Completion settings before completing word.")
+
+(defun word-complete--pre-completion-setup (alternative)
+  "Setup before completing word.
+If ALTERNATIVE is non-nil, set alternative completion settings as well."
+  (unless completion-in-region-mode
+    (setf word-complete--pre-completion-buffer (current-buffer)
+          word-complete--pre-completion-settings completion-category-overrides)
+    (add-hook 'completion-at-point-functions
+              #'word-complete--completion-at-point
+              nil t)
+    (when alternative
+      (setf completion-category-overrides
+            (word-complete--get-completion-settings)))
+    (add-hook 'completion-in-region-mode-hook
+              #'word-complete--post-completion-cleanup)))
+
+(defun word-complete--post-completion-cleanup ()
+  "Cleanup after completing word."
+  (unless completion-in-region-mode
+    (with-current-buffer word-complete--pre-completion-buffer
+      (remove-hook 'completion-at-point-functions
+                   #'word-complete--completion-at-point
+                   t)
+      (setf completion-category-overrides
+            word-complete--pre-completion-settings))
+    (setf word-complete--pre-completion-buffer nil
+          word-complete--pre-completion-settings nil)
+    (remove-hook 'completion-in-region-mode-hook
+                 #'word-complete--post-completion-cleanup)))
 
 (defun word-complete (&optional arg)
   "Complete word using command `completion-at-point'.
 If ARG is non-nil, consider the characters at point form a
 substring of other words."
   (interactive "P")
-  (let* ((overrides (if arg
-                        `(,(word-complete--get-completion-override))
-                      completion-category-overrides))
-         (completion-category-overrides overrides)
-         (completion-at-point-functions '(word-complete--completion-at-point)))
-    (completion-at-point)))
+  (word-complete--pre-completion-setup arg)
+  (completion-at-point)
+  (word-complete--post-completion-cleanup))
 
 (provide 'word-complete)
 ;;; word-complete.el ends here
