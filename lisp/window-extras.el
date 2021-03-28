@@ -25,26 +25,11 @@
                 #'window-extras--avoid-fitting-to-buffer)))
 
 ;; Org mode
-(defvar org-src-window-setup)
-(declare-function org-src-switch-to-buffer "org-src")
-
-(defun window-extras--quit-org-src (fn &rest args)
-  "Apply FN on ARGS but quit window appropriately."
-  (let ((window (selected-window)))
-    (apply fn args)
-    (when (and (eq org-src-window-setup 'other-window)
-               (eq (cadr args) 'exit))
-      (quit-restore-window window))))
-
 (defun window-extras--setup-org ()
   "Setup Org mode integration."
   (with-eval-after-load 'org
     (setf (symbol-function 'org-switch-to-buffer-other-window)
-          #'switch-to-buffer-other-window))
-
-  (with-eval-after-load 'org-src
-    (advice-add #'org-src-switch-to-buffer :around
-                #'window-extras--quit-org-src)))
+          #'switch-to-buffer-other-window)))
 
 ;; Calc
 (declare-function calc "calc")

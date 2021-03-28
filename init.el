@@ -2430,9 +2430,6 @@
 
   (setf org-adapt-indentation nil
         org-startup-indented t)
-  (setf org-fontify-done-headline t
-        org-fontify-quote-and-verse-blocks t
-        org-fontify-whole-heading-line t)
   (setf org-special-ctrl-a/e t
         org-catch-invisible-edits 'show-and-error)
   (setf org-image-actual-width '(300))
@@ -2445,12 +2442,6 @@
   (setf org-use-sub-superscripts '{})
   (setf org-format-latex-options (plist-put org-format-latex-options
                                             :scale 1.2))
-
-  (setf org-refile-targets '((nil . (:maxlevel . 5))
-                             (org-agenda-files . (:maxlevel . 5)))
-        org-refile-use-outline-path 'file
-        org-refile-allow-creating-parent-nodes 'confirm
-        org-outline-path-complete-in-steps nil)
 
   (setf org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
@@ -2471,9 +2462,22 @@
     (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
   (add-hook 'org-mode-hook #'my-load-org-babel-languages))
 
+(use-package org-table
+  :defer t
+  :config (setf org-table-header-line-p t))
+
 (use-package org-goto
   :defer t
   :config (setf org-goto-interface 'outline-path-completion))
+
+(use-package org-refile
+  :defer t
+  :config
+  (setf org-refile-targets '((nil . (:maxlevel . 5))
+                             (org-agenda-files . (:maxlevel . 5)))
+        org-refile-allow-creating-parent-nodes 'confirm)
+  (setf org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil))
 
 (use-package org-id
   :defer t
@@ -2553,9 +2557,7 @@
 (use-package org-src
   :defer t
   :config
-  (setf org-src-fontify-natively t
-        org-src-tab-acts-natively t
-        org-src-preserve-indentation t)
+  (setf org-src-preserve-indentation t)
   (setf org-src-window-setup 'other-window))
 
 (use-package ob-async
