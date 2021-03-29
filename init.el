@@ -1622,10 +1622,6 @@
   :after doc-view
   :config (doc-view-extras-setup))
 
-(use-package image-file
-  :when (display-graphic-p)
-  :config (auto-image-file-mode))
-
 (use-package nov
   :ensure t
   :defer t
