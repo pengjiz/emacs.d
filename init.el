@@ -1739,12 +1739,7 @@
   :config (setf diary-comment-start "##"))
 
 (use-package appt
-  :defer t
-  :bind (("C-c o n" . appt-add)
-         ("C-c o d" . appt-delete))
-  :init
-  ;; NOTE: It seems that those lines must be before the activation, otherwise
-  ;; they may not take effects at the very beginning.
+  :config
   (setf appt-display-diary nil
         appt-audible nil
         appt-display-mode-line nil)
@@ -1765,9 +1760,12 @@
                      :title "Appt"))
           (alert (format template message time) :title "Appt")))))
 
-  ;; NOTE: This is not a minor mode and the positive argument is essential to
-  ;; turn it on, not toggle.
-  (appt-activate 1))
+  (appt-activate 1)
+  (with-eval-after-load 'org
+    (run-with-timer 1 3600 (lambda () (when appt-timer
+                                        (let (appt-display-diary)
+                                          (org-agenda-to-appt t)
+                                          (appt-check t)))))))
 
 ;;; Emacs Lisp
 
@@ -2515,11 +2513,7 @@
   (setf org-agenda-block-separator "")
   (setf org-agenda-span 'day
         org-agenda-start-on-weekday 0)
-  (setf org-stuck-projects '("+project/-DONE-CANCELLED" ("NEXT") nil ""))
-
-  ;; NOTE: Refreshing will remove appointments from other sources, so we do not
-  ;; refresh even though that may leave finished items in the list.
-  (run-with-timer 1 3600 #'org-agenda-to-appt))
+  (setf org-stuck-projects '("+project/-DONE-CANCELLED" ("NEXT") nil "")))
 
 ;; Clock
 (use-package org-clock
