@@ -1095,29 +1095,30 @@
 
 ;;; Completion
 
-(progn ; recursive minibuffers
+(progn ; general completion
   (setf enable-recursive-minibuffers t)
-  (minibuffer-depth-indicate-mode))
+  (setf completion-ignore-case t
+        read-buffer-completion-ignore-case t))
 
 (use-package minibuffer
   :defer t
   :bind ([remap complete-symbol] . completion-at-point)
   :config
-  (setf completion-ignore-case t
-        read-file-name-completion-ignore-case t
-        read-buffer-completion-ignore-case t)
-  (setf completion-styles '(basic partial-completion substring initials)
-        completion-cycle-threshold 5))
+  (setf read-file-name-completion-ignore-case t)
+  (setf completion-styles '(basic partial-completion substring initials)))
+
+(use-package mb-depth
+  :config (minibuffer-depth-indicate-mode))
+
+(use-package minibuf-eldef
+  :init (setf minibuffer-eldef-shorten-default t)
+  :config (minibuffer-electric-default-mode))
 
 (use-package icomplete
   :config
   (setf icomplete-prospects-height 1)
   (setf icomplete-show-matches-on-no-input t)
   (icomplete-mode))
-
-(use-package minibuf-eldef
-  :init (setf minibuffer-eldef-shorten-default t)
-  :config (minibuffer-electric-default-mode))
 
 (use-package company
   :ensure t
@@ -1233,9 +1234,7 @@
 
 (use-package tempo
   :defer t
-  :config
-  (setf tempo-interactive t)
-  (setf tempo-show-completion-buffer nil))
+  :config (setf tempo-interactive t))
 
 (use-package autoinsert
   :defer t
