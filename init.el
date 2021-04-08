@@ -98,11 +98,7 @@
         initial-scratch-message nil
         initial-major-mode #'fundamental-mode)
 
-  ;; NOTE: A non-nil value for this variable will trigger some weird logic. So
-  ;; we always keep it nil and modify the function instead.
-  (setf inhibit-startup-echo-area-message nil)
-  (unless (daemonp)
-    (setf (symbol-function 'display-startup-echo-area-message) #'my-ignore)))
+  (setf inhibit-startup-echo-area-message nil))
 
 ;;; Initialization
 
@@ -172,14 +168,8 @@
 
 (use-package with-editor
   :ensure t
-  :hook ((shell-mode eshell-mode) . my-export-editor)
-  :init
-  (shell-command-with-editor-mode)
-
-  (defun my-export-editor ()
-    "Call `with-editor-export-editor' but suppress messages."
-    (let ((inhibit-message t))
-      (with-editor-export-editor))))
+  :hook ((shell-mode eshell-mode) . with-editor-export-editor)
+  :init (shell-command-with-editor-mode))
 
 ;;; General utility
 
@@ -610,7 +600,6 @@
 (use-package autorevert
   :config
   (setf global-auto-revert-non-file-buffers t)
-  (setf auto-revert-verbose nil)
   (global-auto-revert-mode))
 
 (use-package uniquify
@@ -786,7 +775,6 @@
         dired-bind-vm nil
         dired-bind-man nil)
   :config
-  (setf dired-omit-verbose nil)
   (setf dired-omit-files "\\`[#.]\\|[#~]\\'"
         dired-omit-extensions nil))
 
