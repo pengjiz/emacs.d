@@ -129,13 +129,6 @@
   :defer t
   :hook (after-init . rich-title-setup))
 
-(use-package hydra
-  :ensure t
-  :defer t
-  :config
-  (setf lv-use-separator t)
-  (setf hydra-look-for-remap t))
-
 (use-package transient
   :ensure t
   :defer t
@@ -214,20 +207,12 @@
          ("C-c t l" . toggle-truncate-lines)
          ("C-c t q" . auto-fill-mode)
          ("C-c t p" . visible-mode)
-         ("C-c a l" . list-processes)
-         ("M-g n" . hydra-errors/next-error)
-         ("M-g p" . hydra-errors/previous-error))
+         ("C-c a l" . list-processes))
   :hook ((text-mode bibtex-mode) . auto-fill-mode)
   :init
   (line-number-mode)
   (column-number-mode)
   (size-indication-mode)
-
-  (defhydra hydra-errors ()
-    "Errors"
-    ("p" previous-error "previous")
-    ("n" next-error "next")
-    ("<" first-error "first"))
   :config
   (setf extended-command-suggest-shorter nil)
   (setf completion-show-help nil)
@@ -506,21 +491,9 @@
          ("C-c @ C-p" . outline-previous-visible-heading)
          ("C-c @ C-n" . outline-next-visible-heading)
          ("C-c @ C-b" . outline-backward-same-level)
-         ("C-c @ C-f" . outline-forward-same-level)
-         ("C-c @ p" . hydra-outline/outline-previous-visible-heading)
-         ("C-c @ n" . hydra-outline/outline-next-visible-heading)
-         ("C-c @ b" . hydra-outline/outline-backward-same-level)
-         ("C-c @ f" . hydra-outline/outline-forward-same-level))
+         ("C-c @ C-f" . outline-forward-same-level))
   :hook ((prog-mode protobuf-mode TeX-mode) . outline-minor-mode)
-  :init
-  (setf outline-minor-mode-map (make-sparse-keymap))
-
-  (defhydra hydra-outline ()
-    "Outline"
-    ("p" outline-previous-visible-heading "previous")
-    ("n" outline-next-visible-heading "next")
-    ("b" outline-backward-same-level "backward")
-    ("f" outline-forward-same-level "forward")))
+  :init (setf outline-minor-mode-map (make-sparse-keymap)))
 
 (use-package bicycle
   :ensure t
@@ -1043,16 +1016,9 @@
 
 (use-package winner
   :defer t
-  :bind (("C-c w u" . hydra-winner/winner-undo)
-         ("C-c w r" . hydra-winner/winner-redo))
   :init
   (setf winner-dont-bind-my-keys t)
-  (winner-mode)
-
-  (defhydra hydra-winner ()
-    "Winner"
-    ("u" winner-undo "undo")
-    ("r" winner-redo "redo")))
+  (winner-mode))
 
 (use-package ace-window
   :ensure t
@@ -1341,9 +1307,6 @@
   :ensure t
   :defer t
   :bind (;; -
-         :map diff-hl-mode-map
-         ("C-c g p" . hydra-hunks/diff-hl-previous-hunk)
-         ("C-c g n" . hydra-hunks/diff-hl-next-hunk)
          :map diff-hl-command-map
          ("SPC" . diff-hl-mark-hunk))
   :hook (dired-mode . diff-hl-dired-mode)
@@ -1354,12 +1317,7 @@
 
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
-    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
-
-  (defhydra hydra-hunks ()
-    "Hunks"
-    ("p" diff-hl-previous-hunk "previous")
-    ("n" diff-hl-next-hunk "next")))
+    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
 
 (use-package gitignore-mode
   :ensure t
@@ -1528,21 +1486,7 @@
   :defer t
   :bind (("C-c c g" . gud-gdb)
          ("C-c c p" . pdb))
-  :config
-  (setf gud-pdb-command-name "python -m pdb")
-
-  (defhydra hydra-debug ()
-    "Debug"
-    ("n" gud-next "next")
-    ("s" gud-step "step")
-    ("r" gud-cont "continue")
-    ("b" gud-break "break")
-    ("d" gud-remove "remove"))
-  (bind-keys ("C-x C-a n" . hydra-debug/gud-next)
-             ("C-x C-a s" . hydra-debug/gud-step)
-             ("C-x C-a r" . hydra-debug/gud-cont)
-             ("C-x C-a b" . hydra-debug/gud-break)
-             ("C-x C-a d" . hydra-debug/gud-remove)))
+  :config (setf gud-pdb-command-name "python -m pdb"))
 
 (use-package rmsbolt
   :ensure t
