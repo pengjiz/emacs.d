@@ -2360,20 +2360,18 @@
         org-agenda-files `(,org-directory))
   (setf org-archive-location "::* Archived")
 
-  (setf org-adapt-indentation nil
-        org-startup-indented t)
+  (setf org-adapt-indentation nil)
   (setf org-special-ctrl-a/e t
         org-catch-invisible-edits 'show-and-error)
+  (setf org-startup-folded nil)
   (setf org-image-actual-width '(300))
+  (setf org-highlight-latex-and-related '(latex entities))
+  (setf org-use-sub-superscripts '{})
+
   (setf org-modules '(org-id ol-docview ol-eww org-habit))
   (setf org-export-backends '(ascii html latex))
   (setf org-file-apps '((auto-mode . emacs)
                         (directory . emacs)))
-
-  (setf org-highlight-latex-and-related '(latex entities))
-  (setf org-use-sub-superscripts '{})
-  (setf org-format-latex-options (plist-put org-format-latex-options
-                                            :scale 1.2))
 
   (setf org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
@@ -2393,10 +2391,6 @@
     ;; Only load languages once
     (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
   (add-hook 'org-mode-hook #'my-load-org-babel-languages))
-
-(use-package org-table
-  :defer t
-  :config (setf org-table-header-line-p t))
 
 (use-package org-goto
   :defer t
