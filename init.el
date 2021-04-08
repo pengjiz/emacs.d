@@ -25,8 +25,7 @@
         (symbol-function 'yes-or-no-p) #'y-or-n-p)
 
   (blink-cursor-mode 0)
-  (setf (default-value 'cursor-in-non-selected-windows) nil
-        visible-cursor nil
+  (setf visible-cursor nil
         x-stretch-cursor t)
 
   (push '(font . "Source Code Pro-12") default-frame-alist)
