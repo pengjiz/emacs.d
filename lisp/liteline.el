@@ -161,7 +161,7 @@ Return forms that can be passed directly to `format-mode-line'."
   (replace-regexp-in-string "%" "%%" string))
 
 (defsubst liteline--clean-text-properties (string)
-  "Remove text properties for mouse in STRING."
+  "Remove mouse related text properties in STRING."
   (remove-list-of-text-properties 0 (length string)
                                   '(mouse-face help-echo keymap local-map)
                                   string))

@@ -92,13 +92,12 @@
 (progn ; startup
   (setf inhibit-default-init t
         inhibit-startup-screen t
-        inhibit-startup-buffer-menu t)
+        inhibit-startup-buffer-menu t
+        inhibit-startup-echo-area-message nil)
 
   (setf initial-buffer-choice t
         initial-scratch-message nil
-        initial-major-mode #'fundamental-mode)
-
-  (setf inhibit-startup-echo-area-message nil))
+        initial-major-mode #'fundamental-mode))
 
 ;;; Initialization
 
@@ -140,11 +139,11 @@
   :init
   (setf alert-default-style 'libnotify)
 
-  (defun my-set-reminder (min msg)
-    "Show MSG after MIN minutes."
+  (defun my-set-reminder (time message)
+    "Show MESSAGE after TIME minutes."
     (interactive (list (read-number "Minutes: " 10)
                        (read-string "Message: ")))
-    (run-with-timer (* min 60) nil #'alert msg :title "Reminder"))
+    (run-with-timer (* time 60) nil #'alert message :title "Reminder"))
   :config (setf alert-fade-time 15))
 
 (use-package url
@@ -1395,7 +1394,7 @@
          ([remap comint-delchar-or-maybe-eof] . delete-char)
          ("C-c a a" . comint-send-eof))
   :config
-  (setf (default-value 'comint-prompt-read-only) nil
+  (setf comint-prompt-read-only nil
         comint-scroll-to-bottom-on-input 'this))
 
 ;;; Eshell
@@ -1733,7 +1732,7 @@
 (use-package ielm
   :defer t
   :bind ("C-c a i" . ielm)
-  :config (setf ielm-prompt-read-only (default-value 'comint-prompt-read-only)))
+  :config (setf ielm-prompt-read-only nil))
 
 ;;; C & C++ & AWK
 
