@@ -2060,17 +2060,12 @@
   :defer t
   :hook ((js2-mode typescript-mode) . my-enable-tide)
   :init
+  (setf tide-completion-setup-company-backend nil)
+
   (defun my-enable-tide ()
     (unless (file-remote-p default-directory)
       (tide-setup)))
-  :config
-  (setf tide-completion-enable-autoimport-suggestions nil
-        tide-completion-detailed t)
-  (setf tide-always-show-documentation t)
-
-  (with-eval-after-load 'company
-    (setf (default-value 'company-backends)
-          (delq #'company-tide (default-value 'company-backends)))))
+  :config (setf tide-completion-enable-autoimport-suggestions nil))
 
 (use-package skewer-mode
   :ensure t
