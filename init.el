@@ -662,7 +662,8 @@
   (setf backup-by-copying t
         delete-old-versions t
         version-control t
-        backup-directory-alist `(("." . ,(my-expand-var-file-name "backups/"))))
+        backup-directory-alist `((,tramp-file-name-regexp . nil)
+                                 ("." . ,(my-expand-var-file-name "backups/"))))
 
   (setf view-read-only t)
   (setf save-abbrevs 'silently)
@@ -706,10 +707,7 @@
   :init
   (setf tramp-persistency-file-name (my-expand-var-file-name "tramp/persistency")
         tramp-auto-save-directory (my-expand-var-file-name "tramp/auto-save/")
-        tramp-backup-directory-alist backup-directory-alist
-        ;; Do not save history
-        tramp-histfile-override t)
-  (setf tramp-default-method "ssh"))
+        tramp-histfile-override t))
 
 (use-package saveplace
   :init (setf save-place-file (my-expand-var-file-name "places"))
