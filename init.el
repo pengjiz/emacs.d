@@ -488,10 +488,10 @@
   :bind (;; -
          :map outline-minor-mode-map
          ("C-c @ SPC" . outline-mark-subtree)
-         ("C-c @ C-p" . outline-previous-visible-heading)
-         ("C-c @ C-n" . outline-next-visible-heading)
-         ("C-c @ C-b" . outline-backward-same-level)
-         ("C-c @ C-f" . outline-forward-same-level))
+         ("C-c @ p" . outline-previous-visible-heading)
+         ("C-c @ n" . outline-next-visible-heading)
+         ("C-c @ b" . outline-backward-same-level)
+         ("C-c @ f" . outline-forward-same-level))
   :hook ((prog-mode protobuf-mode TeX-mode) . outline-minor-mode)
   :init (setf outline-minor-mode-map (make-sparse-keymap)))
 
@@ -1016,6 +1016,10 @@
 
 (use-package winner
   :defer t
+  :bind (;; -
+         :map winner-mode-map
+         ("C-c w u" . winner-undo)
+         ("C-c w r" . winner-redo))
   :init
   (setf winner-dont-bind-my-keys t)
   (winner-mode))
@@ -1307,6 +1311,9 @@
   :ensure t
   :defer t
   :bind (;; -
+         :map diff-hl-mode-map
+         ("C-c g p" . diff-hl-previous-hunk)
+         ("C-c g n" . diff-hl-next-hunk)
          :map diff-hl-command-map
          ("SPC" . diff-hl-mark-hunk))
   :hook (dired-mode . diff-hl-dired-mode)
