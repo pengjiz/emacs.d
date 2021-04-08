@@ -655,8 +655,10 @@
          ("C-c b r" . rename-buffer)
          ("C-c b R" . rename-uniquely))
   :config
-  (setf auto-save-list-file-prefix (my-expand-var-file-name "auto-save/saves-")
-        auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+  (let ((list-prefix (my-expand-var-file-name "auto-save/sessions/"))
+        (save-directory (my-expand-var-file-name "auto-save/saves/")))
+    (setf auto-save-list-file-prefix list-prefix
+          auto-save-file-name-transforms `((".*" ,save-directory t))))
   (setf backup-by-copying t
         delete-old-versions t
         version-control t
