@@ -972,6 +972,7 @@
                         "*firestarter*"
                         "*Macroexpansion*"
                         "*Ledger Report*"
+                        "*Ledger Error*"
                         "*Gnuplot Trail*"
                         "*skewer-error*"
                         "*cider-error*"
