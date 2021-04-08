@@ -160,9 +160,8 @@
   :init (setf request-storage-directory (my-expand-var-file-name "request/")))
 
 (use-package server
-  :when (display-graphic-p)
   :config
-  (unless (server-running-p)
+  (unless (or (daemonp) (server-running-p))
     (server-start)))
 
 (use-package with-editor
@@ -2200,8 +2199,7 @@
         TeX-parse-self t
         TeX-auto-save t)
   (setf TeX-electric-sub-and-superscript t)
-  (setf TeX-source-correlate-start-server nil
-        TeX-source-correlate-method 'synctex)
+  (setf TeX-source-correlate-method 'synctex)
   (setf TeX-clean-confirm nil)
   (setf TeX-command-list
         '(("View" "%V" TeX-run-discard-or-function t t :help "Run Viewer")
