@@ -2595,19 +2595,6 @@
         org-html-head (format "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
                               (concat "file://" (my-expand-etc-file-name "css/org.css")))))
 
-(use-package interleave
-  :ensure t
-  :defer t
-  :init
-  (setf interleave-org-notes-dir-list '("."))
-
-  (with-eval-after-load 'org
-    (bind-key "C-c o p" #'interleave-mode org-mode-map))
-
-  (with-eval-after-load 'doc-view
-    (bind-key "C-c o p" #'interleave-open-notes-file-for-pdf
-              doc-view-mode-map)))
-
 ;;; Markdown
 
 (use-package markdown-mode
