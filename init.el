@@ -1273,12 +1273,8 @@
 (use-package flycheck-inline
   :ensure t
   :defer t
-  :hook (flycheck-mode . my-enable-flycheck-inline)
-  :init
-  (defun my-enable-flycheck-inline ()
-    (if flycheck-mode
-        (flycheck-inline-mode)
-      (flycheck-inline-mode 0))))
+  :hook (flycheck-mode . flycheck-inline-mode)
+  :config (require 'compile))
 
 ;;; Spell check
 
