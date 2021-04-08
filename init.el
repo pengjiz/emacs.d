@@ -646,6 +646,7 @@
   :config
   (let ((list-prefix (my-expand-var-file-name "auto-save/sessions/"))
         (save-directory (my-expand-var-file-name "auto-save/saves/")))
+    (make-directory save-directory t)
     (setf auto-save-list-file-prefix list-prefix
           auto-save-file-name-transforms `((".*" ,save-directory t))))
   (setf backup-by-copying t
