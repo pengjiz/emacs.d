@@ -29,7 +29,8 @@
     (visual-line-mode . "v")
     (visible-mode . "p")
     (whitespace-mode . "w")
-    (flyspell-mode . "s"))
+    (flyspell-mode . "s")
+    (auto-revert-mode . "g"))
   "Minor modes that should be shown in the mode line."
   :type '(alist :key-type symbol
                 :value-type string))

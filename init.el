@@ -598,9 +598,8 @@
   (add-hook 'kill-buffer-query-functions #'my-protect-special-buffers))
 
 (use-package autorevert
-  :config
-  (setf global-auto-revert-non-file-buffers t)
-  (global-auto-revert-mode))
+  :bind ("C-c t g" . auto-revert-mode)
+  :init (global-auto-revert-mode))
 
 (use-package uniquify
   :config
