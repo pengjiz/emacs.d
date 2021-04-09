@@ -1294,7 +1294,6 @@
 ;; Show edits
 (use-package diff-hl
   :ensure t
-  :defer t
   :bind (;; -
          :map diff-hl-mode-map
          ("C-c g p" . diff-hl-previous-hunk)
@@ -1304,9 +1303,6 @@
   :hook (dired-mode . diff-hl-dired-mode)
   :init (global-diff-hl-mode)
   :config
-  (unless (display-graphic-p)
-    (diff-hl-margin-mode))
-
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
