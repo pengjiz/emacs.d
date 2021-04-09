@@ -8,6 +8,8 @@
 
 (require 'tab-bar)
 (require 'project)
+(eval-when-compile
+  (require 'subr-x))
 
 ;;; Tab information
 
@@ -48,58 +50,19 @@
 
 ;;; Org clock
 
-(defvar org-clock-effort)
-(defvar org-clock-task-overrun)
-(defvar org-clock-task-overrun-text)
-(defvar org-clock-heading)
-(defvar org-mode-line-string)
-(defvar org-clock-string-limit)
-(declare-function org-clock-get-clocked-time "org-clock")
-(declare-function org-clock-notify-once-if-expired "org-clock")
 (declare-function org-clock-get-clock-string "org-clock")
-(declare-function org-clock--mode-line-heading "org-clock")
 
-(defun rich-title--get-org-clock-string ()
-  "Return Org clock string that will be shown in the frame title.
-
-This is a customized version of `org-clock-get-clock-string'."
-  (let* ((clocked-time (org-clock-get-clocked-time))
-         (clock-string
-          (concat "["
-                  (org-duration-from-minutes clocked-time)
-                  (and org-clock-effort
-                       (concat
-                        "/"
-                        (org-duration-from-minutes
-                         (org-duration-to-minutes org-clock-effort))))
-                  (and org-clock-task-overrun org-clock-task-overrun-text)
-                  "] "
-                  org-clock-heading)))
-    (if (and (> org-clock-string-limit 0)
-             (> (length clock-string) org-clock-string-limit))
-        (substring clock-string 0 org-clock-string-limit)
-      clock-string)))
-
-(defun rich-title--update-org-clock-mode-line (&optional refresh)
-  "Update `org-mode-line-string' with Org clock and frame title.
-When REFRESH is non-nil, refresh the cached heading first.
-
-This is a customized version of `org-clock-update-mode-line'."
-  (if org-clock-effort
-      (org-clock-notify-once-if-expired)
-    (setf org-clock-task-overrun nil))
-  (when refresh
-    (setf org-clock-heading (org-clock--mode-line-heading)))
-  (setf org-mode-line-string (org-clock-get-clock-string))
-  (force-mode-line-update))
+(defun rich-title--tweak-org-clock-string (result)
+  "Return Org clock string appropriately based on RESULT."
+  (when-let* ((index (string-match-p "(" result)))
+    (concat (substring result 1 index)
+            (substring result (1+ index) -1))))
 
 (defun rich-title--setup-org-clock ()
   "Setup Org clock."
   (with-eval-after-load 'org-clock
-    (setf (symbol-function 'org-clock-get-clock-string)
-          #'rich-title--get-org-clock-string
-          (symbol-function 'org-clock-update-mode-line)
-          #'rich-title--update-org-clock-mode-line)))
+    (advice-add #'org-clock-get-clock-string :filter-return
+                #'rich-title--tweak-org-clock-string)))
 
 ;;; Entry point
 
@@ -114,7 +77,9 @@ This is a customized version of `org-clock-update-mode-line'."
   "Base frame title format.")
 
 (defconst rich-title--org-clock-format
-  `(,@rich-title--base-format "  " org-mode-line-string)
+  `(,@rich-title--base-format
+    " - "
+    org-mode-line-string)
   "Frame title format with Org clock.")
 
 (defun rich-title-setup ()
