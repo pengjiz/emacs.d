@@ -1813,8 +1813,7 @@
 (use-package geiser-mode
   :ensure geiser
   :defer t
-  :bind (:map geiser-mode-map ("C-c a a" . run-geiser))
-  :init (setf geiser-active-implementations '(racket)))
+  :bind (:map geiser-mode-map ("C-c a a" . run-geiser)))
 
 (use-package geiser-repl
   :defer t
@@ -1832,6 +1831,10 @@
   :defer t
   :after geiser-mode
   :config (setf geiser-autodoc-delay eldoc-idle-delay))
+
+(use-package geiser-racket
+  :ensure t
+  :defer t)
 
 (use-package scribble-mode
   :ensure t
