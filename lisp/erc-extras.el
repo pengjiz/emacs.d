@@ -62,12 +62,12 @@
   "Setup ERC extensions."
   (setf (symbol-function 'erc-nickserv-call-identify-function)
         #'erc-extras--call-nickserv-identify-function)
-  (advice-add #'erc-nickserv-identify-autodetect
-              :around #'erc-extras--force-nickserv-identification)
-  (advice-add #'erc-nickserv-identify-on-connect
-              :around #'erc-extras--force-nickserv-identification)
-  (advice-add #'erc-nickserv-identify-on-nick-change
-              :around #'erc-extras--force-nickserv-identification))
+  (advice-add #'erc-nickserv-identify-autodetect :around
+              #'erc-extras--force-nickserv-identification)
+  (advice-add #'erc-nickserv-identify-on-connect :around
+              #'erc-extras--force-nickserv-identification)
+  (advice-add #'erc-nickserv-identify-on-nick-change :around
+              #'erc-extras--force-nickserv-identification))
 
 (provide 'erc-extras)
 ;;; erc-extras.el ends here

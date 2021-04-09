@@ -184,7 +184,6 @@
   (setf disabled-command-function #'my-show-disabled-command))
 
 (use-package simple
-  :defer t
   :bind (([remap just-one-space] . cycle-spacing)
          ([remap downcase-word] . downcase-dwim)
          ([remap capitalize-word] . capitalize-dwim)
@@ -1002,7 +1001,6 @@
   :config (window-extras-setup))
 
 (use-package winner
-  :defer t
   :bind (;; -
          :map winner-mode-map
          ("C-c w u" . winner-undo)
@@ -1537,9 +1535,7 @@
   :init
   (setf elfeed-enclosure-default-dir
         (expand-file-name (convert-standard-filename "Downloads/") "~"))
-  ;; NOTE: This fixes the weird issue that cursor is not at the beginning of
-  ;; buffer after switching when there are tables in the entry.
-  (setf elfeed-show-entry-switch #'pop-to-buffer-same-window))
+  :config (setf elfeed-show-entry-switch #'pop-to-buffer-same-window))
 
 ;;; Viewer
 
