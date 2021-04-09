@@ -486,28 +486,31 @@ If DEFAULT is non-nil, set the default value."
 (defvar-local liteline--git nil "Current Git status.")
 (put 'liteline--git 'risky-local-variable t)
 
+(defun liteline--get-git ()
+  "Return current Git status."
+  (if vc-display-status
+      (concat (propertize (substring-no-properties vc-mode 5)
+                          'face 'liteline-git-branch)
+              ":"
+              (cl-case (vc-state buffer-file-name 'Git)
+                ((up-to-date) "-")
+                ((edited) (propertize "*" 'face 'liteline-git-edited))
+                ((added) (propertize "+" 'face 'liteline-git-new))
+                ((conflict) (propertize "=" 'face 'liteline-git-error))
+                ((removed) (propertize "!" 'face 'liteline-git-warning))
+                ((needs-update) (propertize "^" 'face 'liteline-git-warning))
+                ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
+                ((ignored) "~")
+                (otherwise (propertize "?" 'face 'liteline-git-error))))
+    "Git"))
+
 (defun liteline--update-git (&rest _)
   "Update `liteline--git'."
-  (setf liteline--git
-        (when (and buffer-file-name
-                   vc-mode
-                   (eq (vc-backend buffer-file-name) 'Git))
-          (if (not vc-display-status)
-              "Git"
-            (format
-             "Git[%s:%s]"
-             (propertize (substring-no-properties vc-mode 5)
-                         'face 'liteline-git-branch)
-             (cl-case (vc-state buffer-file-name 'Git)
-               ((up-to-date) "-")
-               ((edited) (propertize "*" 'face 'liteline-git-edited))
-               ((added) (propertize "+" 'face 'liteline-git-new))
-               ((conflict) (propertize "=" 'face 'liteline-git-error))
-               ((removed) (propertize "!" 'face 'liteline-git-warning))
-               ((needs-update) (propertize "^" 'face 'liteline-git-warning))
-               ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
-               ((ignored) "~")
-               (otherwise (propertize "?" 'face 'liteline-git-error)))))))
+  (if (and buffer-file-name
+           vc-mode
+           (eq (vc-backend buffer-file-name) 'Git))
+      (setf liteline--git (liteline--get-git))
+    (setf liteline--git nil))
   (force-mode-line-update))
 
 (defun liteline--setup-git ()
