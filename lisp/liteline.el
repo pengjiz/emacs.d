@@ -257,11 +257,13 @@ If DEFAULT is non-nil, set the default value."
   (cl-case major-mode
     ((image-mode)
      (let ((size (image-size (image-get-display-property) :pixels)))
-       (format " %dx%d " (car size) (cdr size))))
+       (concat (and size-indication-mode " %I")
+               (format " %dx%d " (car size) (cdr size)))))
     ((doc-view-mode)
-     (format " %d/%d "
-             (image-mode-window-get 'page)
-             (doc-view-last-page-number)))
+     (concat (and size-indication-mode " %I")
+             (format " %d/%d "
+                     (image-mode-window-get 'page)
+                     (doc-view-last-page-number))))
     (otherwise
      (concat
       " "
@@ -487,21 +489,25 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--update-git (&rest _)
   "Update `liteline--git'."
   (setf liteline--git
-        (when (and vc-mode vc-display-status buffer-file-name)
-          (concat
-           (propertize (substring-no-properties vc-mode 5)
-                       'face 'liteline-git-branch)
-           ":"
-           (cl-case (vc-state buffer-file-name)
-             ((up-to-date) "-")
-             ((edited) (propertize "*" 'face 'liteline-git-edited))
-             ((added) (propertize "+" 'face 'liteline-git-new))
-             ((conflict) (propertize "=" 'face 'liteline-git-error))
-             ((removed) (propertize "!" 'face 'liteline-git-warning))
-             ((needs-update) (propertize "^" 'face 'liteline-git-warning))
-             ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
-             ((ignored) "~")
-             (otherwise (propertize "?" 'face 'liteline-git-error))))))
+        (when (and buffer-file-name
+                   vc-mode
+                   (eq (vc-backend buffer-file-name) 'Git))
+          (if (not vc-display-status)
+              "Git"
+            (format
+             "Git[%s:%s]"
+             (propertize (substring-no-properties vc-mode 5)
+                         'face 'liteline-git-branch)
+             (cl-case (vc-state buffer-file-name 'Git)
+               ((up-to-date) "-")
+               ((edited) (propertize "*" 'face 'liteline-git-edited))
+               ((added) (propertize "+" 'face 'liteline-git-new))
+               ((conflict) (propertize "=" 'face 'liteline-git-error))
+               ((removed) (propertize "!" 'face 'liteline-git-warning))
+               ((needs-update) (propertize "^" 'face 'liteline-git-warning))
+               ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
+               ((ignored) "~")
+               (otherwise (propertize "?" 'face 'liteline-git-error)))))))
   (force-mode-line-update))
 
 (defun liteline--setup-git ()
