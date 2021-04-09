@@ -35,7 +35,7 @@
 (defvar-local rich-title--project nil "Current project information.")
 
 (defun rich-title--update-project ()
-  "Update `rich-title--project' and frame title."
+  "Update `rich-title--project'."
   (unless (file-remote-p default-directory)
     (if-let* ((project (project-current))
               (root (file-name-directory (project-root project)))
@@ -50,7 +50,11 @@
 
 ;;; Org clock
 
+(defvar org-mode-line-string)
 (declare-function org-clock-get-clock-string "org-clock")
+(declare-function org-clock-update-mode-line "org-clock")
+
+(defvar rich-title--org-clock nil "Current Org clock information.")
 
 (defun rich-title--tweak-org-clock-string (result)
   "Return Org clock string appropriately based on RESULT."
@@ -58,11 +62,19 @@
     (concat (substring result 1 index)
             (substring result (1+ index) -1))))
 
+(defun rich-title--update-org-clock (&rest _)
+  "Update `rich-title--org-clock'."
+  (setf rich-title--org-clock
+        (substring-no-properties org-mode-line-string))
+  (force-mode-line-update))
+
 (defun rich-title--setup-org-clock ()
   "Setup Org clock."
   (with-eval-after-load 'org-clock
     (advice-add #'org-clock-get-clock-string :filter-return
-                #'rich-title--tweak-org-clock-string)))
+                #'rich-title--tweak-org-clock-string)
+    (advice-add #'org-clock-update-mode-line :after
+                #'rich-title--update-org-clock)))
 
 ;;; Entry point
 
@@ -78,8 +90,9 @@
 
 (defconst rich-title--org-clock-format
   `(,@rich-title--base-format
-    " - "
-    org-mode-line-string)
+    " ("
+    rich-title--org-clock
+    ")")
   "Frame title format with Org clock.")
 
 (defun rich-title-setup ()
