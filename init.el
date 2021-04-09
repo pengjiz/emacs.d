@@ -1812,8 +1812,8 @@
   :bind (:map geiser-mode-map ("C-c a a" . run-geiser)))
 
 (use-package geiser-repl
+  :ensure geiser
   :defer t
-  :after geiser-mode
   :bind (:map geiser-repl-mode-map ("C-c a a" . geiser-repl-exit))
   :init
   (make-directory (my-expand-var-file-name "geiser/") t)
@@ -1824,8 +1824,8 @@
         geiser-repl-read-only-output-p nil))
 
 (use-package geiser-autodoc
+  :ensure geiser
   :defer t
-  :after geiser-mode
   :config (setf geiser-autodoc-delay eldoc-idle-delay))
 
 (use-package geiser-racket
