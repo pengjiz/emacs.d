@@ -713,8 +713,7 @@
   :init (setf bookmark-default-file (my-expand-var-file-name "bookmarks"))
   :config
   (unless (file-exists-p bookmark-default-file)
-    (dolist (item '(("finances" . "ledger/finances.ledger")
-                    ("bookcase" . "bookcase/inventory.org")))
+    (dolist (item '(("finances" . "ledger/finances.ledger")))
       (let ((filename (my-expand-sync-file-name (cdr item))))
         (when (file-exists-p filename)
           (cl-pushnew `(,(car item) . ((filename . ,filename))) bookmark-alist
