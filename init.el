@@ -110,10 +110,6 @@
                  "C-x C-u" "C-x C-l" "C-x m" "C-x 4 m"))
     (unbind-key key)))
 
-(use-package color-theme-sanityinc-tomorrow
-  :ensure t
-  :config (load-theme 'sanityinc-tomorrow-night t))
-
 (use-package liteline
   :load-path "lisp"
   :defer t
