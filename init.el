@@ -110,6 +110,12 @@
                  "C-x C-u" "C-x C-l" "C-x m" "C-x 4 m"))
     (unbind-key key)))
 
+(use-package modus-themes
+  :ensure t
+  :bind ("C-c t n" . modus-themes-toggle)
+  :init (modus-themes-load-themes)
+  :config (modus-themes-load-vivendi))
+
 (use-package liteline
   :load-path "lisp"
   :defer t
