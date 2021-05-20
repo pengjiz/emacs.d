@@ -1076,8 +1076,7 @@
          :map company-mode-map
          ([remap dabbrev-completion] . company-complete)
          :map company-active-map
-         ([remap dabbrev-completion] . company-other-backend)
-         ("C-j" . company-complete-selection))
+         ([remap dabbrev-completion] . company-other-backend))
   :hook ((emacs-lisp-mode
           clojure-mode
           scheme-mode
@@ -1102,9 +1101,8 @@
   :init
   (setf company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
                             company-preview-if-just-one-frontend)
-        company-backends '(company-files
-                           company-dabbrev-code
-                           company-dabbrev))
+        company-backends '(company-files company-dabbrev-code company-dabbrev)
+        company-transformers '(company-sort-prefer-same-case-prefix))
 
   (defun my-enable-company ()
     (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
@@ -1129,9 +1127,10 @@
         (push backend company-backends)))
     (company-mode))
   :config
+  (setf company-idle-delay 0.5)
   (setf company-selection-wrap-around t
         company-show-numbers t
-        company-tooltip-align-annotations t))
+        company-format-margin-function nil))
 
 (use-package company-dabbrev
   :defer t
