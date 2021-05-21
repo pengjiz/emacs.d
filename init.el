@@ -171,10 +171,14 @@
 ;;; General utility
 
 (progn ; disabled commands
-  (put #'narrow-to-defun 'disabled nil)
-  (put #'narrow-to-region 'disabled nil)
-  (put #'narrow-to-page 'disabled nil)
-  (put #'erase-buffer 'disabled nil)
+  (put 'suspend-frame 'disabled t)
+  (dolist (command '(erase-buffer
+                     narrow-to-region
+                     narrow-to-page
+                     set-goal-column
+                     scroll-left
+                     dired-find-alternate-file))
+    (put command 'disabled nil))
 
   ;; A less intrusive way to handle invocation of disabled commands
   (defun my-show-disabled-command (&optional command _)
@@ -737,7 +741,6 @@
                 "ltxpng"
                 (and "__minted" (1+ nonl)))
             eos))
-  (put #'dired-find-alternate-file 'disabled nil)
 
   (dolist (key '("c" "Z" "P"))
     (unbind-key key dired-mode-map)))
