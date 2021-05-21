@@ -340,7 +340,6 @@
 
 (use-package help
   :defer t
-  :no-require t
   :config (setf help-window-select t))
 
 (use-package info
@@ -581,7 +580,6 @@
 
 (use-package isearch
   :defer t
-  :no-require t
   :config
   (setf isearch-allow-scroll t)
   (setf isearch-lazy-count t))
