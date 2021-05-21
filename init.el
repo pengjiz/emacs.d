@@ -19,7 +19,8 @@
         mode-line-default-help-echo nil)
 
   (setf ring-bell-function #'ignore
-        (symbol-function 'yes-or-no-p) #'y-or-n-p)
+        (symbol-function 'yes-or-no-p) #'y-or-n-p
+        echo-keystrokes 0.1)
 
   (blink-cursor-mode 0)
   (setf visible-cursor nil
