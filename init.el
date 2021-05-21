@@ -895,6 +895,7 @@
            (display-buffer-reuse-window
             display-buffer-below-selected)
            (window-height . 20)
+           (window-min-height . 20)
            (reusable-frames . nil))
           ;; Help
           (,(rx bos (or "*Man"
@@ -914,11 +915,13 @@
             display-buffer-reuse-mode-window
             display-buffer-below-selected)
            (window-height . 15)
+           (window-min-height . 15)
            (reusable-frames . nil))
           ;; Application
           (,(rx bos (or "Trash Can"
                         "*Occur"
                         "*xref*"
+                        "*Apropos*"
                         " *Agenda Commands*"
                         " *Org todo*"
                         "*Org Select*"
@@ -980,7 +983,9 @@
            (preserve-size . (nil . t))
            (reusable-frames . nil))
           ;; Information
-          (,(rx bos (or "*Local Variables*"
+          (,(rx bos (or " *Metahelp*"
+                        "*Local Variables*"
+                        "*Messages*"
                         "*Reconcile*"
                         "*Fancy Diary Entries*"
                         "*Holidays*"
