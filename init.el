@@ -2337,12 +2337,12 @@
 
   (setf org-default-notes-file (expand-file-name "inbox.org" org-directory)
         org-agenda-files `(,org-directory))
-  (setf org-archive-location "::* Archived")
+  (setf org-archive-location ".archive.org::")
 
   (setf org-adapt-indentation nil)
   (setf org-special-ctrl-a/e t
         org-catch-invisible-edits 'show-and-error)
-  (setf org-startup-folded nil)
+  (setf org-startup-folded 'content)
   (setf org-image-actual-width '(300))
   (setf org-highlight-latex-and-related '(latex entities))
   (setf org-use-sub-superscripts '{})
@@ -2383,6 +2383,12 @@
         org-refile-allow-creating-parent-nodes 'confirm)
   (setf org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil))
+
+(use-package org-archive
+  :defer t
+  :config
+  (setf org-archive-default-command #'org-archive-set-tag)
+  (setf org-archive-file-header-format nil))
 
 (use-package org-id
   :defer t
@@ -2439,6 +2445,7 @@
   (setf org-clock-persist 'history)
   (setf org-clock-task-overrun-text "*"
         org-clock-clocked-in-display 'frame-title)
+  (setf org-show-notification-timeout 10)
 
   (defun my-confirm-exit-when-clocking ()
     "Ask for confirmation on exit with a running clock."
