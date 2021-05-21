@@ -567,7 +567,9 @@
 (use-package imenu
   :defer t
   :bind ("M-g i" . imenu)
-  :config (setf imenu-auto-rescan t))
+  :config
+  (setf imenu-auto-rescan t)
+  (setf imenu-space-replacement nil))
 
 ;;; Search & replace
 
