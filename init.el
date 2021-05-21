@@ -113,6 +113,12 @@
   :init (modus-themes-load-themes)
   :config (modus-themes-load-vivendi))
 
+(use-package faces
+  :defer t
+  :config
+  (set-face-attribute 'fixed-pitch nil :family "Source Code Pro")
+  (set-face-attribute 'variable-pitch nil :family "DejaVu Sans"))
+
 (use-package liteline
   :load-path "lisp"
   :defer t
