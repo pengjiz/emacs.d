@@ -9,8 +9,7 @@
 ;;; Boot
 
 (progn ; fundamental
-  (setf ad-redefinition-action 'accept
-        debugger-stack-frame-as-list t)
+  (setf ad-redefinition-action 'accept)
   (setf create-lockfiles nil
         delete-by-moving-to-trash t)
   (prefer-coding-system 'utf-8))
