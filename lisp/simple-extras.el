@@ -29,6 +29,15 @@
     (backward-kill-sexp)
     (insert (format "%S" value))))
 
+;;; Completion
+
+(defun simple-extras-force-completion-at-point ()
+  "Force completion on the text around point."
+  (interactive)
+  (minibuffer-hide-completions)
+  (let ((completion-cycle-threshold t))
+    (completion-at-point)))
+
 ;;; Copy email address
 
 (defun simple-extras--copy-mail-address (&optional to &rest _)

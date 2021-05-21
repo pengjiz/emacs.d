@@ -217,7 +217,10 @@
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
-  (bind-key "C-c e r" #'simple-extras-eval-and-replace-last-sexp))
+  (bind-key "C-c e r" #'simple-extras-eval-and-replace-last-sexp)
+  (with-eval-after-load 'minibuffer
+    (bind-key "C-<tab>" #'simple-extras-force-completion-at-point
+              completion-in-region-mode-map)))
 
 (use-package savehist
   :init (setf savehist-file (my-expand-var-file-name "savehist"))
@@ -1042,14 +1045,18 @@
 (progn ; general completion
   (setf enable-recursive-minibuffers t)
   (setf completion-ignore-case t
-        read-buffer-completion-ignore-case t))
+        read-buffer-completion-ignore-case t)
+
+  (unbind-key "C-<tab>" minibuffer-local-map))
 
 (use-package minibuffer
   :defer t
-  :bind ([remap complete-symbol] . completion-at-point)
+  :bind (([remap complete-symbol] . completion-at-point)
+         :map minibuffer-local-completion-map
+         ("C-<tab>" . minibuffer-force-complete))
   :config
   (setf read-file-name-completion-ignore-case t)
-  (setf completion-styles '(basic partial-completion substring initials)))
+  (setf completion-styles '(basic substring partial-completion initials)))
 
 (use-package mb-depth
   :config (minibuffer-depth-indicate-mode))
@@ -1057,12 +1064,6 @@
 (use-package minibuf-eldef
   :init (setf minibuffer-eldef-shorten-default t)
   :config (minibuffer-electric-default-mode))
-
-(use-package icomplete
-  :config
-  (setf icomplete-prospects-height 1)
-  (setf icomplete-show-matches-on-no-input t)
-  (icomplete-mode))
 
 (use-package company
   :ensure t
