@@ -1589,14 +1589,11 @@
         erc-try-new-nick-p nil)
   (setf erc-user-full-name "Pengji Zhang")
   (setf erc-prompt-for-password nil)
-  (setf erc-hide-list '("353")
-        erc-lurker-hide-list '("JOIN" "PART" "QUIT")))
+  (setf erc-lurker-hide-list '("JOIN" "PART" "QUIT")))
 
 (use-package erc-join
   :defer t
   :config
-  (setf erc-autojoin-channels-alist
-        '(("freenode.net" "#emacs" "#archlinux" "#haskell")))
   ;; Join channels only after identifying
   (setf erc-autojoin-timing 'ident
         erc-autojoin-delay 0))
@@ -1615,12 +1612,6 @@
           (erc-button-url-regexp 0 t browse-url 0)
           ("<URL: *\\([^<> ]+\\) *>" 0 t browse-url 1)
           ("\\s-\\(@\\([0-9][0-9][0-9]\\)\\)" 1 t erc-button-beats-to-time 2))))
-
-(use-package erc-match
-  :defer t
-  :config
-  (setf erc-fools '("rudybot")
-        erc-fool-highlight-type 'all))
 
 (use-package erc-truncate
   :defer t
