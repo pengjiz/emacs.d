@@ -280,15 +280,6 @@
          ("C-c x R" . sort-columns)
          ("C-c x d" . delete-duplicate-lines)))
 
-(use-package unfill
-  :ensure t
-  :defer t
-  :bind ([remap fill-paragraph] . unfill-toggle)
-  :init
-  (defvar c-mode-base-map)
-  (with-eval-after-load 'cc-mode
-    (bind-key [remap c-fill-paragraph] #'unfill-toggle c-mode-base-map)))
-
 (use-package typo
   :ensure t
   :defer t
