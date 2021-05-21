@@ -18,7 +18,6 @@
   (setf (default-value 'mode-line-format) nil
         mode-line-default-help-echo nil)
 
-  (tooltip-mode 0)
   (setf ring-bell-function #'ignore
         use-dialog-box nil
         (symbol-function 'yes-or-no-p) #'y-or-n-p)
