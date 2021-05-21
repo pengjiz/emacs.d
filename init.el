@@ -100,7 +100,6 @@
 ;;; Initialization
 
 (progn ; general customization
-  ;; Use the custom file to store machine-specific settings
   (setf custom-file (my-expand-var-file-name "custom.el"))
   (load custom-file t t t)
 
@@ -213,14 +212,12 @@
   :load-path "lisp"
   :config
   (simple-extras-setup)
-
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
-  (bind-key "C-c e r" #'simple-extras-eval-and-replace-last-sexp)
-  (with-eval-after-load 'minibuffer
-    (bind-key "C-<tab>" #'simple-extras-force-completion-at-point
-              completion-in-region-mode-map)))
+  (bind-keys ("C-c e r" . simple-extras-eval-and-replace-last-sexp)
+             :map completion-in-region-mode-map
+             ("C-<tab>" . simple-extras-force-completion-at-point)))
 
 (use-package savehist
   :init (setf savehist-file (my-expand-var-file-name "savehist"))
@@ -873,8 +870,6 @@
   :init
   (setf scroll-error-top-bottom t)
   (setf fit-window-to-buffer-horizontally t)
-
-  ;; Manage how windows are displayed
   (setf display-buffer-alist
         `(;; Auxiliary
           (,(rx bos (or "CAPTURE-"
