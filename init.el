@@ -19,7 +19,6 @@
         mode-line-default-help-echo nil)
 
   (setf ring-bell-function #'ignore
-        use-dialog-box nil
         (symbol-function 'yes-or-no-p) #'y-or-n-p)
 
   (blink-cursor-mode 0)
