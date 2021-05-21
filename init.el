@@ -506,6 +506,11 @@
   :defer t
   :hook ((prog-mode protobuf-mode) . rainbow-delimiters-mode))
 
+(use-package rainbow-mode
+  :ensure t
+  :defer t
+  :bind ("C-c t o" . rainbow-mode))
+
 (use-package highlight-numbers
   :ensure t
   :defer t
