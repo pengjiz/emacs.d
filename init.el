@@ -225,7 +225,8 @@
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
-  (bind-keys ("C-c e r" . simple-extras-eval-and-replace-last-sexp)
+  (bind-keys ("M-`" . simple-extras-unfill-paragraph)
+             ("C-c e r" . simple-extras-eval-and-replace-last-sexp)
              :map completion-in-region-mode-map
              ("C-<tab>" . simple-extras-force-completion-at-point)))
 

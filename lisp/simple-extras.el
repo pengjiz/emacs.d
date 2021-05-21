@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-;;; Fill comments
+;;; Fill and unfill
 
 (define-minor-mode simple-extras-auto-fill-comments-mode
   "Minor mode to automatically fill comments only."
@@ -20,7 +20,14 @@
     (kill-local-variable 'comment-auto-fill-only-comments)
     (auto-fill-mode 0)))
 
-;;; Eval and replace
+(defun simple-extras-unfill-paragraph (&optional region)
+  "Unwrap paragraph at or after point.
+REGION is directly passed to `fill-paragraph'."
+  (interactive (list t))
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil region)))
+
+;;; Evaluate
 
 (defun simple-extras-eval-and-replace-last-sexp ()
   "Replace the preceding sexp with its value."
@@ -38,7 +45,7 @@
   (let ((completion-cycle-threshold t))
     (completion-at-point)))
 
-;;; Copy email address
+;;; Copy
 
 (defun simple-extras--copy-mail-address (&optional to &rest _)
   "Copy email address TO if given."
