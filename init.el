@@ -1071,7 +1071,7 @@
          ("C-<tab>" . minibuffer-force-complete))
   :config
   (setf read-file-name-completion-ignore-case t)
-  (setf completion-styles '(basic substring partial-completion initials)))
+  (setf completion-styles '(basic substring initials partial-completion)))
 
 (use-package mb-depth
   :config (minibuffer-depth-indicate-mode))
