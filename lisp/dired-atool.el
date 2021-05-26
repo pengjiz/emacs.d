@@ -37,7 +37,7 @@
   "Extra options passing to apack."
   :type '(repeat string))
 
-(defcustom dired-atool-using-trash
+(defcustom dired-atool-use-trash
   t
   "Whether to use trash.
 Non-nil means following `delete-by-moving-to-trash' when deleting
@@ -138,7 +138,7 @@ ARG is directly passed to `dired-get-marked-files'."
     (when (and (file-exists-p target)
                (yes-or-no-p (format "File %s exists. Remove it before packing? "
                                     target)))
-      (delete-file target dired-atool-using-trash))
+      (delete-file target dired-atool-use-trash))
     (dired-atool--run destination
                       dired-atool-apack-program
                       dired-atool-apack-extra-options

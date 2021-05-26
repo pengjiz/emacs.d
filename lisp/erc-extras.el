@@ -13,7 +13,7 @@
 
 ;;; NickServ identification
 
-(defvar erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password
+(defvar erc-extras--nickserv-read-password erc-prompt-for-nickserv-password
   "Whether to ask for NickServ password.")
 
 (defun erc-extras--search-nickserv-auth-source-password (nickname)
@@ -36,7 +36,7 @@
 
 (defun erc-extras--call-nickserv-identify-function (nickname)
   "Call function to identify NICKNAME to NickServ."
-  (let ((password (and erc-extras--nickserv-asking-password
+  (let ((password (and erc-extras--nickserv-read-password
                        (read-passwd (format "NickServ password for %s on %s: "
                                             nickname
                                             (or (erc-network)
@@ -52,7 +52,7 @@
 ;; t to force identification.
 (defun erc-extras--force-nickserv-identification (fn &rest args)
   "Apply FN on ARGS, but force NickServ identification."
-  (let ((erc-extras--nickserv-asking-password erc-prompt-for-nickserv-password)
+  (let ((erc-extras--nickserv-read-password erc-prompt-for-nickserv-password)
         (erc-prompt-for-nickserv-password t))
     (apply fn args)))
 
