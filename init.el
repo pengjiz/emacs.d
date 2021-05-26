@@ -15,9 +15,6 @@
   (prefer-coding-system 'utf-8))
 
 (progn ; user interface
-  (setf (default-value 'mode-line-format) nil
-        mode-line-default-help-echo nil)
-
   (setf ring-bell-function #'ignore
         (symbol-function 'yes-or-no-p) #'y-or-n-p
         echo-keystrokes 0.1)
