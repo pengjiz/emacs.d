@@ -177,20 +177,13 @@
 ;;; General utility
 
 (progn ; disabled commands
-  (put 'suspend-frame 'disabled t)
   (dolist (command '(erase-buffer
                      narrow-to-region
                      narrow-to-page
                      set-goal-column
                      scroll-left
                      dired-find-alternate-file))
-    (put command 'disabled nil))
-
-  ;; A less intrusive way to handle invocation of disabled commands
-  (defun my-show-disabled-command (&optional command _)
-    "Show a message for disabled COMMAND without invoking it."
-    (message "Disabled command %s invoked" (or command this-command)))
-  (setf disabled-command-function #'my-show-disabled-command))
+    (put command 'disabled nil)))
 
 (use-package simple
   :bind (([remap just-one-space] . cycle-spacing)
@@ -986,6 +979,7 @@
           ;; Information
           (,(rx bos (or " *Metahelp*"
                         "*Local Variables*"
+                        "*Disabled Command*"
                         "*Messages*"
                         "*Reconcile*"
                         "*Fancy Diary Entries*"
