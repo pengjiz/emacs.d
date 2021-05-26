@@ -44,14 +44,24 @@ Non-nil means following `delete-by-moving-to-trash' when deleting
 files or directories."
   :type 'boolean)
 
+(defcustom dired-atool-do-revert
+  t
+  "Whether to automatically revert Dired buffers.
+Non-nil means reverting all Dired buffers related to the
+destination directory automatically after operations."
+  :type 'boolean)
+
 ;;; Run program
 
 (defconst dired-atool--process-buffer-name "*dired-atool*"
   "Buffer name for atool process.")
 
 (defun dired-atool--sentinel (process event)
-  "Report status of PROCESS based on EVENT."
+  "Perform actions for PROCESS based on EVENT."
   (when (memq (process-status process) '(exit signal))
+    (when-let* ((destination (and dired-atool-do-revert
+                                  (process-get process 'destination))))
+      (dired-fun-in-all-buffers destination nil #'revert-buffer))
     (if (string-match-p "finished" event)
         (message "%s finished" (process-name process))
       (message "%s exited abnormally" (process-name process)))
@@ -70,14 +80,17 @@ files or directories."
                                  (list arg)))
                  args)))
 
-(defun dired-atool--run (program &rest args)
-  "Start PROGRAM with ARGS."
+(defun dired-atool--run (destination program &rest args)
+  "Start PROGRAM with ARGS.
+DESTINATION is the destination directory for which all relevant
+Dired buffers may be reverted when the process exits."
   (let* ((flat-args (dired-atool--flatten args))
          (process (apply #'start-process
                          (file-name-nondirectory program)
                          dired-atool--process-buffer-name
                          program
                          flat-args)))
+    (process-put process 'destination destination)
     (set-process-sentinel process #'dired-atool--sentinel)))
 
 ;;; Unpack files
@@ -87,14 +100,19 @@ files or directories."
 ARG is directly passed to `dired-get-marked-files'."
   (interactive "P")
   (let* ((files (dired-get-marked-files nil arg))
-         (destination (read-directory-name "Unpack to: "
-                                           (dired-dwim-target-directory))))
+         (destination (dired-mark-pop-up nil 'uncompress files
+                                         #'read-directory-name
+                                         (format "Unpack %s to: "
+                                                 (dired-mark-prompt arg files))
+                                         (dired-dwim-target-directory))))
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
-    (make-directory destination t)
+    (unless (file-exists-p destination)
+      (dired-create-directory destination))
     (let ((default-directory (expand-file-name destination)))
-      (dired-atool--run dired-atool-aunpack-program
+      (dired-atool--run default-directory
+                        dired-atool-aunpack-program
                         "--each"
                         dired-atool-aunpack-extra-options
                         files))))
@@ -106,19 +124,25 @@ ARG is directly passed to `dired-get-marked-files'."
 ARG is directly passed to `dired-get-marked-files'."
   (interactive "P")
   (let* ((files (dired-get-marked-files t arg))
-         (destination (read-file-name "Pack to: "
-                                      (dired-dwim-target-directory))))
+         (target (dired-mark-pop-up nil 'compress files
+                                    #'read-file-name
+                                    (format "Pack %s to: "
+                                            (dired-mark-prompt arg files))
+                                    (dired-dwim-target-directory)))
+         (destination (file-name-directory target)))
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
-    (make-directory (file-name-directory destination) t)
-    (when (and (file-exists-p destination)
+    (unless (file-exists-p destination)
+      (dired-create-directory destination))
+    (when (and (file-exists-p target)
                (yes-or-no-p (format "File %s exists. Remove it before packing? "
-                                    destination)))
-      (delete-file destination dired-atool-using-trash))
-    (dired-atool--run dired-atool-apack-program
+                                    target)))
+      (delete-file target dired-atool-using-trash))
+    (dired-atool--run destination
+                      dired-atool-apack-program
                       dired-atool-apack-extra-options
-                      (expand-file-name destination)
+                      (expand-file-name target)
                       files)))
 
 (provide 'dired-atool)
