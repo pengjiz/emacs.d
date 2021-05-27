@@ -99,23 +99,24 @@ Dired buffers may be reverted when the process exits."
   "Unpack files with aunpack in Dired.
 ARG is directly passed to `dired-get-marked-files'."
   (interactive "P")
-  (let* ((files (dired-get-marked-files nil arg))
-         (destination (dired-mark-pop-up nil 'uncompress files
-                                         #'read-directory-name
-                                         (format "Unpack %s to: "
-                                                 (dired-mark-prompt arg files))
-                                         (dired-dwim-target-directory))))
+  (let* ((archives (dired-get-marked-files nil arg nil nil t))
+         (files (mapcar #'dired-make-relative archives))
+         (prompt (format "Unpack %s to: " (dired-mark-prompt arg files)))
+         (directory (dired-dwim-target-directory))
+         (destination (expand-file-name (dired-mark-pop-up nil 'uncompress files
+                                                           #'read-directory-name
+                                                           prompt directory))))
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
     (unless (file-exists-p destination)
       (dired-create-directory destination))
-    (let ((default-directory (expand-file-name destination)))
-      (dired-atool--run default-directory
+    (let ((default-directory destination))
+      (dired-atool--run destination
                         dired-atool-aunpack-program
                         "--each"
                         dired-atool-aunpack-extra-options
-                        files))))
+                        archives))))
 
 ;;; Pack files
 
@@ -123,12 +124,12 @@ ARG is directly passed to `dired-get-marked-files'."
   "Pack files with apack in Dired.
 ARG is directly passed to `dired-get-marked-files'."
   (interactive "P")
-  (let* ((files (dired-get-marked-files t arg))
-         (target (dired-mark-pop-up nil 'compress files
-                                    #'read-file-name
-                                    (format "Pack %s to: "
-                                            (dired-mark-prompt arg files))
-                                    (dired-dwim-target-directory)))
+  (let* ((files (dired-get-marked-files t arg nil nil t))
+         (prompt (format "Pack %s to: " (dired-mark-prompt arg files)))
+         (directory (dired-dwim-target-directory))
+         (target (expand-file-name (dired-mark-pop-up nil 'compress files
+                                                      #'read-file-name
+                                                      prompt directory)))
          (destination (file-name-directory target)))
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
@@ -136,13 +137,17 @@ ARG is directly passed to `dired-get-marked-files'."
     (unless (file-exists-p destination)
       (dired-create-directory destination))
     (when (and (file-exists-p target)
-               (yes-or-no-p (format "File %s exists. Remove it before packing? "
-                                    target)))
+               (yes-or-no-p (format "File %s exists. %s it? "
+                                    target
+                                    (if (and dired-atool-use-trash
+                                             delete-by-moving-to-trash)
+                                        "Trash"
+                                      "Delete"))))
       (delete-file target dired-atool-use-trash))
     (dired-atool--run destination
                       dired-atool-apack-program
                       dired-atool-apack-extra-options
-                      (expand-file-name target)
+                      target
                       files)))
 
 (provide 'dired-atool)
