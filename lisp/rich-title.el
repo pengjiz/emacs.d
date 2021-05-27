@@ -38,7 +38,7 @@
   "Update `rich-title--project'."
   (unless (file-remote-p default-directory)
     (if-let* ((project (project-current))
-              (root (file-name-directory (project-root project)))
+              (root (project-root project))
               (name (file-name-nondirectory (directory-file-name root))))
         (setf rich-title--project (format " [%s]" name))
       (setf rich-title--project nil))
