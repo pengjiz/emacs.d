@@ -19,24 +19,28 @@
 
 ;;; Face and option
 
-(defcustom eshell-extras-prompt-git-dirty-label
-  "*"
-  "The indicator to show that the Git working tree is dirty."
-  :type 'string
+(defcustom eshell-extras-prompt-git-state-indicators-alist
+  '((clean . nil)
+    (dirty . "*"))
+  "Indicators for different Git working tree states."
+  :type '(alist :key-type (choice (const clean)
+                                  (const dirty))
+                :value-type (choice string
+                                    (const :tag "None" nil)))
   :group 'eshell-prompt)
 
-(defface eshell-extras-prompt-python-env
-  '((t :inherit eshell-ls-executable))
-  "Face used by Python environment name in the prompt."
+(defface eshell-extras-prompt-plain
+  '((t :inherit eshell-prompt))
+  "Face used by plain parts in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-directory
-  '((t :inherit eshell-ls-directory))
+  '((t :inherit (bold eshell-ls-directory)))
   "Face used by the current directory in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-git-branch
-  '((t :inherit eshell-ls-special))
+  '((t :inherit (bold eshell-ls-special)))
   "Face used by the current Git branch name in the prompt."
   :group 'eshell-prompt)
 
@@ -45,21 +49,18 @@
   "Face used by the Git working tree status."
   :group 'eshell-prompt)
 
-(defface eshell-extras-prompt-success
+(defface eshell-extras-prompt-exit-success
   '((t :inherit success))
   "Face used by the prompt when the last command succeeds."
   :group 'eshell-prompt)
 
-(defface eshell-extras-prompt-error
+(defface eshell-extras-prompt-exit-error
   '((t :inherit (bold error)))
   "Face used by the prompt when the last command fails."
   :group 'eshell-prompt)
 
 (defface eshell-extras-autosuggest-suggestion
-  '((((background dark))
-     :foreground "DimGrey" :inherit default)
-    (((background light))
-     :foreground "LightGrey" :inherit default))
+  '((t :inherit shadow))
   "Face used by autosuggest suggestions."
   :group 'eshell-hist)
 
@@ -94,6 +95,14 @@
 
 ;;; Prompt
 
+(defun eshell-extras--get-directory ()
+  "Get the current directory."
+  (let* ((directory (abbreviate-file-name (eshell/pwd)))
+         (basename (file-name-nondirectory directory)))
+    (if (string-empty-p basename)
+        directory
+      basename)))
+
 (defun eshell-extras--call-git-string (command &rest args)
   "Execute COMMAND and ARGS with Git.
 Return the first line of output if any. Otherwise return nil."
@@ -111,21 +120,24 @@ Return the first line of output if any. Otherwise return nil."
 
 (defun eshell-extras--get-git-status ()
   "Get the status of the current Git working tree."
-  (when (eshell-extras--call-git-string "status" "--porcelain")
-    eshell-extras-prompt-git-dirty-label))
+  (let ((state (if (eshell-extras--call-git-string "status" "--porcelain")
+                   'dirty
+                 'clean)))
+    (cdr (assq state eshell-extras-prompt-git-state-indicators-alist))))
 
 (defun eshell-extras--get-prompt ()
   "Return a prompt for Eshell."
-  (let* ((path (file-name-nondirectory (abbreviate-file-name (eshell/pwd))))
+  (let* ((directory (eshell-extras--get-directory))
          (env (bound-and-true-p conda-current-environment))
          (branch (eshell-extras--get-git-branch))
          (status (and branch (eshell-extras--get-git-status))))
     (concat
      ;; Python environment
      (when env
-       (format "(%s) " (propertize env 'face 'eshell-extras-prompt-python-env)))
+       (propertize (format "(%s)" env) 'face 'eshell-extras-prompt-plain))
+     (and env " ")
      ;; Current working directory
-     (propertize path 'face 'eshell-extras-prompt-directory)
+     (propertize directory 'face 'eshell-extras-prompt-directory)
      ;; Git branch name or short SHA
      (when branch
        (propertize (concat "@" branch) 'face 'eshell-extras-prompt-git-branch))
@@ -135,15 +147,14 @@ Return the first line of output if any. Otherwise return nil."
      " "
      ;; Last command status
      (propertize "λ" 'face (if (zerop eshell-last-command-status)
-                               'eshell-extras-prompt-success
-                             'eshell-extras-prompt-error))
+                               'eshell-extras-prompt-exit-success
+                             'eshell-extras-prompt-exit-error))
      " ")))
 
 (defun eshell-extras--setup-prompt ()
   "Setup Eshell prompt."
   (setf eshell-prompt-function #'eshell-extras--get-prompt
         eshell-prompt-regexp "^.* λ "
-        ;; Highlighting prompt also makes it read-only, which I do not want.
         eshell-highlight-prompt nil))
 
 ;;; Autosuggest
