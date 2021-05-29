@@ -6,6 +6,8 @@
 
 ;;; Code:
 
+(require 'compile)
+(require 'vc-hooks)
 (eval-when-compile
   (require 'cl-lib)
   (require 'subr-x)
@@ -14,7 +16,7 @@
 ;;; Face and option
 
 (defgroup liteline nil
-  "A light-weight mode line."
+  "A lightweight mode line."
   :group 'mode-line)
 
 (defcustom liteline-word-count-modes
@@ -22,7 +24,7 @@
   "Major modes in which word count is shown."
   :type '(repeat symbol))
 
-(defcustom liteline-important-minor-modes-alist
+(defcustom liteline-minor-mode-indicator-alist
   '((typo-mode . "t")
     (abbrev-mode . "r")
     (auto-fill-function . "q")
@@ -31,61 +33,61 @@
     (whitespace-mode . "w")
     (flyspell-mode . "s")
     (auto-revert-mode . "g"))
-  "Minor modes that should be shown in the mode line."
+  "Indicators for minor modes that are shown when enabled."
   :type '(alist :key-type symbol
                 :value-type string))
 
 (defface liteline-buffer-modified
   '((t :inherit (bold warning)))
-  "Face used for indicating buffer is modified.")
+  "Face used for modified buffers.")
 
 (defface liteline-buffer-read-only
   '((t :inherit (bold error)))
-  "Face used for indicating buffer is read-only.")
+  "Face used for read-only buffers.")
 
 (defface liteline-buffer-narrowed
   '((t :inherit warning))
-  "Face used for indicating buffer is narrowed.")
+  "Face used for narrowed buffers.")
 
 (defface liteline-buffer-name
   '((t :inherit mode-line-buffer-id))
-  "Face used by normal buffer name.")
+  "Face used by normal buffer names.")
 
-(defface liteline-buffer-file-non-existent
+(defface liteline-buffer-file-missing
   '((t :inherit (bold error)))
-  "Face used for name of a buffer backed by a non-existent file.")
+  "Face used for buffers backed by missing files.")
 
 (defface liteline-action
-  '((t :inherit match))
-  "Face used by general action information.")
+  '((t :inherit mode-line-emphasis))
+  "Face used by action information.")
 
-(defface liteline-flycheck-message
-  '((t :inherit warning))
+(defface liteline-flycheck-general
+  '((t :inherit compilation-mode-line-run))
   "Face used to show general Flycheck messages.")
 
-(defface liteline-flycheck-message-urgent
-  '((t :inherit (bold error)))
+(defface liteline-flycheck-urgent
+  '((t :inherit compilation-mode-line-fail))
   "Face used to show urgent Flycheck messages.")
 
-(defface liteline-flycheck-error-info
-  '((t :inherit flycheck-fringe-info))
-  "Face used by Flycheck errors of the information level.")
+(defface liteline-flycheck-clean
+  '((t :inherit compilation-mode-line-exit))
+  "Face used to show there are no Flycheck issues.")
 
-(defface liteline-flycheck-error-warning
-  '((t :inherit flycheck-fringe-warning))
-  "Face used by Flycheck errors of the warning level.")
+(defface liteline-flycheck-info
+  '((t :inherit compilation-info))
+  "Face used by Flycheck information count.")
 
-(defface liteline-flycheck-error-error
-  '((t :inherit flycheck-fringe-error))
-  "Face used by Flycheck errors of the error level.")
+(defface liteline-flycheck-warning
+  '((t :inherit compilation-warning))
+  "Face used by Flycheck warning count.")
 
-(defface liteline-flycheck-error-clean
-  '((t :inherit success))
-  "Face used to show there are no Flycheck errors.")
+(defface liteline-flycheck-error
+  '((t :inherit compilation-error))
+  "Face used by Flycheck error count.")
 
 (defface liteline-git-branch
-  '((t :inherit mode-line-buffer-id))
-  "Face used for Git branch.")
+  '((t :inherit vc-up-to-date-state))
+  "Face used by Git branch names.")
 
 (defface liteline-git-new
   '((t :inherit success))
@@ -106,7 +108,7 @@
 ;;; Mode line helper
 
 (eval-and-compile
-  (defvar liteline--segment-fns-alist nil "Functions of segments.")
+  (defvar liteline--segment-fn-alist nil "Functions of segments.")
 
   (defun liteline--prepare-segments (segments)
     "Prepare mode line forms of SEGMENTS.
@@ -118,11 +120,10 @@ Return forms that can be passed directly to `format-mode-line'."
               ((consp segment)
                (push segment forms))
               ((symbolp segment)
-               (if (setf it (cdr (assq segment liteline--segment-fns-alist)))
+               (if (setf it (cdr (assq segment liteline--segment-fn-alist)))
                    (push `(:eval (,it)) forms)
                  (push it forms)))
-              (t
-               (error "%s is not a valid segment" segment))))
+              (t (error "%s is not a valid segment" segment))))
       (cons "" (nreverse forms)))))
 
 (defmacro liteline-define-segment (name doc &rest body)
@@ -131,13 +132,13 @@ Return forms that can be passed directly to `format-mode-line'."
            (doc-string 2)
            (debug (&define name stringp def-body)))
   (let ((symbol (intern (format "liteline--segment-%s" name))))
-    (cl-pushnew (cons name symbol) liteline--segment-fns-alist
+    (cl-pushnew (cons name symbol) liteline--segment-fn-alist
                 :test #'eq :key #'car)
     `(progn
        (defun ,symbol ()
          ,(or doc (format "Show the %s information." name))
          ,@body)
-       (cl-pushnew (cons ',name #',symbol) liteline--segment-fns-alist
+       (cl-pushnew (cons ',name #',symbol) liteline--segment-fn-alist
                    :test #'eq :key #'car))))
 
 (defun liteline--window-active-p ()
@@ -148,11 +149,11 @@ Return forms that can be passed directly to `format-mode-line'."
                (with-selected-window (minibuffer-window)
                  (minibuffer-selected-window))))))
 
-(defvar liteline--mode-line-fns-alist nil "Functions of mode lines.")
+(defvar liteline--mode-line-fn-alist nil "Functions of mode lines.")
 
 (defun liteline--prepare-mode-line (name)
   "Prepare the mode line of NAME."
-  (if-let* ((fn (cdr (assq name liteline--mode-line-fns-alist))))
+  (if-let* ((fn (cdr (assq name liteline--mode-line-fn-alist))))
       `(:eval (,fn))
     (error "%s is not a valid mode line" name)))
 
@@ -161,7 +162,7 @@ Return forms that can be passed directly to `format-mode-line'."
   (replace-regexp-in-string "%" "%%" string))
 
 (defsubst liteline--clean-text-properties (string)
-  "Remove mouse related text properties in STRING."
+  "Remove certain text properties in STRING."
   (remove-list-of-text-properties 0 (length string)
                                   '(mouse-face help-echo keymap local-map)
                                   string))
@@ -169,14 +170,12 @@ Return forms that can be passed directly to `format-mode-line'."
 (defun liteline--wrap-mode-line (left right)
   "Wrap LEFT and RIGHT segment forms into a full mode line."
   (let* ((right-string (format-mode-line right))
-         (right-width (string-width right-string)))
+         (right-width (string-width right-string))
+         (padding `((space :align-to (- (+ right right-fringe right-margin)
+                                        ,right-width)))))
     (liteline--clean-text-properties right-string)
     (list left
-          (propertize
-           " "
-           'display
-           `((space :align-to (- (+ right right-fringe right-margin)
-                                 ,right-width))))
+          (propertize " " 'display padding)
           (liteline--escape right-string))))
 
 (defmacro liteline-define-mode-line (name left &optional right)
@@ -189,7 +188,7 @@ Return forms that can be passed directly to `format-mode-line'."
          ,(format "Show the %s mode line." name)
          (liteline--wrap-mode-line ',(liteline--prepare-segments left)
                                    ',(liteline--prepare-segments right)))
-       (cl-pushnew (cons ',name #',symbol) liteline--mode-line-fns-alist
+       (cl-pushnew (cons ',name #',symbol) liteline--mode-line-fn-alist
                    :test #'eq :key #'car))))
 
 (defun liteline-set-mode-line (name &optional default)
@@ -205,11 +204,16 @@ If DEFAULT is non-nil, set the default value."
 ;; Buffer information
 (defun liteline--get-buffer-modification ()
   "Return buffer modification status."
-  (cond (buffer-read-only
-         (propertize "%%" 'face 'liteline-buffer-read-only))
-        ((buffer-modified-p)
-         (propertize "*" 'face 'liteline-buffer-modified))
-        (t "-")))
+  (let ((read-only buffer-read-only)
+        (modified (buffer-modified-p)))
+    (cond ((and read-only modified)
+           (concat (propertize "%%" 'face 'liteline-buffer-read-only)
+                   (propertize "*" 'face 'liteline-buffer-modified)))
+          (read-only
+           (propertize "%%%%" 'face 'liteline-buffer-read-only))
+          (modified
+           (propertize "**" 'face 'liteline-buffer-modified))
+          (t "--"))))
 
 (defun liteline--get-buffer-name ()
   "Return buffer name."
@@ -217,19 +221,14 @@ If DEFAULT is non-nil, set the default value."
                       'liteline-buffer-name)
                      ((and (file-remote-p buffer-file-name)
                            (not (file-remote-p buffer-file-name nil t)))
-                      'liteline-buffer-file-non-existent)
+                      'liteline-buffer-file-missing)
                      ((not (file-exists-p buffer-file-name))
-                      'liteline-buffer-file-non-existent)
-                     (t
-                      'liteline-buffer-name)))
-         (name (propertize (buffer-name) 'face face))
-         (narrowed (buffer-narrowed-p)))
+                      'liteline-buffer-file-missing)
+                     (t 'liteline-buffer-name))))
     (concat
-     (and narrowed
-          (propertize "~[" 'face 'liteline-buffer-narrowed))
-     name
-     (and narrowed
-          (propertize "]" 'face 'liteline-buffer-narrowed)))))
+     (when (buffer-narrowed-p)
+       (propertize "~" 'face 'liteline-buffer-narrowed))
+     (propertize (buffer-name) 'face face))))
 
 (defun liteline--get-buffer-hostname ()
   "Return the hostname for remote buffers."
@@ -238,7 +237,7 @@ If DEFAULT is non-nil, set the default value."
     (concat "@" host)))
 
 (liteline-define-segment buffer-info
-  "Show the basic buffer information."
+  "Show buffer information."
   (concat
    " "
    (liteline--get-buffer-modification)
@@ -252,8 +251,8 @@ If DEFAULT is non-nil, set the default value."
 (declare-function image-mode-window-get "image-mode")
 (declare-function doc-view-last-page-number "doc-view")
 
-(liteline-define-segment buffer-position
-  "Show the position information."
+(liteline-define-segment position
+  "Show position information."
   (cl-case major-mode
     ((image-mode)
      (let ((size (image-size (image-get-display-property) :pixels)))
@@ -268,43 +267,42 @@ If DEFAULT is non-nil, set the default value."
      (concat
       " "
       (and size-indication-mode "%I ")
-      (let ((column-number
-             (if column-number-indicator-zero-based
-                 "%c"
-               "%C")))
+      (let ((column (or (and column-number-indicator-zero-based "%c") "%C")))
         (cond ((and line-number-mode column-number-mode)
-               (concat "%l:" column-number " "))
-              ((line-number-mode
-                "L%l "))
-              ((column-number-mode
-                (concat "C" column-number " ")))))
+               (concat "%l:" column " "))
+              (line-number-mode "L%l ")
+              (column-number-mode (concat "C" column " "))))
       "%p "))))
 
-;; Encoding
-(liteline-define-segment buffer-encoding
-  "Show the encoding information."
+;; Coding system
+(liteline-define-segment coding-system
+  "Show coding system information."
   (and (liteline--window-active-p)
        (concat
+        " "
+        (let ((system (coding-system-plist buffer-file-coding-system)))
+          (if (memq (plist-get system :category)
+                    '(coding-category-undecided coding-category-utf-8))
+              "UTF-8"
+            (upcase (symbol-name (plist-get system :name)))))
         " "
         (cl-case (coding-system-eol-type buffer-file-coding-system)
           ((0) "LF ")
           ((1) "CRLF ")
-          ((2) "CR "))
-        (let ((sys (coding-system-plist buffer-file-coding-system)))
-          (if (memq (plist-get sys :category)
-                    '(coding-category-undecided coding-category-utf-8))
-              "UTF-8"
-            (upcase (symbol-name (plist-get sys :name)))))
-        " ")))
+          ((2) "CR ")))))
 
 ;; Input method
 (liteline-define-segment input-method
-  "Show the input method name."
+  "Show input method information."
   (and (liteline--window-active-p)
        current-input-method
        (concat " " current-input-method-title " ")))
 
 ;; Major mode
+(defvar reftex-index-restriction-indicator)
+(defvar reftex-toc-include-labels-indicator)
+(defvar reftex-toc-include-index-indicator)
+(defvar reftex-toc-max-level-indicator)
 (declare-function reftex-offer-label-menu "reftex-ref")
 
 (defun liteline--setup-conda ()
@@ -352,7 +350,7 @@ If DEFAULT is non-nil, set the default value."
        (format "[%s]" conda-current-environment)))
     ;; RefTeX index
     ((reftex-index-mode)
-     (when (bound-and-true-p reftex-index-restriction-indicator)
+     (when reftex-index-restriction-indicator
        (format "[%s]" reftex-index-restriction-indicator)))
     ;; RefTeX reference style
     ((reftex-select-label-mode)
@@ -360,22 +358,20 @@ If DEFAULT is non-nil, set the default value."
        (format "[%s]" reftex-refstyle)))
     ;; RefTeX TOC
     ((reftex-toc-mode)
-     (format
-      " L:%s I:%s T:%s"
-      (or (bound-and-true-p reftex-toc-include-labels-indicator) "-")
-      (or (bound-and-true-p reftex-toc-include-index-indicator) "-")
-      (or (bound-and-true-p reftex-toc-max-level-indicator) "-")))
+     (format " L:%s I:%s T:%s"
+             (or reftex-toc-include-labels-indicator "-")
+             (or reftex-toc-include-index-indicator "-")
+             (or reftex-toc-max-level-indicator "-")))
     ;; Calc modes
     ((calc-mode)
-     (let ((string (substring-no-properties
-                    (string-trim (replace-regexp-in-string
-                                  "\\`Calc.*: " ""
-                                  mode-line-buffer-identification)))))
+     (let* ((name mode-line-buffer-identification)
+            (info (replace-regexp-in-string "\\`Calc.*: " "" name))
+            (string (substring-no-properties (string-trim info))))
        (unless (string-empty-p string)
          (concat " " string))))))
 
 (liteline-define-segment major-mode
-  "Show the major mode name and other related information."
+  "Show major mode information."
   '(" "
     mode-name
     (:eval (liteline--get-major-mode-extra-info))
@@ -386,9 +382,8 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Keyboard macro
 (defun liteline--get-macro-indicator ()
-  "Return an indicator when recording keyboard macros."
-  (when defining-kbd-macro
-    "M>"))
+  "Return an indicator when defining keyboard macros."
+  (and defining-kbd-macro "M>"))
 
 ;; Recursive editing
 (defun liteline--get-recursive-editing-depth ()
@@ -398,10 +393,11 @@ If DEFAULT is non-nil, set the default value."
       (format "@%d" depth))))
 
 ;; Selection
-(defsubst liteline--get-column (pos)
-  "Return the column number of POS."
-  (save-excursion (goto-char pos)
-                  (current-column)))
+(defsubst liteline--get-column (position)
+  "Return the column number at POSITION."
+  (save-excursion
+    (goto-char position)
+    (current-column)))
 
 (defun liteline--get-selection-info ()
   "Return the selection information."
@@ -414,15 +410,13 @@ If DEFAULT is non-nil, set the default value."
                              lines
                              (abs (- (liteline--get-column end)
                                      (liteline--get-column start)))))
-                    ((> lines 1)
-                     (format "%dC %dL" (- end start) lines))
-                    (t
-                     (format "%dC" (- end start))))
+                    ((> lines 1) (format "%dC %dL" (- end start) lines))
+                    (t (format "%dC" (- end start))))
               (when (apply #'derived-mode-p liteline-word-count-modes)
                 (format " %dW" (count-words start end)))))))
 
 (liteline-define-segment action
-  "Show action status."
+  "Show action information."
   (when (liteline--window-active-p)
     (let (action)
       (dolist (fn '(liteline--get-selection-info
@@ -447,27 +441,29 @@ If DEFAULT is non-nil, set the default value."
   (setf liteline--flycheck
         (cl-case status
           ((no-checker)
-           (propertize "No checker" 'face 'liteline-flycheck-message))
+           (propertize "No checker" 'face 'liteline-flycheck-general))
           ((running)
-           (propertize "Running" 'face 'liteline-flycheck-message))
+           (propertize "Running" 'face 'liteline-flycheck-general))
           ((errored)
-           (propertize "Errored" 'face 'liteline-flycheck-message-urgent))
+           (propertize "Errored" 'face 'liteline-flycheck-urgent))
           ((interrupted)
-           (propertize "Interrupted" 'face 'liteline-flycheck-message))
+           (propertize "Interrupted" 'face 'liteline-flycheck-general))
           ((suspicious)
-           (propertize "Unknown" 'face 'liteline-flycheck-message-urgent))
+           (propertize "Unknown" 'face 'liteline-flycheck-urgent))
           ((finished)
            (let-alist (flycheck-count-errors flycheck-current-errors)
              (if (or .error .warning .info)
                  (concat
-                  (propertize (format "%dE " (or .error 0))
-                              'face 'liteline-flycheck-error-error)
-                  (propertize (format "%dW " (or .warning 0))
-                              'face 'liteline-flycheck-error-warning)
+                  (propertize (format "%dE" (or .error 0))
+                              'face 'liteline-flycheck-error)
+                  " "
+                  (propertize (format "%dW" (or .warning 0))
+                              'face 'liteline-flycheck-warning)
+                  " "
                   (propertize (format "%dI" (or .info 0))
-                              'face 'liteline-flycheck-error-info))
+                              'face 'liteline-flycheck-info))
                (propertize "No issues"
-                           'face 'liteline-flycheck-error-clean)))))))
+                           'face 'liteline-flycheck-clean)))))))
 
 (defun liteline--setup-flycheck ()
   "Setup Flycheck."
@@ -515,38 +511,36 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline--setup-git ()
   "Setup Git integration."
-  (with-eval-after-load 'vc-hooks
-    (advice-add #'vc-mode-line :after #'liteline--update-git)))
+  (advice-add #'vc-mode-line :after #'liteline--update-git))
 
 (liteline-define-segment git
-  "Show Git branch and state."
+  "Show Git status."
   (and (liteline--window-active-p)
        liteline--git
        (concat " " liteline--git " ")))
 
 ;; Minor mode
 (liteline-define-segment minor-modes
-  "Show some important minor modes."
+  "Show indicators for certain minor modes."
   (when (liteline--window-active-p)
-    (let (modes)
-      (dolist (mode liteline-important-minor-modes-alist)
+    (let (indicators)
+      (dolist (mode liteline-minor-mode-indicator-alist)
         (let ((symbol (car mode)))
           (when (and (boundp symbol) (symbol-value symbol))
-            (push (cdr mode) modes))))
-      (when modes
-        (push " " modes)
-        (apply #'concat " " (nreverse modes))))))
+            (push (cdr mode) indicators))))
+      (when indicators
+        (push " " indicators)
+        (apply #'concat " " (nreverse indicators))))))
 
 ;; Misc information
-(defun liteline--get-org-timer ()
-  "Return Org timer information."
-  (when (bound-and-true-p org-timer-mode-line-string)
-    (substring-no-properties org-timer-mode-line-string 2 -1)))
-
 (liteline-define-segment misc
-  "Show some misc but important information."
-  (when (liteline--window-active-p)
-    (concat " " (liteline--get-org-timer) " ")))
+  "Show misc information."
+  (and (liteline--window-active-p)
+       (memq 'org-timer-mode-line-string global-mode-string)
+       (bound-and-true-p org-timer-mode-line-string)
+       (concat " "
+               (substring-no-properties org-timer-mode-line-string 2 -1)
+               " ")))
 
 ;; Two-column
 (defvar 2C-mode-line-format)
@@ -562,10 +556,10 @@ If DEFAULT is non-nil, set the default value."
 (liteline-define-mode-line main
   (action
    buffer-info
-   buffer-position)
+   position)
   (misc
    git
-   buffer-encoding
+   coding-system
    input-method
    minor-modes
    major-mode
