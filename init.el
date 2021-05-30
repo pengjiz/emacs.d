@@ -1223,8 +1223,7 @@
 (use-package flycheck-inline
   :ensure t
   :defer t
-  :hook (flycheck-mode . flycheck-inline-mode)
-  :config (require 'compile))
+  :hook (flycheck-mode . flycheck-inline-mode))
 
 ;;; Spell check
 
