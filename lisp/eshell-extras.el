@@ -19,10 +19,10 @@
 
 ;;; Face and option
 
-(defcustom eshell-extras-prompt-git-state-indicators-alist
+(defcustom eshell-extras-prompt-git-state-indicator-alist
   '((clean . nil)
     (dirty . "*"))
-  "Indicators for different Git working tree states."
+  "Indicators for Git working tree states."
   :type '(alist :key-type (choice (const clean)
                                   (const dirty))
                 :value-type (choice string
@@ -123,7 +123,7 @@ Return the first line of output if any. Otherwise return nil."
   (let ((state (if (eshell-extras--call-git-string "status" "--porcelain")
                    'dirty
                  'clean)))
-    (cdr (assq state eshell-extras-prompt-git-state-indicators-alist))))
+    (cdr (assq state eshell-extras-prompt-git-state-indicator-alist))))
 
 (defun eshell-extras--get-prompt ()
   "Return a prompt for Eshell."

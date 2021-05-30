@@ -16,35 +16,34 @@
   :group 'convenience)
 
 (defcustom change-language-languages
-  '("German"
-    "Default")
+  '("German" "Default")
   "List of languages to be considered."
   :type '(repeat string))
 
 (defcustom change-language-functions
   '(change-language-change-ispell-dictionary
     change-language-change-input-method
-    change-language-change-typography-style)
+    change-language-change-typo-language)
   "Hook to be run when changing language."
   :type 'hook)
 
-(defcustom change-language-ispell-dictionaries-alist
+(defcustom change-language-ispell-dictionary-alist
   '(("English" . "en_US")
     ("German" . "de_DE"))
   "Ispell dictionaries for languages."
   :type '(alist :keytype string
                 :value-type string))
 
-(defcustom change-language-input-methods-alist
+(defcustom change-language-input-method-alist
   '(("German" . "german-postfix"))
   "Input methods for languages."
   :type '(alist :keytype string
                 :value-type string))
 
-(defcustom change-language-typography-styles-alist
+(defcustom change-language-typo-language-alist
   '(("German" . "German")
     ("English" . "English"))
-  "Typography styles for languages."
+  "Language names used by typo for languages."
   :type '(alist :keytype string
                 :value-type string))
 
@@ -71,7 +70,7 @@ With non-nil ARG force changing to the language selected."
 (defun change-language-change-ispell-dictionary (language)
   "Change to the Ispell dictionary for LANGUAGE."
   (let ((dictionary (cdr (assoc language
-                                change-language-ispell-dictionaries-alist))))
+                                change-language-ispell-dictionary-alist))))
     (ispell-change-dictionary (or dictionary "default"))))
 
 ;;; Input method
@@ -79,7 +78,7 @@ With non-nil ARG force changing to the language selected."
 (defun change-language-change-input-method (language)
   "Change to the input method for LANGUAGE."
   (let ((input-method (cdr (assoc language
-                                  change-language-input-methods-alist))))
+                                  change-language-input-method-alist))))
     ;; NOTE: Do not use set-input-method because it changes the default input
     ;; method globally.
     (activate-input-method input-method)))
@@ -88,12 +87,11 @@ With non-nil ARG force changing to the language selected."
 
 (declare-function typo-change-language "ext:typo")
 
-(defun change-language-change-typography-style (language)
-  "Change to the typography style for LANGUAGE."
+(defun change-language-change-typo-language (language)
+  "Change to the typo language for LANGUAGE."
   (when (fboundp #'typo-change-language)
-    (let ((style (cdr (assoc language
-                             change-language-typography-styles-alist))))
-      (typo-change-language (or style (default-value 'typo-language))))))
+    (let ((name (cdr (assoc language change-language-typo-language-alist))))
+      (typo-change-language (or name (default-value 'typo-language))))))
 
 (provide 'change-language)
 ;;; change-language.el ends here
