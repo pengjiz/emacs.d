@@ -18,7 +18,7 @@
 
 (defcustom conda-environment-directories
   `(,(expand-file-name (convert-standard-filename ".conda/envs/") "~"))
-  "A list of directories of the conda environments."
+  "List of directories for environments."
   :type '(repeat directory))
 
 (defcustom conda-default-environment
@@ -29,28 +29,28 @@
 
 (defcustom conda-pre-activate-hook
   nil
-  "The hook to run before activating an environment."
+  "Hook to run before activating an environment."
   :type 'hook)
 
 (defcustom conda-post-activate-hook
   nil
-  "The hook to run after activating an environment."
+  "Hook to run after activating an environment."
   :type 'hook)
 
 (defcustom conda-pre-deactivate-hook
   nil
-  "The hook to run before deactivating an environment."
+  "Hook to run before deactivating an environment."
   :type 'hook)
 
 (defcustom conda-post-deactivate-hook
   nil
-  "The hook to run after deactivating an environment."
+  "Hook to run after deactivating an environment."
   :type 'hook)
 
 ;;; Find environments
 
 (defun conda--get-environments ()
-  "Get all conda environments."
+  "Get all environments."
   (mapcan (lambda (directory)
             (when (file-directory-p directory)
               (let (environments)
@@ -82,20 +82,23 @@
   "Previous value of variable `exec-path'.")
 
 (defun conda-activate (environment &optional show-message)
-  "Activate conda ENVIRONMENT.
+  "Activate the environment named ENVIRONMENT.
 When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive
-   (list (completing-read "Environment: "
-                          (conda--get-environments)
-                          nil t)
-         (prefix-numeric-value current-prefix-arg)))
+   (list (unless (file-remote-p default-directory)
+           (completing-read "Environment: "
+                            (conda--get-environments)
+                            nil t))
+         t))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
+  (unless (and environment (not (string-empty-p environment)))
+    (user-error "Conda environment not specified"))
+
   (let* ((path (conda--get-environment-path environment))
-         ;; FIXME: This does not work on Windows.
-         (bin-path (expand-file-name "bin" path)))
-    ;; Error when the environment is not found
-    (unless path
+         ;; FIXME: This may not work on all platforms.
+         (bin-path (and path (expand-file-name "bin" path))))
+    (unless (and path bin-path (file-directory-p bin-path))
       (error "%s is not a valid conda environment" environment))
 
     (conda-deactivate show-message)
@@ -118,8 +121,6 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
     (setenv "CONDA_PREFIX" path)
 
     ;; Eshell
-    ;;
-    ;; NOTE: This will update all Eshell buffers, which is what I usually want.
     (setf (default-value 'eshell-path-env) (getenv "PATH"))
     (dolist (buffer (buffer-list))
       (with-current-buffer buffer
@@ -134,7 +135,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
 (defun conda-deactivate (&optional show-message)
   "Deactivate the current environment.
 When SHOW-MESSAGE is non-nil, display helpful messages."
-  (interactive "p")
+  (interactive (list t))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
 
@@ -173,10 +174,10 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
 (defun conda-activate-default (&optional show-message)
   "Activate the default environment.
 When SHOW-MESSAGE is non-nil, display helpful messages."
-  (interactive "p")
+  (interactive (list t))
   (if conda-default-environment
       (conda-activate conda-default-environment show-message)
-    (error "Default environment not set")))
+    (error "Default conda environment not set")))
 
 ;;; Flycheck integration
 
@@ -195,8 +196,10 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
             (flycheck-reset-enabled-checker checker)))))))
 
 (with-eval-after-load 'flycheck
-  (add-hook 'conda-post-activate-hook #'conda--reset-flycheck-enabled-checkers)
-  (add-hook 'conda-post-deactivate-hook #'conda--reset-flycheck-enabled-checkers))
+  (add-hook 'conda-post-activate-hook
+            #'conda--reset-flycheck-enabled-checkers)
+  (add-hook 'conda-post-deactivate-hook
+            #'conda--reset-flycheck-enabled-checkers))
 
 (provide 'conda)
 ;;; conda.el ends here
