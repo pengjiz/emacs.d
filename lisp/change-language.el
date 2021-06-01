@@ -16,8 +16,8 @@
   :group 'convenience)
 
 (defcustom change-language-languages
-  '("German" "Default")
-  "List of languages to be considered."
+  '("English" "German")
+  "List of registered languages."
   :type '(repeat string))
 
 (defcustom change-language-functions
@@ -31,57 +31,58 @@
   '(("English" . "en_US")
     ("German" . "de_DE"))
   "Ispell dictionaries for languages."
-  :type '(alist :keytype string
+  :type '(alist :key-type string
                 :value-type string))
 
 (defcustom change-language-input-method-alist
   '(("German" . "german-postfix"))
   "Input methods for languages."
-  :type '(alist :keytype string
+  :type '(alist :key-type string
                 :value-type string))
 
 (defcustom change-language-typo-language-alist
-  '(("German" . "German")
-    ("English" . "English"))
+  '(("English" . "English")
+    ("German" . "German"))
   "Language names used by typo for languages."
-  :type '(alist :keytype string
+  :type '(alist :key-type string
                 :value-type string))
 
 ;;; Core
 
 (defvar-local change-language-current-language nil
-  "The language for the current buffer.")
+  "Language for the current buffer.")
 
-(defun change-language (&optional arg)
-  "Change language for the current buffer.
-With non-nil ARG force changing to the language selected."
-  (interactive "P")
-  (let ((language (completing-read "Language: "
-                                   change-language-languages
-                                   nil t)))
-    (when (or arg
-              (not (equal change-language-current-language
-                          language)))
-      (run-hook-with-args 'change-language-functions language)
-      (setf change-language-current-language language))))
+(defun change-language (language &optional show-message)
+  "Change to LANGUAGE for the current buffer.
+When SHOW-MESSAGE is non-nil, display helpful messages."
+  (interactive
+   (let* ((prompt "Language (default unspecified): ")
+          (input (completing-read prompt change-language-languages nil t)))
+     (list (and (not (string-empty-p input)) input) t)))
+  (unless (or (not language)
+              (member language change-language-languages))
+    (error "%s is not a registered language" language))
+  (run-hook-with-args 'change-language-functions language)
+  (setf change-language-current-language language)
+  (when show-message
+    (message "Local language changed to %s"
+             (or change-language-current-language "unspecified"))))
 
 ;;; Ispell
 
 (defun change-language-change-ispell-dictionary (language)
   "Change to the Ispell dictionary for LANGUAGE."
-  (let ((dictionary (cdr (assoc language
-                                change-language-ispell-dictionary-alist))))
+  (let* ((dictionaries change-language-ispell-dictionary-alist)
+         (dictionary (and language (cdr (assoc language dictionaries)))))
     (ispell-change-dictionary (or dictionary "default"))))
 
 ;;; Input method
 
 (defun change-language-change-input-method (language)
   "Change to the input method for LANGUAGE."
-  (let ((input-method (cdr (assoc language
-                                  change-language-input-method-alist))))
-    ;; NOTE: Do not use set-input-method because it changes the default input
-    ;; method globally.
-    (activate-input-method input-method)))
+  (let* ((methods change-language-input-method-alist)
+         (method (and language (cdr (assoc language methods)))))
+    (activate-input-method method)))
 
 ;;; Typography style
 
@@ -90,7 +91,8 @@ With non-nil ARG force changing to the language selected."
 (defun change-language-change-typo-language (language)
   "Change to the typo language for LANGUAGE."
   (when (fboundp #'typo-change-language)
-    (let ((name (cdr (assoc language change-language-typo-language-alist))))
+    (let* ((names change-language-typo-language-alist)
+           (name (and language (cdr (assoc language names)))))
       (typo-change-language (or name (default-value 'typo-language))))))
 
 (provide 'change-language)
