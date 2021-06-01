@@ -2458,10 +2458,6 @@
   (setf org-src-preserve-indentation t)
   (setf org-src-window-setup 'other-window))
 
-(use-package ob-async
-  :ensure t
-  :after org)
-
 (use-package ob-http
   :ensure t
   :defer t
