@@ -81,18 +81,16 @@
 (defvar org-clock-frame-title-format)
 
 (defconst rich-title--base-format
-  '("GNU Emacs"
-    (:eval (rich-title--get-tab-info))
-    " - "
-    (:eval (rich-title--get-file-info))
-    rich-title--project)
+  '("GNU Emacs" (:eval (rich-title--get-tab-info)) " - "
+    (:eval (rich-title--get-file-info)) rich-title--project)
   "Base frame title format.")
 
+(defconst rich-title--icon-format
+  '("GNU Emacs - " (:eval (rich-title--get-file-info)))
+  "Title format for iconified frames.")
+
 (defconst rich-title--org-clock-format
-  `(,@rich-title--base-format
-    " ("
-    rich-title--org-clock
-    ")")
+  `(,@rich-title--base-format " (" rich-title--org-clock ")")
   "Frame title format with Org clock.")
 
 (defun rich-title-setup ()
@@ -100,7 +98,8 @@
   (rich-title--setup-project)
   (rich-title--setup-org-clock)
 
-  (setf frame-title-format rich-title--base-format)
+  (setf frame-title-format rich-title--base-format
+        icon-title-format rich-title--icon-format)
   (with-eval-after-load 'org-clock
     (setf org-clock-frame-title-format rich-title--org-clock-format)))
 
