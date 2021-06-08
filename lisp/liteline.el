@@ -113,17 +113,13 @@
   (defun liteline--prepare-segments (segments)
     "Prepare mode line forms of SEGMENTS.
 Return forms that can be passed directly to `format-mode-line'."
-    (let (forms it)
+    (let (forms)
       (dolist (segment segments)
-        (cond ((stringp segment)
-               (push segment forms))
-              ((consp segment)
-               (push segment forms))
-              ((symbolp segment)
-               (if (setf it (cdr (assq segment liteline--segment-fn-alist)))
-                   (push `(:eval (,it)) forms)
-                 (push it forms)))
-              (t (error "%s is not a valid segment" segment))))
+        (if (stringp segment)
+            (push segment forms)
+          (if-let* ((fn (cdr (assq segment liteline--segment-fn-alist))))
+              (push `(:eval (,fn)) forms)
+            (error "%s is not a valid segment" segment))))
       (cons "" (nreverse forms)))))
 
 (defmacro liteline-define-segment (name doc &rest body)
@@ -151,32 +147,29 @@ Return forms that can be passed directly to `format-mode-line'."
 
 (defvar liteline--mode-line-fn-alist nil "Functions of mode lines.")
 
+(defvar-local liteline--mode-line-right-string nil
+  "Formatted string for the right part of mode line.")
+(put 'liteline--mode-line-right-string 'risky-local-variable t)
+
 (defun liteline--prepare-mode-line (name)
   "Prepare the mode line of NAME."
   (if-let* ((fn (cdr (assq name liteline--mode-line-fn-alist))))
       `(:eval (,fn))
     (error "%s is not a valid mode line" name)))
 
-(defsubst liteline--escape (string)
-  "Escape special characters in STRING for mode line."
-  (replace-regexp-in-string "%" "%%" string))
-
-(defsubst liteline--clean-text-properties (string)
-  "Remove certain text properties in STRING."
-  (remove-list-of-text-properties 0 (length string)
-                                  '(mouse-face help-echo keymap local-map)
-                                  string))
-
 (defun liteline--wrap-mode-line (left right)
   "Wrap LEFT and RIGHT segment forms into a full mode line."
-  (let* ((right-string (format-mode-line right))
-         (right-width (string-width right-string))
-         (padding `((space :align-to (- (+ right right-fringe right-margin)
-                                        ,right-width)))))
-    (liteline--clean-text-properties right-string)
-    (list left
-          (propertize " " 'display padding)
-          (liteline--escape right-string))))
+  (setf liteline--mode-line-right-string (format-mode-line right))
+  (remove-list-of-text-properties 0 (length liteline--mode-line-right-string)
+                                  '(mouse-face help-echo keymap local-map)
+                                  liteline--mode-line-right-string)
+  (let* ((width (string-width liteline--mode-line-right-string))
+         (space `((space :align-to (- (+ right
+                                         right-fringe
+                                         right-margin)
+                                      ,width))))
+         (padding (propertize " " 'display space)))
+    `(,left ,padding liteline--mode-line-right-string)))
 
 (defmacro liteline-define-mode-line (name left &optional right)
   "Define a mode line function for NAME with LEFT and RIGHT segments."
@@ -238,13 +231,12 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment buffer-info
   "Show buffer information."
-  (concat
-   " "
-   (liteline--get-buffer-modification)
-   " "
-   (liteline--get-buffer-name)
-   (liteline--get-buffer-hostname)
-   " "))
+  (concat " "
+          (liteline--get-buffer-modification)
+          " "
+          (liteline--get-buffer-name)
+          (liteline--get-buffer-hostname)
+          " "))
 
 ;; Position
 (declare-function image-get-display-property "image-mode")
@@ -554,16 +546,8 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Main
 (liteline-define-mode-line main
-  (action
-   buffer-info
-   position)
-  (misc
-   git
-   coding-system
-   input-method
-   minor-modes
-   major-mode
-   flycheck))
+  (action buffer-info position)
+  (misc git coding-system input-method minor-modes major-mode flycheck))
 
 ;;; Entry point
 
