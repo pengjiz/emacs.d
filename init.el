@@ -134,20 +134,6 @@
         transient-levels-file (my-expand-var-file-name "transient/levels.el")
         transient-values-file (my-expand-var-file-name "transient/values.el")))
 
-(use-package alert
-  :ensure t
-  :defer t
-  :bind ("C-c o r" . my-set-reminder)
-  :init
-  (setf alert-default-style 'libnotify)
-
-  (defun my-set-reminder (time message)
-    "Show MESSAGE after TIME minutes."
-    (interactive (list (read-number "Minutes: " 10)
-                       (read-string "Message: ")))
-    (run-with-timer (* time 60) nil #'alert message :title "Reminder"))
-  :config (setf alert-fade-time 15))
-
 (use-package url
   :defer t
   :init (setf url-configuration-directory (my-expand-var-file-name "url/")))
@@ -1657,20 +1643,6 @@
         appt-display-mode-line nil)
   (setf appt-display-interval 10
         appt-message-warning-time 20)
-
-  (when (fboundp #'alert)
-    (setf appt-display-format 'window
-          appt-disp-window-function #'my-display-appt-message
-          appt-delete-window-function #'ignore)
-
-    (defun my-display-appt-message (time _ message)
-      "Display MESSAGE due in TIME minutes with `alert'."
-      (let ((template "%s in %s minutes"))
-        (if (listp message)
-            (dotimes (index (length message))
-              (alert (format template (nth index message) (nth index time))
-                     :title "Appt"))
-          (alert (format template message time) :title "Appt")))))
 
   (appt-activate 1)
   (with-eval-after-load 'org
