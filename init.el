@@ -1078,6 +1078,8 @@
          :map company-mode-map
          ([remap dabbrev-completion] . company-complete)
          :map company-active-map
+         ([remap beginning-of-buffer] . company-select-first)
+         ([remap end-of-buffer] . company-select-last)
          ([remap dabbrev-completion] . company-other-backend))
   :hook ((emacs-lisp-mode
           clojure-mode
@@ -1130,8 +1132,7 @@
     (company-mode))
   :config
   (setf company-idle-delay 0.5)
-  (setf company-selection-wrap-around t
-        company-show-numbers t
+  (setf company-show-numbers t
         company-format-margin-function nil))
 
 (use-package company-dabbrev
