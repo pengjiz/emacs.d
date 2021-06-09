@@ -7,10 +7,10 @@
 ;;; Code:
 
 (setf gc-cons-threshold 100000000)
-(defun my-set-gc-cons-threshold ()
+(defun early-init--set-gc-cons-threshold ()
   "Set `gc-cons-threshold' to a normal value."
   (setf gc-cons-threshold 10000000))
-(add-hook 'emacs-startup-hook #'my-set-gc-cons-threshold)
+(add-hook 'emacs-startup-hook #'early-init--set-gc-cons-threshold)
 
 (setf load-prefer-newer t)
 

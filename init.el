@@ -47,40 +47,40 @@
   (require 'bind-key))
 
 (progn ; helpers
-  (defconst my-etc-directory
+  (defconst init-etc-directory
     (expand-file-name (convert-standard-filename "etc/")
                       user-emacs-directory)
     "The directory where packages put their configuration files.")
-  (defconst my-var-directory
+  (defconst init-var-directory
     (expand-file-name (convert-standard-filename "var/")
                       user-emacs-directory)
     "The directory where packages put their persistent data files.")
-  (defconst my-sync-directory
+  (defconst init-sync-directory
     (expand-file-name (convert-standard-filename "Sync/")
                       "~")
     "The directory where files are synchronized among machines.")
-  (make-directory my-etc-directory t)
-  (make-directory my-var-directory t)
-  (make-directory my-sync-directory t)
+  (make-directory init-etc-directory t)
+  (make-directory init-var-directory t)
+  (make-directory init-sync-directory t)
 
-  (defun my-expand-etc-file-name (file)
-    "Expand FILE relative to `my-etc-directory'."
+  (defun init--etc (file)
+    "Expand FILE relative to `init-etc-directory'."
     (expand-file-name (convert-standard-filename file)
-                      my-etc-directory))
+                      init-etc-directory))
 
-  (defun my-expand-var-file-name (file)
-    "Expand FILE relative to `my-var-directory'."
+  (defun init--var (file)
+    "Expand FILE relative to `init-var-directory'."
     (expand-file-name (convert-standard-filename file)
-                      my-var-directory))
+                      init-var-directory))
 
-  (defun my-expand-sync-file-name (file)
-    "Expand FILE relative to `my-sync-directory'."
+  (defun init--sync (file)
+    "Expand FILE relative to `init-sync-directory'."
     (expand-file-name (convert-standard-filename file)
-                      my-sync-directory))
+                      init-sync-directory))
 
   ;; NOTE: To manipulate non-interactive functions we need to use
   ;; non-interactive functions, so that they will not become interactive.
-  (defun my-ignore (&rest _)
+  (defun init-ignore (&rest _)
     "Do nothing and return nil."
     nil))
 
@@ -97,7 +97,7 @@
 ;;; Initialization
 
 (progn ; general customization
-  (setf custom-file (my-expand-var-file-name "custom.el"))
+  (setf custom-file (init--var "custom.el"))
   (load custom-file t t t)
 
   (dolist (key '("M-`" "M-=" "M-$" "M-z" "C-z" "C-x C-z"
@@ -130,22 +130,22 @@
   :ensure t
   :defer t
   :init
-  (setf transient-history-file (my-expand-var-file-name "transient/history.el")
-        transient-levels-file (my-expand-var-file-name "transient/levels.el")
-        transient-values-file (my-expand-var-file-name "transient/values.el")))
+  (setf transient-history-file (init--var "transient/history.el")
+        transient-levels-file (init--var "transient/levels.el")
+        transient-values-file (init--var "transient/values.el")))
 
 (use-package url
   :defer t
-  :init (setf url-configuration-directory (my-expand-var-file-name "url/")))
+  :init (setf url-configuration-directory (init--var "url/")))
 
 (use-package url-cache
   :defer t
-  :init (setf url-cache-directory (my-expand-var-file-name "url/cache/")))
+  :init (setf url-cache-directory (init--var "url/cache/")))
 
 (use-package request
   :ensure t
   :defer t
-  :init (setf request-storage-directory (my-expand-var-file-name "request/")))
+  :init (setf request-storage-directory (init--var "request/")))
 
 (use-package server
   :config
@@ -207,7 +207,7 @@
              ("C-<tab>" . simple-extras-force-completion-at-point)))
 
 (use-package savehist
-  :init (setf savehist-file (my-expand-var-file-name "savehist"))
+  :init (setf savehist-file (init--var "savehist"))
   :config (savehist-mode))
 
 (use-package undo-propose
@@ -281,7 +281,7 @@
 
 (use-package kkc
   :defer t
-  :init (setf kkc-init-file-name (my-expand-var-file-name "kkcrc")))
+  :init (setf kkc-init-file-name (init--var "kkcrc")))
 
 (use-package change-language
   :load-path "lisp"
@@ -395,9 +395,9 @@
           text-mode
           bibtex-mode
           conf-mode)
-         . my-enable-whitespace)
+         . init--enable-whitespace)
   :init
-  (defun my-enable-whitespace ()
+  (defun init--enable-whitespace ()
     (add-hook 'hack-local-variables-hook #'whitespace-mode nil t))
   :config
   (setf whitespace-style '(face
@@ -409,16 +409,18 @@
                            lines-tail)
         whitespace-line-column nil)
 
-  (defun my-set-whitespaces-to-clean (fn &rest args)
-    "Apply FN on ARGS but explicitly set whitespaces to clean."
+  (defun init--set-cleanup-whitespace-style (fn &rest args)
+    "Apply FN on ARGS but explicitly set whitespace style for cleanup."
     (let ((whitespace-style '(empty
                               indentation
                               space-before-tab
                               space-after-tab
                               trailing)))
       (apply fn args)))
-  (advice-add #'whitespace-cleanup :around #'my-set-whitespaces-to-clean)
-  (advice-add #'whitespace-cleanup-region :around #'my-set-whitespaces-to-clean))
+  (advice-add #'whitespace-cleanup :around
+              #'init--set-cleanup-whitespace-style)
+  (advice-add #'whitespace-cleanup-region :around
+              #'init--set-cleanup-whitespace-style))
 
 (use-package whitespace-cleanup-mode
   :ensure t
@@ -439,11 +441,11 @@
 (use-package hideshow
   :defer t
   :bind (:map hs-minor-mode-map ("C-c @ t" . hs-toggle-hiding))
-  :hook ((prog-mode protobuf-mode bibtex-mode) . my-enable-hideshow)
+  :hook ((prog-mode protobuf-mode bibtex-mode) . init--enable-hideshow)
   :init
   (setf hs-minor-mode-map (make-sparse-keymap))
 
-  (defun my-enable-hideshow ()
+  (defun init--enable-hideshow ()
     (unless (eq major-mode 'idris-prover-script-mode)
       (hs-minor-mode))))
 
@@ -570,12 +572,12 @@
 
 ;; Protect a few special buffers
 (progn ; special buffers
-  (defun my-protect-special-buffers ()
+  (defun init--protect-special-buffers ()
     "Protect special buffers from being killed."
     (or (not (member (buffer-name (current-buffer))
                      '("*scratch*" "*Messages*")))
         (ignore (bury-buffer))))
-  (add-hook 'kill-buffer-query-functions #'my-protect-special-buffers))
+  (add-hook 'kill-buffer-query-functions #'init--protect-special-buffers))
 
 (use-package autorevert
   :bind ("C-c t g" . auto-revert-mode)
@@ -623,8 +625,8 @@
          ("C-c b r" . rename-buffer)
          ("C-c b R" . rename-uniquely))
   :config
-  (let ((list-prefix (my-expand-var-file-name "auto-save/sessions/"))
-        (save-directory (my-expand-var-file-name "auto-save/saves/")))
+  (let ((list-prefix (init--var "auto-save/sessions/"))
+        (save-directory (init--var "auto-save/saves/")))
     (make-directory save-directory t)
     (setf auto-save-list-file-prefix list-prefix
           auto-save-file-name-transforms `((".*" ,save-directory t))))
@@ -632,17 +634,17 @@
         delete-old-versions t
         version-control t
         backup-directory-alist `((,tramp-file-name-regexp . nil)
-                                 ("." . ,(my-expand-var-file-name "backups/"))))
+                                 ("." . ,(init--var "backups/"))))
 
   (setf view-read-only t)
   (setf save-abbrevs 'silently)
   (setf require-final-newline t)
 
   (setf confirm-nonexistent-file-or-buffer t)
-  (defun my-create-parent-directory ()
-    "Create the parent directory if it is non-existent."
+  (defun init--ensure-directory-for-file ()
+    "Ensure that the directory for file exists."
     (make-directory (file-name-directory buffer-file-name) t))
-  (add-hook 'find-file-not-found-functions #'my-create-parent-directory))
+  (add-hook 'find-file-not-found-functions #'init--ensure-directory-for-file))
 
 (use-package files-x
   :defer t
@@ -674,17 +676,17 @@
 (use-package tramp
   :defer t
   :init
-  (setf tramp-persistency-file-name (my-expand-var-file-name "tramp/persistency")
-        tramp-auto-save-directory (my-expand-var-file-name "tramp/auto-save/")
+  (setf tramp-persistency-file-name (init--var "tramp/persistency")
+        tramp-auto-save-directory (init--var "tramp/auto-save/")
         tramp-histfile-override t))
 
 (use-package saveplace
-  :init (setf save-place-file (my-expand-var-file-name "places"))
+  :init (setf save-place-file (init--var "places"))
   :config (save-place-mode))
 
 (use-package recentf
   :init
-  (setf recentf-save-file (my-expand-var-file-name "recentf"))
+  (setf recentf-save-file (init--var "recentf"))
   (setf recentf-auto-cleanup 300)
   :config
   (setf recentf-max-saved-items 100)
@@ -693,13 +695,14 @@
 
 (use-package bookmark
   :defer t
-  :init (setf bookmark-default-file (my-expand-var-file-name "bookmarks"))
+  :init (setf bookmark-default-file (init--var "bookmarks"))
   :config
   (unless (file-exists-p bookmark-default-file)
-    (dolist (item '(("finances" . "ledger/finances.ledger")))
-      (let ((filename (my-expand-sync-file-name (cdr item))))
-        (when (file-exists-p filename)
-          (cl-pushnew `(,(car item) . ((filename . ,filename))) bookmark-alist
+    (dolist (bookmark '(("finances" . "ledger/finances.ledger")))
+      (let ((name (car bookmark))
+            (file (init--sync (cdr bookmark))))
+        (when (file-exists-p file)
+          (cl-pushnew `(,name . ((filename . ,file))) bookmark-alist
                       :test #'equal :key #'car))))))
 
 (use-package dired
@@ -797,11 +800,11 @@
   :defer t
   :after dired
   :init
-  (setf image-dired-dir (my-expand-var-file-name "image-dired/")
-        image-dired-db-file (my-expand-var-file-name "image-dired/db")
-        image-dired-gallery-dir (my-expand-var-file-name "image-dired/gallery/")
-        image-dired-temp-image-file (my-expand-var-file-name "image-dired/temp")
-        image-dired-temp-rotate-image-file (my-expand-var-file-name "image-dired/rotate-temp")))
+  (setf image-dired-dir (init--var "image-dired/")
+        image-dired-db-file (init--var "image-dired/db")
+        image-dired-gallery-dir (init--var "image-dired/gallery/")
+        image-dired-temp-image-file (init--var "image-dired/temp")
+        image-dired-temp-rotate-image-file (init--var "image-dired/rotate-temp")))
 
 (use-package disk-usage
   :ensure t
@@ -823,7 +826,7 @@
 (use-package auth-source
   :defer t
   :config
-  (setf auth-sources `(,(my-expand-sync-file-name "misc/authinfo.gpg")))
+  (setf auth-sources `(,(init--sync "misc/authinfo.gpg")))
   (setf auth-source-cache-expiry 3600))
 
 (use-package epa
@@ -1087,14 +1090,14 @@
           rst-mode
           org-mode
           ledger-mode)
-         . my-enable-company)
+         . init--enable-company)
   :init
   (setf company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
                             company-preview-if-just-one-frontend)
         company-backends '(company-files company-dabbrev-code company-dabbrev)
         company-transformers '(company-sort-prefer-same-case-prefix))
 
-  (defun my-enable-company ()
+  (defun init--enable-company ()
     (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
                                                  'clojure-mode
                                                  'rust-mode
@@ -1166,7 +1169,7 @@
   :defer t
   :bind (("C-c t r" . abbrev-mode)
          ("C-c e e" . expand-abbrev))
-  :init (setf abbrev-file-name (my-expand-var-file-name "abbrev-defs"))
+  :init (setf abbrev-file-name (init--var "abbrev-defs"))
   :hook ((text-mode bibtex-mode) . abbrev-mode))
 
 (use-package tempo
@@ -1178,7 +1181,7 @@
   :bind ("C-c e t" . auto-insert)
   :init
   (setf auto-insert t)
-  (setf auto-insert-directory (my-expand-etc-file-name "insert/")
+  (setf auto-insert-directory (init--etc "insert/")
         auto-insert-alist nil))
 
 ;;; Lint
@@ -1268,9 +1271,9 @@
   :after magit
   :config
   (setf git-commit-summary-max-length 50)
-  (defun my-setup-git-commit-mode ()
+  (defun init--setup-git-commit-mode ()
     (setf fill-column 72))
-  (add-hook 'git-commit-mode-hook #'my-setup-git-commit-mode)
+  (add-hook 'git-commit-mode-hook #'init--setup-git-commit-mode)
   (add-hook 'git-commit-setup-hook #'git-commit-turn-on-flyspell))
 
 ;; Show edits
@@ -1305,7 +1308,7 @@
 
 (use-package project
   :defer t
-  :init (setf project-list-file (my-expand-var-file-name "projects"))
+  :init (setf project-list-file (init--var "projects"))
   :config
   (setf project-vc-merge-submodules nil)
   (setf project-switch-commands '((project-find-file "Find file")
@@ -1381,15 +1384,15 @@
 
 (use-package esh-mode
   :defer t
-  :init (setf eshell-directory-name (my-expand-var-file-name "eshell/"))
+  :init (setf eshell-directory-name (init--var "eshell/"))
   :config
   (setf eshell-scroll-to-bottom-on-input 'this)
 
-  (defun my-setup-eshell-mode ()
+  (defun init--setup-eshell-mode ()
     (bind-keys :map eshell-mode-map
                ("C-x m" . eshell-life-is-too-much)
                ("C-c a a" . eshell-life-is-too-much)))
-  (add-hook 'eshell-mode-hook #'my-setup-eshell-mode))
+  (add-hook 'eshell-mode-hook #'init--setup-eshell-mode))
 
 (use-package esh-var
   :defer t
@@ -1414,7 +1417,7 @@
 
 (use-package em-alias
   :defer t
-  :init (setf eshell-aliases-file (my-expand-etc-file-name "eshell/aliases")))
+  :init (setf eshell-aliases-file (init--etc "eshell/aliases")))
 
 (use-package em-glob
   :defer t
@@ -1431,8 +1434,8 @@
 (use-package em-script
   :defer t
   :init
-  (setf eshell-rc-script (my-expand-etc-file-name "eshell/profile")
-        eshell-login-script (my-expand-etc-file-name "eshell/login")))
+  (setf eshell-rc-script (init--etc "eshell/profile")
+        eshell-login-script (init--etc "eshell/login")))
 
 (use-package eshell-z
   :ensure t
@@ -1474,29 +1477,29 @@
   :defer t
   :bind ("C-c f e" . eww-open-file)
   :init
-  (make-directory (my-expand-var-file-name "eww/") t)
-  (setf eww-bookmarks-directory (my-expand-var-file-name "eww/"))
+  (make-directory (init--var "eww/") t)
+  (setf eww-bookmarks-directory (init--var "eww/"))
   :config
   (setf eww-search-prefix "https://www.google.com/search?q=")
 
-  (defun my-use-fundamental-mode-for-eww (fn &rest args)
+  (defun init--use-fundamental-mode-for-eww (fn &rest args)
     "Apply FN on ARGS, but force using `fundamental-mode' to view page source."
     (cl-letf (((symbol-function 'mhtml-mode) #'fundamental-mode)
               ((symbol-function 'html-mode) #'fundamental-mode))
       (apply fn args)))
-  (advice-add #'eww-view-source :around #'my-use-fundamental-mode-for-eww))
+  (advice-add #'eww-view-source :around #'init--use-fundamental-mode-for-eww))
 
 (use-package elfeed
   :ensure t
   :defer t
   :init
-  (setf elfeed-db-directory (my-expand-sync-file-name "misc/elfeed/db/"))
+  (setf elfeed-db-directory (init--sync "misc/elfeed/db/"))
   (with-eval-after-load 'recentf
     (push "/elfeed/db/" recentf-exclude))
   :bind ("C-c m w" . elfeed)
   :config
   ;; Load feeds
-  (load (my-expand-sync-file-name "misc/elfeed/feeds.el") t t t)
+  (load (init--sync "misc/elfeed/feeds.el") t t t)
   ;; Mark old entries as read
   (add-hook 'elfeed-new-entry-hook
             (elfeed-make-tagger :before "10 days ago"
@@ -1533,7 +1536,7 @@
   :ensure t
   :defer t
   :mode ("\\.epub\\'" . nov-mode)
-  :init (setf nov-save-place-file (my-expand-var-file-name "nov-places")))
+  :init (setf nov-save-place-file (init--var "nov-places")))
 
 ;;; Chatting
 
@@ -1605,7 +1608,7 @@
   :defer t
   :bind ("C-c m d" . calendar)
   :init
-  (let ((sync-directory (my-expand-sync-file-name "misc/")))
+  (let ((sync-directory (init--sync "misc/")))
     (make-directory sync-directory t)
     (setf diary-file (expand-file-name "diary" sync-directory)))
   :config
@@ -1615,7 +1618,7 @@
   (setf calendar-date-display-form calendar-iso-date-display-form)
   (calendar-set-date-style 'iso)
   (setf calendar-mode-line-format nil
-        (symbol-function 'calendar-set-mode-line) #'my-ignore))
+        (symbol-function 'calendar-set-mode-line) #'init-ignore))
 
 (use-package holidays
   :defer t
@@ -1775,8 +1778,8 @@
   :defer t
   :bind (:map geiser-repl-mode-map ("C-c a a" . geiser-repl-exit))
   :init
-  (make-directory (my-expand-var-file-name "geiser/") t)
-  (setf geiser-repl-history-filename (my-expand-var-file-name "geiser/history"))
+  (make-directory (init--var "geiser/") t)
+  (setf geiser-repl-history-filename (init--var "geiser/history"))
   :config
   (setf geiser-repl-company-p nil)
   (setf geiser-repl-read-only-prompt-p nil
@@ -1897,8 +1900,8 @@
          :map idris-repl-mode-map
          ("C-c a a" . idris-quit))
   :init
-  (make-directory (my-expand-var-file-name "idris/") t)
-  (setf idris-repl-history-file (my-expand-var-file-name "idris/history.eld"))
+  (make-directory (init--var "idris/") t)
+  (setf idris-repl-history-file (init--var "idris/history.eld"))
   :config
   (setf idris-stay-in-current-window-on-compiler-error t)
   (setf idris-enable-elab-prover t))
@@ -1910,7 +1913,7 @@
   :defer t
   :init
   (setf ess-write-to-dribble nil)
-  (setf ess-history-directory (my-expand-var-file-name "ess/history/"))
+  (setf ess-history-directory (init--var "ess/history/"))
   (make-directory ess-history-directory t)
 
   (with-eval-after-load 'org
@@ -2011,11 +2014,11 @@
 (use-package tide
   :ensure t
   :defer t
-  :hook ((js2-mode typescript-mode) . my-enable-tide)
+  :hook ((js2-mode typescript-mode) . init--enable-tide)
   :init
   (setf tide-completion-setup-company-backend nil)
 
-  (defun my-enable-tide ()
+  (defun init--enable-tide ()
     (unless (file-remote-p default-directory)
       (tide-setup)))
   :config (setf tide-completion-enable-autoimport-suggestions nil))
@@ -2061,13 +2064,13 @@
   (setf python-indent-guess-indent-offset-verbose nil
         python-indent-offset 4)
 
-  (defun my-setup-python-mode ()
+  (defun init--setup-python-mode ()
     (setf fill-column 79))
-  (add-hook 'python-mode-hook #'my-setup-python-mode)
+  (add-hook 'python-mode-hook #'init--setup-python-mode)
 
-  (defun my-setup-inferior-python-mode ()
+  (defun init--setup-inferior-python-mode ()
     (kill-local-variable 'comint-prompt-read-only))
-  (add-hook 'inferior-python-mode-hook #'my-setup-inferior-python-mode))
+  (add-hook 'inferior-python-mode-hook #'init--setup-inferior-python-mode))
 
 (use-package anaconda-mode
   :ensure t
@@ -2078,12 +2081,12 @@
          ([remap xref-find-definitions] . anaconda-mode-find-definitions)
          ([remap xref-find-references] . anaconda-mode-find-references)
          ("C-c C-v" . anaconda-mode-find-assignments))
-  :hook (python-mode . my-enable-anaconda)
+  :hook (python-mode . init--enable-anaconda)
   :init
   (setf anaconda-mode-map (make-sparse-keymap))
-  (setf anaconda-mode-installation-directory (my-expand-var-file-name "anaconda-mode/"))
+  (setf anaconda-mode-installation-directory (init--var "anaconda-mode/"))
 
-  (defun my-enable-anaconda ()
+  (defun init--enable-anaconda ()
     (unless (file-remote-p default-directory)
       (anaconda-mode)
       (anaconda-eldoc-mode)))
@@ -2195,10 +2198,10 @@
   :config
   (setf LaTeX-babel-hyphen nil)
 
-  (defun my-setup-LaTeX-mode ()
+  (defun init--setup-LaTeX-mode ()
     (make-local-variable 'TeX-electric-math)
     (setf TeX-electric-math '("\\(" . "\\)")))
-  (add-hook 'LaTeX-mode-hook #'my-setup-LaTeX-mode))
+  (add-hook 'LaTeX-mode-hook #'init--setup-LaTeX-mode))
 
 (use-package preview
   :defer t
@@ -2266,7 +2269,7 @@
   (setf ledger-default-date-format ledger-iso-date-format
         ledger-post-amount-alignment-at :decimal
         ledger-copy-transaction-insert-blank-line-after t)
-  (setf ledger-schedule-file (my-expand-sync-file-name "ledger/schedule"))
+  (setf ledger-schedule-file (init--sync "ledger/schedule"))
   (setf ledger-report-resize-window nil
         ledger-report-use-header-line t)
   (setf ledger-reports
@@ -2292,10 +2295,10 @@
 (use-package org
   :defer t
   :init
-  (make-directory (my-expand-var-file-name "org/") t)
+  (make-directory (init--var "org/") t)
   (setf org-babel-load-languages nil)
   :config
-  (setf org-directory (my-expand-sync-file-name "org/"))
+  (setf org-directory (init--sync "org/"))
   (make-directory org-directory t)
 
   (setf org-default-notes-file (expand-file-name "inbox.org" org-directory)
@@ -2327,12 +2330,12 @@
                                    ("project" . ?p)))
   (setf org-tags-exclude-from-inheritance '("project"))
 
-  (defun my-load-org-babel-languages ()
+  (defun init--load-org-babel-languages ()
     "Load all Org Babel languages once."
     (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
     ;; Only load languages once
-    (remove-hook 'org-mode-hook #'my-load-org-babel-languages))
-  (add-hook 'org-mode-hook #'my-load-org-babel-languages))
+    (remove-hook 'org-mode-hook #'init--load-org-babel-languages))
+  (add-hook 'org-mode-hook #'init--load-org-babel-languages))
 
 (use-package org-goto
   :defer t
@@ -2355,7 +2358,7 @@
 
 (use-package org-id
   :defer t
-  :init (setf org-id-locations-file (my-expand-var-file-name "org/id-locations")))
+  :init (setf org-id-locations-file (init--var "org/id-locations")))
 
 (use-package org-duration
   :defer t
@@ -2400,7 +2403,7 @@
 (use-package org-clock
   :defer t
   :init
-  (setf org-clock-persist-file (my-expand-var-file-name "org/clock-save.el"))
+  (setf org-clock-persist-file (init--var "org/clock-save.el"))
   (with-eval-after-load 'org
     (org-clock-persistence-insinuate))
   :config
@@ -2410,13 +2413,13 @@
         org-clock-clocked-in-display 'frame-title)
   (setf org-show-notification-timeout 10)
 
-  (defun my-confirm-exit-when-clocking ()
+  (defun init--confirm-exit-when-clocking ()
     "Ask for confirmation on exit with a running clock."
     (or (not (org-clocking-p))
         (progn
           (org-clock-goto)
           (yes-or-no-p "A running clock exists; exit anyway? "))))
-  (add-hook 'kill-emacs-query-functions #'my-confirm-exit-when-clocking))
+  (add-hook 'kill-emacs-query-functions #'init--confirm-exit-when-clocking))
 
 (use-package org-mru-clock
   :ensure t
@@ -2471,7 +2474,7 @@
         org-html-htmlize-output-type 'css
         org-html-head-include-default-style nil
         org-html-head (format "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
-                              (concat "file://" (my-expand-etc-file-name "css/org.css")))))
+                              (concat "file://" (init--etc "css/org.css")))))
 
 ;;; Markdown
 
@@ -2483,7 +2486,7 @@
   (setf (default-value 'markdown-enable-math) t)
   (setf markdown-fontify-code-blocks-natively t)
   (setf markdown-max-image-size '(300 . nil))
-  (setf markdown-css-paths `(,(concat "file://" (my-expand-etc-file-name "css/pandoc.css")))
+  (setf markdown-css-paths `(,(concat "file://" (init--etc "css/pandoc.css")))
         markdown-command '("pandoc" "--section-divs" "--from=markdown" "--to=html5")))
 
 ;;; ReStructuredText
@@ -2587,11 +2590,11 @@
   :ensure t
   :defer t
   :config
-  (defun my-setup-yaml-mode ()
+  (defun init--setup-yaml-mode ()
     (flyspell-mode 0)
     (auto-fill-mode 0)
     (abbrev-mode 0))
-  (add-hook 'yaml-mode-hook #'my-setup-yaml-mode))
+  (add-hook 'yaml-mode-hook #'init--setup-yaml-mode))
 
 ;;; CSV
 
