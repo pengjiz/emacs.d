@@ -1637,19 +1637,19 @@
   :config (setf diary-comment-start "##"))
 
 (use-package appt
+  :defer t
   :config
   (setf appt-display-diary nil
         appt-audible nil
         appt-display-mode-line nil)
   (setf appt-display-interval 10
-        appt-message-warning-time 20)
+        appt-message-warning-time 20))
 
-  (appt-activate 1)
-  (with-eval-after-load 'org
-    (run-with-timer 1 3600 (lambda () (when appt-timer
-                                        (let (appt-display-diary)
-                                          (org-agenda-to-appt t)
-                                          (appt-check t)))))))
+(use-package appt-extras
+  :load-path "lisp"
+  :defer t
+  :bind ("C-c o r" . appt-extras-set-reminder)
+  :hook (after-init . appt-extras-setup))
 
 ;;; Emacs Lisp
 
