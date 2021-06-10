@@ -6,11 +6,13 @@
 
 ;;; Code:
 
+(defconst early-init--original-gc-cons-threshold gc-cons-threshold
+  "Original value of `gc-cons-threshold'.")
 (setf gc-cons-threshold 100000000)
-(defun early-init--set-gc-cons-threshold ()
-  "Set `gc-cons-threshold' to a normal value."
-  (setf gc-cons-threshold 10000000))
-(add-hook 'emacs-startup-hook #'early-init--set-gc-cons-threshold)
+(defun early-init--restore-gc-cons-threshold ()
+  "Restore `gc-cons-threshold' to the original value."
+  (setf gc-cons-threshold early-init--original-gc-cons-threshold))
+(add-hook 'emacs-startup-hook #'early-init--restore-gc-cons-threshold)
 
 (setf load-prefer-newer t)
 
