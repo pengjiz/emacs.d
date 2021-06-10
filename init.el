@@ -827,6 +827,7 @@
   :defer t
   :config
   (setf auth-sources `(,(init--sync "misc/authinfo.gpg")))
+  (setf auth-source-save-behavior nil)
   (setf auth-source-cache-expiry 3600))
 
 (use-package epa
