@@ -1633,7 +1633,6 @@
   :defer t
   :config
   (setf appt-display-diary nil
-        appt-audible nil
         appt-display-mode-line nil)
   (setf appt-display-interval 10
         appt-message-warning-time 20))
