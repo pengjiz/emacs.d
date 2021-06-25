@@ -440,13 +440,8 @@
 (use-package hideshow
   :defer t
   :bind (:map hs-minor-mode-map ("C-c @ t" . hs-toggle-hiding))
-  :hook ((prog-mode protobuf-mode bibtex-mode) . init--enable-hideshow)
-  :init
-  (setf hs-minor-mode-map (make-sparse-keymap))
-
-  (defun init--enable-hideshow ()
-    (unless (eq major-mode 'idris-prover-script-mode)
-      (hs-minor-mode))))
+  :hook ((prog-mode protobuf-mode bibtex-mode) . hs-minor-mode)
+  :init (setf hs-minor-mode-map (make-sparse-keymap)))
 
 (use-package outline
   :defer t
@@ -886,8 +881,6 @@
                         "*Anaconda*"
                         "*tide-documentation*"
                         "*Racer Help*"
-                        "*idris-holes*"
-                        "*idris-info*"
                         "*cider-doc*"
                         "*cider-inspect*"
                         "*Geiser documentation*"))
@@ -948,7 +941,6 @@
                         "*cider-error*"
                         "*cider-test-report*"
                         "*Geiser dbg*"
-                        "*idris-notes*"
                         "*HsCompilation*"
                         "*R view"
                         "*S objects*"
@@ -1077,7 +1069,6 @@
           c++-mode
           rust-mode
           haskell-mode
-          idris-mode
           ess-r-mode
           python-mode
           sh-mode
@@ -1101,7 +1092,6 @@
     (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
                                                  'clojure-mode
                                                  'rust-mode
-                                                 'idris-mode
                                                  'sh-mode
                                                  'css-mode
                                                  'latex-mode
@@ -1887,24 +1877,6 @@
   (with-eval-after-load 'company
     (setf (default-value 'company-backends)
           (delq #'dante-company (default-value 'company-backends)))))
-
-;;; Idris
-
-(use-package idris-mode
-  :ensure t
-  :defer t
-  :bind (;; -
-         :map idris-mode-map
-         ("C-c a a" . idris-repl)
-         ("C-c a m" . idris-list-holes)
-         :map idris-repl-mode-map
-         ("C-c a a" . idris-quit))
-  :init
-  (make-directory (init--var "idris/") t)
-  (setf idris-repl-history-file (init--var "idris/history.eld"))
-  :config
-  (setf idris-stay-in-current-window-on-compiler-error t)
-  (setf idris-enable-elab-prover t))
 
 ;;; R
 

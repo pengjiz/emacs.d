@@ -80,21 +80,6 @@
   (dolist (hook '(ediff-quit-hook ediff-suspend-hook))
     (add-hook hook #'window-extras--restore-pre-ediff-configuration t)))
 
-;; Idris mode
-(defvar idris-hole-list-buffer-name)
-(declare-function idris-hole-list-quit "ext:idris-hole-list")
-
-(defun window-extras--quit-idris-hole-list (&rest _)
-  "Quit Idris hole list window when appropriate."
-  (when-let* ((window (get-buffer-window idris-hole-list-buffer-name t)))
-    (quit-window nil window)))
-
-(defun window-extras--setup-idris ()
-  "Setup Idris mode integration."
-  (with-eval-after-load 'idris-hole-list
-    (advice-add #'idris-hole-list-quit :before
-                #'window-extras--quit-idris-hole-list)))
-
 ;;; Entry point
 
 (defun window-extras-setup ()
@@ -103,8 +88,7 @@
   (window-extras--setup-org)
   (window-extras--setup-calc)
   (window-extras--setup-ielm)
-  (window-extras--setup-ediff)
-  (window-extras--setup-idris))
+  (window-extras--setup-ediff))
 
 (provide 'window-extras)
 ;;; window-extras.el ends here
