@@ -100,8 +100,8 @@
   (setf custom-file (init--var "custom.el"))
   (load custom-file t t t)
 
-  (dolist (key '("M-`" "M-=" "M-$" "M-z" "C-z" "C-x C-z"
-                 "C-x C-u" "C-x C-l" "C-x m" "C-x 4 m"))
+  (dolist (key '("M-`" "M-=" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
+                 "C-x m" "C-x 4 m" "C-x 5 m"))
     (unbind-key key)))
 
 (use-package modus-themes
@@ -173,8 +173,7 @@
          ([remap downcase-word] . downcase-dwim)
          ([remap capitalize-word] . capitalize-dwim)
          ([remap upcase-word] . upcase-dwim)
-         ("C-c b e" . erase-buffer)
-         ("C-c b c" . clone-indirect-buffer-other-window)
+         ("C-c b c" . clone-indirect-buffer)
          ("C-c t v" . visual-line-mode)
          ("C-c t l" . toggle-truncate-lines)
          ("C-c t q" . auto-fill-mode)
@@ -201,8 +200,8 @@
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
-  (bind-keys ("M-`" . simple-extras-unfill-paragraph)
-             ("C-c e r" . simple-extras-eval-and-replace-last-sexp)
+  (bind-keys ("M-z" . simple-extras-unfill-paragraph)
+             ("M-=" . simple-extras-eval-and-replace-last-sexp)
              :map completion-in-region-mode-map
              ("C-<tab>" . simple-extras-force-completion-at-point)))
 
