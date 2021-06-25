@@ -187,8 +187,7 @@
   :config
   (setf extended-command-suggest-shorter nil)
   (setf completion-show-help nil)
-  (setf kill-do-not-save-duplicates t
-        save-interprogram-paste-before-kill t)
+  (setf kill-do-not-save-duplicates t)
   (setf set-mark-command-repeat-pop t)
   (setf shell-command-dont-erase-buffer 'end-last-out
         async-shell-command-display-buffer nil))
