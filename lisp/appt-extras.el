@@ -42,7 +42,7 @@
 
 (defun appt-extras--display-appointment (time _ message)
   "Display MESSAGE for appointment due in TIME minutes."
-  (let ((template "%s (in %s min)"))
+  (let ((template "%s [in %s min]"))
     (if (listp message)
         (dotimes (index (length message))
           (appt-extras--notify "Appt" (format template
