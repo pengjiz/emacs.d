@@ -196,7 +196,7 @@
   :load-path "lisp"
   :config
   (simple-extras-setup)
-  (dolist (hook '(prog-mode-hook protobuf-mode-hook))
+  (dolist (hook '(prog-mode-hook protobuf-mode-hook gnuplot-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
   (bind-keys ("M-z" . simple-extras-unfill-paragraph)
@@ -223,7 +223,7 @@
 
 (use-package bug-reference
   :defer t
-  :hook ((prog-mode protobuf-mode) . bug-reference-prog-mode)
+  :hook ((prog-mode protobuf-mode gnuplot-mode) . bug-reference-prog-mode)
   :bind (("C-c t u" . bug-reference-mode)
          ("C-c t U" . bug-reference-prog-mode)
          :map bug-reference-map
@@ -233,6 +233,7 @@
   :defer t
   :hook (((prog-mode
            protobuf-mode
+           gnuplot-mode
            TeX-mode
            conf-mode
            yaml-mode)
@@ -249,7 +250,7 @@
 
 (use-package subword
   :defer t
-  :hook ((prog-mode protobuf-mode) . subword-mode)
+  :hook ((prog-mode protobuf-mode gnuplot-mode) . subword-mode)
   :bind ("C-c t b" . subword-mode))
 
 (use-package align
@@ -390,6 +391,7 @@
          ("C-c x w" . whitespace-cleanup))
   :hook ((prog-mode
           protobuf-mode
+          gnuplot-mode
           text-mode
           bibtex-mode
           conf-mode)
@@ -439,7 +441,7 @@
 (use-package hideshow
   :defer t
   :bind (:map hs-minor-mode-map ("C-c @ t" . hs-toggle-hiding))
-  :hook ((prog-mode protobuf-mode bibtex-mode) . hs-minor-mode)
+  :hook ((prog-mode protobuf-mode gnuplot-mode bibtex-mode) . hs-minor-mode)
   :init (setf hs-minor-mode-map (make-sparse-keymap)))
 
 (use-package outline
@@ -451,7 +453,7 @@
          ("C-c @ n" . outline-next-visible-heading)
          ("C-c @ b" . outline-backward-same-level)
          ("C-c @ f" . outline-forward-same-level))
-  :hook ((prog-mode protobuf-mode TeX-mode) . outline-minor-mode)
+  :hook ((prog-mode protobuf-mode gnuplot-mode TeX-mode) . outline-minor-mode)
   :init (setf outline-minor-mode-map (make-sparse-keymap)))
 
 (use-package bicycle
@@ -476,7 +478,7 @@
 (use-package rainbow-delimiters
   :ensure t
   :defer t
-  :hook ((prog-mode protobuf-mode) . rainbow-delimiters-mode))
+  :hook ((prog-mode protobuf-mode gnuplot-mode) . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
   :ensure t
@@ -486,7 +488,7 @@
 (use-package highlight-numbers
   :ensure t
   :defer t
-  :hook ((prog-mode protobuf-mode) . highlight-numbers-mode))
+  :hook ((prog-mode protobuf-mode gnuplot-mode) . highlight-numbers-mode))
 
 (use-package highlight-escape-sequences
   :ensure t
@@ -497,6 +499,7 @@
   :defer t
   :hook ((prog-mode
           protobuf-mode
+          gnuplot-mode
           TeX-mode
           conf-mode
           yaml-mode)
@@ -1215,7 +1218,7 @@
   :bind (("C-c t s" . flyspell-mode)
          ("C-c x s" . flyspell-region))
   :hook (((text-mode bibtex-mode) . flyspell-mode)
-         ((prog-mode protobuf-mode) . flyspell-prog-mode))
+         ((prog-mode protobuf-mode gnuplot-mode) . flyspell-prog-mode))
   :init
   (setf flyspell-issue-welcome-flag nil
         flyspell-issue-message-flag nil)
@@ -2481,6 +2484,24 @@
   (with-eval-after-load 'org
     (push '("dot" . graphviz-dot) org-src-lang-modes)
     (cl-pushnew '(dot . t) org-babel-load-languages :test #'eq :key #'car)))
+
+;;; Gnuplot
+
+(use-package gnuplot
+  :ensure t
+  :defer t
+  :mode ("\\.gp\\'" . gnuplot-mode)
+  :init
+  (with-eval-after-load 'org
+    (cl-pushnew '(gnuplot . t) org-babel-load-languages :test #'eq :key #'car))
+  :config
+  (setf gnuplot-gnuplot-buffer "*gnuplot script*")
+
+  (dolist (key '("C-c C-o" "C-c C-d" "C-c C-z"))
+    (unbind-key key gnuplot-mode-map))
+  (dolist (key '("C-d" "C-c C-d" "C-c C-z"))
+    (unbind-key key gnuplot-comint-mode-map))
+  (unbind-key "C-c C-d" gnuplot-context-sensitive-mode-map))
 
 ;;; GLSL
 
