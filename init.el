@@ -178,7 +178,15 @@
          ("C-c t l" . toggle-truncate-lines)
          ("C-c t q" . auto-fill-mode)
          ("C-c t p" . visible-mode)
-         ("C-c a l" . list-processes))
+         ("C-c a l" . list-processes)
+         :map minibuffer-local-completion-map
+         ("M-`" . switch-to-completions)
+         :map completion-in-region-mode-map
+         ("M-`" . switch-to-completions)
+         :map completion-list-mode-map
+         ("n" . next-completion)
+         ("p" . previous-completion)
+         ("M-`" . delete-completion-window))
   :hook ((text-mode bibtex-mode) . auto-fill-mode)
   :init
   (line-number-mode)
