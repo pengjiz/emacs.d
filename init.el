@@ -202,7 +202,9 @@
   (bind-keys ("M-z" . simple-extras-unfill-paragraph)
              ("M-=" . simple-extras-eval-and-replace-last-sexp)
              :map completion-in-region-mode-map
-             ("C-<tab>" . simple-extras-force-completion-at-point)))
+             ("C-<tab>" . simple-extras-force-completion-at-point)
+             :map completion-list-mode-map
+             ("C-<return>" . simple-extras-choose-completion-no-exit)))
 
 (use-package savehist
   :init (setf savehist-file (init--var "savehist"))

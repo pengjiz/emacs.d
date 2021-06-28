@@ -6,10 +6,14 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl-lib))
+
 ;;; Fill and unfill
 
 (define-minor-mode simple-extras-auto-fill-comments-mode
   "Minor mode to automatically fill comments only."
+  :group 'comment
   :lighter nil
   :keymap nil
   (if simple-extras-auto-fill-comments-mode
@@ -42,8 +46,16 @@ REGION is directly passed to `fill-paragraph'."
   "Force completion on the text around point."
   (interactive)
   (minibuffer-hide-completions)
-  (let ((completion-cycle-threshold t))
+  (cl-letf (((symbol-function 'completion--cycle-threshold)
+             (lambda (&rest _) t)))
     (completion-at-point)))
+
+(defun simple-extras-choose-completion-no-exit (&optional event)
+  "Choose the completion at point without exiting the minibuffer.
+EVENT is directly passed to `choose-completion'."
+  (interactive (list last-nonmenu-event))
+  (let ((completion-no-auto-exit t))
+    (choose-completion event)))
 
 ;;; Copy
 
