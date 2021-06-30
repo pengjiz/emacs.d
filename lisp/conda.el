@@ -8,7 +8,8 @@
 
 (eval-when-compile
   (require 'cl-lib)
-  (require 'subr-x))
+  (require 'subr-x)
+  (require 'let-alist))
 
 ;;; Option
 
@@ -60,26 +61,68 @@
                 (nreverse environments))))
           conda-environment-directories))
 
-(defun conda--get-environment-path (environment)
-  "Get the path of ENVIRONMENT."
+(defun conda--get-environment-root (environment)
+  "Get the root of ENVIRONMENT."
   (catch 'done
     (dolist (directory conda-environment-directories)
-      (let ((path (expand-file-name environment directory)))
-        (when (file-directory-p path)
-          (throw 'done path))))))
+      (let ((filename (expand-file-name environment directory)))
+        (when (file-directory-p filename)
+          (throw 'done filename))))))
+
+(defun conda--get-environment-spec (environment)
+  "Get the spec of ENVIRONMENT."
+  (when-let* ((root (conda--get-environment-root environment))
+              (filename (expand-file-name "bin" root))
+              (bin (and (file-directory-p filename) filename)))
+    `((name . ,environment)
+      (root . ,root)
+      (bin . ,bin))))
 
 ;;; Activate and deactivate environments
 
 (defvar python-shell-virtualenv-root)
 (defvar eshell-path-env)
 
-(defvar conda-current-environment nil
-  "Name of the currently active environment.")
+(defvar conda--current-environment-spec nil
+  "Spec of the current environment.")
 
-(defvar conda--previous-path-env nil
-  "Previous value of the PATH environment variable.")
-(defvar conda--previous-exec-path nil
-  "Previous value of variable `exec-path'.")
+(defun conda-get-current-environment ()
+  "Return the name of the current environment."
+  (and (not (file-remote-p default-directory))
+       (cdr (assq 'name conda--current-environment-spec))))
+
+(defun conda--get-path-directory-name (directory)
+  "Get the name of DIRECTORY suitable for search path."
+  (and directory (directory-file-name directory)))
+
+(defun conda--path-add (directory search-path)
+  "Return a search path with DIRECTORY in SEARCH-PATH."
+  (let ((target (file-name-as-directory directory))
+        (directories (parse-colon-path search-path)))
+    (cl-pushnew target directories :test #'equal)
+    (mapconcat #'conda--get-path-directory-name
+               directories path-separator)))
+
+(defun conda--path-remove (directory search-path)
+  "Return a search path with DIRECTORY not in SEARCH-PATH."
+  (let ((target (file-name-as-directory directory))
+        (directories (parse-colon-path search-path)))
+    (mapconcat #'conda--get-path-directory-name
+               (delete target directories) path-separator)))
+
+(defun conda--prevent-local-virtualenv ()
+  "Prevent local virtualenv when appropriate."
+  (when (and conda--current-environment-spec
+             (not (file-remote-p default-directory)))
+    (kill-local-variable 'python-shell-virtualenv-root)))
+
+(defun conda--unset-local-virtualenv ()
+  "Unset virtualenv locally when appropriate."
+  (when (and conda--current-environment-spec
+             (file-remote-p default-directory)
+             (not (local-variable-p 'python-shell-virtualenv-root)))
+    (make-local-variable 'python-shell-virtualenv-root)
+    (setf python-shell-virtualenv-root nil)))
 
 (defun conda-activate (environment &optional show-message)
   "Activate the environment named ENVIRONMENT.
@@ -92,45 +135,45 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
          t))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
-  (unless (and environment (not (string-empty-p environment)))
+  (when (string-empty-p (or environment ""))
     (user-error "Conda environment not specified"))
 
-  (let* ((path (conda--get-environment-path environment))
-         ;; FIXME: This may not work on all platforms.
-         (bin-path (and path (expand-file-name "bin" path))))
-    (unless (and path bin-path (file-directory-p bin-path))
+  (let ((spec (conda--get-environment-spec environment)))
+    (unless spec
       (error "%s is not a valid conda environment" environment))
-
-    (conda-deactivate show-message)
-    (setf conda-current-environment environment)
+    (when conda--current-environment-spec
+      (conda-deactivate show-message))
+    (setf conda--current-environment-spec spec)
     (run-hooks 'conda-pre-activate-hook)
 
-    ;; Builtin Python mode
-    (setf python-shell-virtualenv-root (file-name-as-directory path))
+    (let-alist spec
+      (with-temp-buffer
+        (cl-pushnew .bin exec-path :test #'equal)
+        (setenv "PATH" (conda--path-add .bin (getenv "PATH")))
+        (setenv "VIRTUAL_ENV" .root)
+        (setenv "CONDA_PREFIX" .root)
+        (setf (default-value 'eshell-path-env) (getenv "PATH")
+              python-shell-virtualenv-root (file-name-as-directory .root)))
 
-    ;; exec-path
-    (setf conda--previous-exec-path exec-path)
-    (cl-pushnew bin-path exec-path :test #'equal)
-
-    ;; PATH environment variable
-    (setf conda--previous-path-env (getenv "PATH"))
-    (setenv "PATH" (string-join exec-path path-separator))
-
-    ;; Virtual environment
-    (setenv "VIRTUAL_ENV" path)
-    (setenv "CONDA_PREFIX" path)
-
-    ;; Eshell
-    (setf (default-value 'eshell-path-env) (getenv "PATH"))
-    (dolist (buffer (buffer-list))
-      (with-current-buffer buffer
-        (when (and (eq major-mode 'eshell-mode)
-                   (not (file-remote-p default-directory)))
-          (setf eshell-path-env (getenv "PATH")))))
+      (dolist (buffer (buffer-list))
+        (with-current-buffer buffer
+          (when (local-variable-p 'exec-path)
+            (cl-pushnew .bin exec-path :test #'equal))
+          (when (local-variable-p 'process-environment)
+            (setenv "PATH" (conda--path-add .bin (getenv "PATH")))
+            (setenv "VIRTUAL_ENV" .root)
+            (setenv "CONDA_PREFIX" .root))
+          (when (and (eq major-mode 'eshell-mode)
+                     (not (file-remote-p default-directory)))
+            (setf eshell-path-env (getenv "PATH")))
+          (conda--prevent-local-virtualenv)
+          (when (derived-mode-p 'org-mode 'python-mode)
+            (conda--unset-local-virtualenv)))))
 
     (run-hooks 'conda-post-activate-hook)
     (when show-message
-      (message "Conda environment %s activated" conda-current-environment))))
+      (message "Conda environment %s activated"
+               (or (cdr (assq 'name spec)) "unknown")))))
 
 (defun conda-deactivate (&optional show-message)
   "Deactivate the current environment.
@@ -138,38 +181,36 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive (list t))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
+  (unless conda--current-environment-spec
+    (user-error "No current conda environment"))
 
-  (setf conda-current-environment nil)
-  (run-hooks 'conda-pre-deactivate-hook)
+  (let-alist conda--current-environment-spec
+    (setf conda--current-environment-spec nil)
+    (run-hooks 'conda-pre-deactivate-hook)
 
-  ;; Builtin Python mode
-  (setf python-shell-virtualenv-root nil)
+    (with-temp-buffer
+      (setf exec-path (delete .bin exec-path))
+      (setenv "PATH" (conda--path-remove .bin (getenv "PATH")))
+      (setenv "VIRTUAL_ENV" nil)
+      (setenv "CONDA_PREFIX" nil)
+      (setf (default-value 'eshell-path-env) (getenv "PATH")
+            python-shell-virtualenv-root nil))
 
-  ;; exec-path
-  (when conda--previous-exec-path
-    (setf exec-path conda--previous-exec-path
-          conda--previous-exec-path nil))
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (when (local-variable-p 'exec-path)
+          (setf exec-path (delete .bin exec-path)))
+        (when (local-variable-p 'process-environment)
+          (setenv "PATH" (conda--path-remove .bin (getenv "PATH")))
+          (setenv "VIRTUAL_ENV" nil)
+          (setenv "CONDA_PREFIX" nil))
+        (when (and (eq major-mode 'eshell-mode)
+                   (not (file-remote-p default-directory)))
+          (setf eshell-path-env (getenv "PATH")))))
 
-  ;; PATH environment variable
-  (when conda--previous-path-env
-    (setenv "PATH" conda--previous-path-env)
-    (setf conda--previous-path-env nil))
-
-  ;; Virtual environment
-  (setenv "VIRTUAL_ENV" nil)
-  (setenv "CONDA_PREFIX" nil)
-
-  ;; Eshell
-  (setf (default-value 'eshell-path-env) (getenv "PATH"))
-  (dolist (buffer (buffer-list))
-    (with-current-buffer buffer
-      (when (and (eq major-mode 'eshell-mode)
-                 (not (file-remote-p default-directory)))
-        (setf eshell-path-env (getenv "PATH")))))
-
-  (run-hooks 'conda-post-deactivate-hook)
-  (when show-message
-    (message "Conda environment deactivated")))
+    (run-hooks 'conda-post-deactivate-hook)
+    (when show-message
+      (message "Conda environment %s deactivated" (or .name "unknown")))))
 
 (defun conda-activate-default (&optional show-message)
   "Activate the default environment.
@@ -178,6 +219,14 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (if conda-default-environment
       (conda-activate conda-default-environment show-message)
     (error "Default conda environment not set")))
+
+;;; Basic integration
+
+(add-hook 'hack-local-variables-hook #'conda--prevent-local-virtualenv)
+(with-eval-after-load 'python
+  (add-hook 'python-mode-hook #'conda--unset-local-virtualenv))
+(with-eval-after-load 'org
+  (add-hook 'org-mode-hook #'conda--unset-local-virtualenv))
 
 ;;; Flycheck integration
 
