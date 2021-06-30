@@ -9,7 +9,8 @@
 (require 'dired)
 (require 'dired-aux)
 (eval-when-compile
-  (require 'subr-x))
+  (require 'subr-x)
+  (require 'let-alist))
 
 ;;; Option
 
@@ -53,24 +54,29 @@ destination directory automatically after operations."
 
 ;;; Run program
 
-(defconst dired-atool--process-buffer-name "*dired-atool*"
-  "Buffer name for atool process.")
-
 (defun dired-atool--sentinel (process event)
   "Perform actions for PROCESS based on EVENT."
   (when (memq (process-status process) '(exit signal))
-    (when-let* ((destination (and dired-atool-do-revert
-                                  (process-get process 'destination))))
-      (dired-fun-in-all-buffers destination nil #'revert-buffer))
-    (if (string-match-p "finished" event)
-        (message "%s finished" (process-name process))
-      (message "%s exited abnormally" (process-name process)))
-    (with-current-buffer (process-buffer process)
-      (goto-char (point-max))
-      (insert (format "%s exited with code %d at %s\n"
-                      (string-join (process-command process) " ")
-                      (process-exit-status process)
-                      (current-time-string))))))
+    (let-alist (process-get process 'operation)
+      (when (and dired-atool-do-revert .destination)
+        (dired-fun-in-all-buffers .destination nil #'revert-buffer))
+      (let ((buffer (process-buffer process))
+            (inhibit-read-only t))
+        (with-current-buffer buffer
+          (goto-char (point-max))
+          (insert (format "%s: process exited with code %d [%s]\n\n"
+                          (capitalize (or .name "unknown"))
+                          (process-exit-status process)
+                          (format-time-string "%FT%T%z"))))
+        (with-current-buffer (get-buffer-create "*dired-atool*")
+          (goto-char (point-max))
+          (insert-buffer-substring buffer))
+        (when .description
+          (message "%s...%s" .description
+                   (if (string-match-p "finished" event)
+                       "done"
+                     "process exited abnormally")))
+        (kill-buffer buffer)))))
 
 (defsubst dired-atool--flatten (args)
   "Flatten ARGS by one level."
@@ -80,18 +86,22 @@ destination directory automatically after operations."
                                  (list arg)))
                  args)))
 
-(defun dired-atool--run (destination program &rest args)
+(defun dired-atool--run (operation program &rest args)
   "Start PROGRAM with ARGS.
-DESTINATION is the destination directory for which all relevant
-Dired buffers may be reverted when the process exits."
-  (let* ((flat-args (dired-atool--flatten args))
-         (process (apply #'start-process
-                         (file-name-nondirectory program)
-                         dired-atool--process-buffer-name
-                         program
-                         flat-args)))
-    (process-put process 'destination destination)
-    (set-process-sentinel process #'dired-atool--sentinel)))
+OPERATION stores information for the current operation."
+  (let* ((name (file-name-nondirectory program))
+         (buffer (generate-new-buffer (format " *%s*" name)))
+         (flat-args (dired-atool--flatten args)))
+    (with-current-buffer buffer
+      (insert (format "%s: %s [%s]\n"
+                      (capitalize (or (cdr (assq 'name operation))
+                                      "unknown"))
+                      (mapconcat #'shell-quote-argument
+                                 (cons program flat-args) " ")
+                      (format-time-string "%FT%T%z"))))
+    (let ((process (apply #'start-process name buffer program flat-args)))
+      (process-put process 'operation operation)
+      (set-process-sentinel process #'dired-atool--sentinel))))
 
 ;;; Unpack files
 
@@ -101,18 +111,25 @@ ARG is directly passed to `dired-get-marked-files'."
   (interactive "P")
   (let* ((archives (dired-get-marked-files nil arg nil nil t))
          (files (mapcar #'dired-make-relative archives))
+         (count (length files))
          (prompt (format "Unpack %s to: " (dired-mark-prompt arg files)))
          (directory (dired-dwim-target-directory))
          (destination (expand-file-name (dired-mark-pop-up nil 'uncompress files
                                                            #'read-directory-name
-                                                           prompt directory))))
+                                                           prompt directory)))
+         (description (concat (format "Unpack: %d file" count)
+                              (and (/= count 1) "s")))
+         (operation `((name . "unpack")
+                      (destination . ,destination)
+                      (description . ,description))))
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
+    (message "%s..." description)
     (unless (file-exists-p destination)
       (dired-create-directory destination))
     (let ((default-directory destination))
-      (dired-atool--run destination
+      (dired-atool--run operation
                         dired-atool-aunpack-program
                         "--each"
                         dired-atool-aunpack-extra-options
@@ -125,26 +142,33 @@ ARG is directly passed to `dired-get-marked-files'."
 ARG is directly passed to `dired-get-marked-files'."
   (interactive "P")
   (let* ((files (dired-get-marked-files t arg nil nil t))
+         (count (length files))
          (prompt (format "Pack %s to: " (dired-mark-prompt arg files)))
          (directory (dired-dwim-target-directory))
          (target (expand-file-name (dired-mark-pop-up nil 'compress files
                                                       #'read-file-name
                                                       prompt directory)))
-         (destination (file-name-directory target)))
+         (destination (file-name-directory target))
+         (description (concat (format "Pack: %d file" count)
+                              (and (/= count 1) "s")))
+         (operation `((name . "pack")
+                      (destination . ,destination)
+                      (description . ,description))))
     (when (or (file-remote-p default-directory)
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
+    (message "%s..." description)
     (unless (file-exists-p destination)
       (dired-create-directory destination))
     (when (and (file-exists-p target)
-               (yes-or-no-p (format "File %s exists. %s it? "
+               (yes-or-no-p (format "File %s exists; %s it first? "
                                     target
                                     (if (and dired-atool-use-trash
                                              delete-by-moving-to-trash)
-                                        "Trash"
-                                      "Delete"))))
+                                        "trash"
+                                      "delete"))))
       (delete-file target dired-atool-use-trash))
-    (dired-atool--run destination
+    (dired-atool--run operation
                       dired-atool-apack-program
                       dired-atool-apack-extra-options
                       target
