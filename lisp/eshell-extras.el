@@ -95,6 +95,8 @@
 
 ;;; Prompt
 
+(declare-function conda-get-current-environment "ext:conda")
+
 (defun eshell-extras--get-directory ()
   "Get the current directory."
   (let* ((directory (abbreviate-file-name (eshell/pwd)))
@@ -128,9 +130,14 @@ Return the first line of output if any. Otherwise return nil."
 (defun eshell-extras--get-prompt ()
   "Return a prompt for Eshell."
   (let* ((directory (eshell-extras--get-directory))
-         (env (bound-and-true-p conda-current-environment))
+         (env (and (fboundp #'conda-get-current-environment)
+                   (conda-get-current-environment)))
          (branch (eshell-extras--get-git-branch))
-         (status (and branch (eshell-extras--get-git-status))))
+         (status (and branch (eshell-extras--get-git-status)))
+         (separator (if (file-remote-p default-directory) "Λ" "λ"))
+         (exit (if (zerop eshell-last-command-status)
+                   'eshell-extras-prompt-exit-success
+                 'eshell-extras-prompt-exit-error)))
     (concat
      ;; Python environment
      (when env
@@ -145,16 +152,14 @@ Return the first line of output if any. Otherwise return nil."
      (when status
        (propertize status 'face 'eshell-extras-prompt-git-status))
      " "
-     ;; Last command status
-     (propertize "λ" 'face (if (zerop eshell-last-command-status)
-                               'eshell-extras-prompt-exit-success
-                             'eshell-extras-prompt-exit-error))
+     ;; Separator with additional information
+     (propertize separator 'face exit)
      " ")))
 
 (defun eshell-extras--setup-prompt ()
   "Setup Eshell prompt."
   (setf eshell-prompt-function #'eshell-extras--get-prompt
-        eshell-prompt-regexp "^.* λ "
+        eshell-prompt-regexp "^.* [λΛ] "
         eshell-highlight-prompt nil))
 
 ;;; Autosuggest
