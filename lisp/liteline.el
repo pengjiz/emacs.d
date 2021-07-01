@@ -296,6 +296,7 @@ If DEFAULT is non-nil, set the default value."
 (defvar reftex-toc-include-index-indicator)
 (defvar reftex-toc-max-level-indicator)
 (declare-function reftex-offer-label-menu "reftex-ref")
+(declare-function conda-get-current-environment "ext:conda")
 
 (defun liteline--setup-conda ()
   "Setup conda."
@@ -338,8 +339,9 @@ If DEFAULT is non-nil, set the default value."
   (cl-case major-mode
     ;; Python environment
     ((python-mode inferior-python-mode)
-     (when (bound-and-true-p conda-current-environment)
-       (format "[%s]" conda-current-environment)))
+     (when-let* ((env (and (fboundp #'conda-get-current-environment)
+                           (conda-get-current-environment))))
+       (format "[%s]" env)))
     ;; RefTeX index
     ((reftex-index-mode)
      (when reftex-index-restriction-indicator
