@@ -76,17 +76,21 @@
 
 ;;; Indentation
 
+(defun pest--get-indent-column ()
+  "Get indentation column for the current line."
+  (let ((depth (car (syntax-ppss (line-beginning-position)))))
+    (* pest-indent-offset
+       (if (looking-at "\\s-*\\s)")
+           (1- depth)
+         depth))))
+
 (defun pest-indent-line ()
   "Indent line for `pest-mode'."
-  (let (indent-point)
-    (save-excursion
-      (let ((level (car (syntax-ppss (line-beginning-position)))))
-        (when (looking-at "\\s-*\\s)")
-          (setf level (1- level)))
-        (indent-line-to (* pest-indent-offset level))
-        (setf indent-point (point))))
-    (unless (> (point) indent-point)
-      (goto-char indent-point))))
+  (let ((target (save-excursion
+                  (indent-line-to (pest--get-indent-column))
+                  (point))))
+    (when (< (point) target)
+      (goto-char target))))
 
 ;;; Completion
 

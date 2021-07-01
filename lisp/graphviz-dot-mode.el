@@ -89,17 +89,21 @@
 
 ;;; Indentation
 
+(defun graphviz-dot--get-indent-column ()
+  "Get indentation column for the current line."
+  (let ((depth (car (syntax-ppss (line-beginning-position)))))
+    (* graphviz-dot-indent-offset
+       (if (looking-at "\\s-*\\s)")
+           (1- depth)
+         depth))))
+
 (defun graphviz-dot-indent-line ()
   "Indent line for `graphviz-dot-mode'."
-  (let (indent-point)
-    (save-excursion
-      (let ((level (car (syntax-ppss (line-beginning-position)))))
-        (when (looking-at "\\s-*\\s)")
-          (setf level (1- level)))
-        (indent-line-to (* graphviz-dot-indent-offset level))
-        (setf indent-point (point))))
-    (unless (> (point) indent-point)
-      (goto-char indent-point))))
+  (let ((target (save-excursion
+                  (indent-line-to (graphviz-dot--get-indent-column))
+                  (point))))
+    (when (< (point) target)
+      (goto-char target))))
 
 ;;; Completion
 

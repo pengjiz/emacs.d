@@ -282,11 +282,9 @@
   :bind (("C-c t t" . typo-mode)
          ("C-c t T" . typo-change-language)))
 
-(use-package mule-cmds
-  :defer t
-  :no-require t
-  :bind ("C-c t i" . toggle-input-method)
-  :init (setf default-input-method "TeX"))
+(progn ; mule-cmds
+  (setf default-input-method "TeX")
+  (bind-key "C-c t i" #'toggle-input-method))
 
 (use-package kkc
   :defer t
@@ -381,12 +379,10 @@
   (setf show-paren-when-point-inside-paren t)
   (show-paren-mode))
 
-(use-package lisp
-  :defer t
-  :no-require t
-  :bind (("C-x C-u" . delete-pair)
-         ("C-x C-l" . raise-sexp)
-         ("C-c x p" . check-parens)))
+(progn ; lisp
+  (bind-keys ("C-x C-u" . delete-pair)
+             ("C-x C-l" . raise-sexp)
+             ("C-c x p" . check-parens)))
 
 ;;; Whitespace
 
@@ -626,11 +622,7 @@
 
 ;;; File
 
-(use-package files
-  :bind (("C-c b g" . revert-buffer)
-         ("C-c b r" . rename-buffer)
-         ("C-c b R" . rename-uniquely))
-  :config
+(progn ; files
   (let ((list-prefix (init--var "auto-save/sessions/"))
         (save-directory (init--var "auto-save/saves/")))
     (make-directory save-directory t)
@@ -650,7 +642,11 @@
   (defun init--ensure-directory-for-file ()
     "Ensure that the directory for file exists."
     (make-directory (file-name-directory buffer-file-name) t))
-  (add-hook 'find-file-not-found-functions #'init--ensure-directory-for-file))
+  (add-hook 'find-file-not-found-functions #'init--ensure-directory-for-file)
+
+  (bind-keys ("C-c b g" . revert-buffer)
+             ("C-c b r" . rename-buffer)
+             ("C-c b R" . rename-uniquely)))
 
 (use-package files-x
   :defer t
@@ -804,7 +800,6 @@
 
 (use-package image-dired
   :defer t
-  :after dired
   :init
   (setf image-dired-dir (init--var "image-dired/")
         image-dired-db-file (init--var "image-dired/db")
@@ -855,20 +850,7 @@
   (setf mouse-wheel-scroll-amount '(1 ((shift) . 5))
         mouse-wheel-progressive-speed nil))
 
-(use-package window
-  :defer t
-  :no-require t
-  :bind (("C-c w s" . split-window-below)
-         ("C-c w v" . split-window-right)
-         ("C-c w k" . delete-window)
-         ("C-c w o" . delete-other-windows)
-         ("C-c w l" . delete-other-windows-vertically)
-         ("C-c w t" . window-toggle-side-windows)
-         ("C-x C-z" . window-toggle-side-windows)
-         ("C-c w =" . balance-windows)
-         ("C-c w f" . fit-window-to-buffer)
-         ("C-c b d" . display-buffer))
-  :init
+(progn ; window
   (setf scroll-error-top-bottom t)
   (setf fit-window-to-buffer-horizontally t)
   (setf display-buffer-alist
@@ -986,7 +968,18 @@
            (slot . 1)
            (window-height . 10)
            (preserve-size . (nil . t))
-           (reusable-frames . nil)))))
+           (reusable-frames . nil))))
+
+  (bind-keys ("C-c w s" . split-window-below)
+             ("C-c w v" . split-window-right)
+             ("C-c w k" . delete-window)
+             ("C-c w o" . delete-other-windows)
+             ("C-c w l" . delete-other-windows-vertically)
+             ("C-c w t" . window-toggle-side-windows)
+             ("C-x C-z" . window-toggle-side-windows)
+             ("C-c w =" . balance-windows)
+             ("C-c w f" . fit-window-to-buffer)
+             ("C-c b d" . display-buffer)))
 
 (use-package window-extras
   :load-path "lisp"
@@ -1127,8 +1120,8 @@
         company-format-margin-function nil))
 
 (use-package company-dabbrev
+  :ensure company
   :defer t
-  :after company
   :config
   (setf company-dabbrev-ignore-case t
         company-dabbrev-downcase nil)
@@ -1139,8 +1132,8 @@
               (string-match-p "\\` \\*" (buffer-name buffer))))))
 
 (use-package company-dabbrev-code
+  :ensure company
   :defer t
-  :after company
   :config (setf company-dabbrev-code-everywhere t))
 
 (use-package hippie-exp
@@ -1269,8 +1262,8 @@
                           #'magit-insert-stashes t))
 
 (use-package git-commit
+  :ensure t
   :defer t
-  :after magit
   :config
   (setf git-commit-summary-max-length 50)
   (defun init--setup-git-commit-mode ()
@@ -1508,13 +1501,13 @@
                                 :remove 'unread)))
 
 (use-package elfeed-search
+  :ensure elfeed
   :defer t
-  :after elfeed
   :config (setf elfeed-search-filter "@1-month-ago"))
 
 (use-package elfeed-show
+  :ensure elfeed
   :defer t
-  :after elfeed
   :init
   (setf elfeed-enclosure-default-dir
         (expand-file-name (convert-standard-filename "Downloads/") "~"))
@@ -1748,19 +1741,19 @@
   :bind (:map clojure-mode-map ("C-c a a" . cider)))
 
 (use-package cider-eval
+  :ensure cider
   :defer t
-  :after cider
   :config (setf cider-save-file-on-load t))
 
 (use-package cider-repl
+  :ensure cider
   :defer t
-  :after cider
   :bind (:map cider-repl-mode-map ("C-c a a" . cider-quit))
   :config (setf cider-repl-display-help-banner nil))
 
 (use-package nrepl-client
+  :ensure cider
   :defer t
-  :after cider
   :config (setf nrepl-hide-special-buffers t))
 
 (use-package flycheck-clj-kondo
@@ -1834,8 +1827,8 @@
     (unbind-key key haskell-mode-map)))
 
 (use-package haskell
+  :ensure haskell-mode
   :defer t
-  :after haskell-mode
   :bind (;; -
          :map interactive-haskell-mode-map
          ("C-c a a" . haskell-interactive-bring)
@@ -1852,21 +1845,21 @@
         haskell-process-show-overlays nil))
 
 (use-package haskell-interactive-mode
+  :ensure haskell-mode
   :defer t
-  :after haskell-mode
   :bind (;; -
          :map haskell-interactive-mode-map
          ("C-c a a" . haskell-interactive-kill)
          ("C-c M-o" . haskell-interactive-mode-clear)))
 
 (use-package haskell-indentation
+  :ensure haskell-mode
   :defer t
-  :after haskell-mode
   :hook (haskell-mode . haskell-indentation-mode))
 
 (use-package haskell-collapse
+  :ensure haskell-mode
   :defer t
-  :after haskell-mode
   :bind (;; -
          :map haskell-collapse-mode-map
          ("C-c @ t" . haskell-hide-toggle)
@@ -1910,13 +1903,13 @@
         inferior-R-args "--no-save"))
 
 (use-package ess-inf
+  :ensure ess
   :defer t
-  :after ess
   :bind (:map inferior-ess-mode-map ("C-c a a" . ess-quit)))
 
 (use-package ess-r-mode
+  :ensure ess
   :defer t
-  :after ess
   :bind (;; -
          :map ess-r-mode-map
          ("C-c a a" . run-ess-r)
@@ -2013,6 +2006,7 @@
   :hook (js2-mode . skewer-mode))
 
 (use-package skewer-repl
+  :ensure skewer-mode
   :defer t
   :after skewer-mode
   :bind (:map skewer-mode-map ("C-c a m" . skewer-repl)))
@@ -2121,12 +2115,9 @@
 
 ;;; LaTeX
 
-(use-package tex-site
-  :ensure auctex)
-
 (use-package tex
+  :ensure auctex
   :defer t
-  :after tex-site
   :bind (;; -
          :map TeX-mode-map
          ([remap TeX-complete-symbol] . completion-at-point)
@@ -2154,26 +2145,26 @@
           ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
 
 (use-package tex-buf
+  :ensure auctex
   :defer t
-  :after tex-site
   :config (setf TeX-save-query nil))
 
 (use-package tex-fold
+  :ensure auctex
   :defer t
-  :after tex-site
   :bind (:map TeX-fold-keymap ("\\" . prettify-symbols-mode))
   :hook (TeX-mode . TeX-fold-mode))
 
 (use-package tex-style
+  :ensure auctex
   :defer t
-  :after tex-site
   :config
   (setf LaTeX-csquotes-open-quote "\\enquote{"
         LaTeX-csquotes-close-quote "}"))
 
 (use-package latex
+  :ensure auctex
   :defer t
-  :after tex-site
   :bind (;; -
          :map LaTeX-math-keymap
          ("o" . LaTeX-math-frac))
@@ -2187,8 +2178,8 @@
   (add-hook 'LaTeX-mode-hook #'init--setup-LaTeX-mode))
 
 (use-package preview
+  :ensure auctex
   :defer t
-  :after tex-site
   :config (setf preview-auto-cache-preamble nil))
 
 (use-package auctex-latexmk
