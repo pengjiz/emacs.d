@@ -46,33 +46,43 @@
 ;;; Font-lock
 
 (defvar pest-font-lock-keywords
-  `((,(regexp-opt pest-special-rule-keywords 'symbols)
+  `((,(rx "=" (0+ space)
+          (group (in "_@$!"))
+          (0+ space) "{")
      (1 font-lock-keyword-face))
-    (,(regexp-opt pest-builtin-rule-keywords 'symbols)
-     (1 font-lock-constant-face))
     (,(regexp-opt pest-forbidden-keywords 'symbols)
      (1 font-lock-warning-face))
-    (,(rx (group (in "_@$!"))
-          (* (syntax whitespace))
-          "{")
-     (1 font-lock-builtin-face)))
+    (,(regexp-opt pest-builtin-rule-keywords 'symbols)
+     (1 font-lock-constant-face))
+    (,(regexp-opt pest-special-rule-keywords 'symbols)
+     (1 font-lock-builtin-face))
+    (,(rx (group (1+ (or word (syntax symbol))))
+          (0+ space) "=")
+     (1 font-lock-variable-name-face)))
   "Font-lock keywords for `pest-mode'.")
 
 ;;; Syntax
 
 (defvar pest-mode-syntax-table
   (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?_ "_" table)
-    (dolist (char '(?= ?~ ?| ?* ?+ ?? ?& ?!))
+    (dolist (char '(?+ ?- ?* ?| ?& ?$ ?=))
       (modify-syntax-entry char "." table))
-    (modify-syntax-entry ?\" "\"" table)
-    ;; FIXME: Single quotes are actually for character literals, not strings.
-    (modify-syntax-entry ?' "\"" table)
-    (modify-syntax-entry ?\\ "\\" table)
     (modify-syntax-entry ?/ ". 12" table)
     (modify-syntax-entry ?\n ">" table)
     table)
   "Syntax table for `pest-mode'.")
+
+(defvar pest-syntax-propertize-function
+  (syntax-propertize-rules
+   ((rx (group "'")
+        (or (and "\\" (or (and "u{" (** 1 6 hex) "}")
+                          (and "x" (= 2 hex))
+                          (in "nrt0\'\"\\")))
+            (not (in "'\\")))
+        (group "'"))
+    (1 "\"")
+    (2 "\"")))
+  "Function to apply syntax properties for `pest-mode'.")
 
 ;;; Indentation
 
@@ -111,24 +121,35 @@
                                pest-builtin-rule-keywords)))
           :annotation-function #'pest--annotate-candidate)))
 
+;;; Imenu
+
+(defvar pest-imenu-generic-expression
+  `((nil
+     ,(rx bol (0+ space)
+          (group (1+ (or word (syntax symbol))))
+          (0+ space) "=")
+     1))
+  "Imenu generic expression for `pest-mode'.")
+
 ;;; Mode
 
 (define-derived-mode pest-mode prog-mode "pest"
   "Major mode for pest PEG."
   (make-local-variable 'indent-line-function)
+  (make-local-variable 'electric-indent-chars)
   (setf indent-line-function #'pest-indent-line)
+  (push ?\} electric-indent-chars)
 
-  (setf font-lock-defaults '(pest-font-lock-keywords))
-
+  (make-local-variable 'syntax-propertize-function)
   (make-local-variable 'comment-start)
-  (setf comment-start "//")
   (make-local-variable 'comment-start-skip)
-  (setf comment-start-skip (rx "/"
-                               (1+ "/")
-                               (0+ (syntax whitespace))))
+  (setf font-lock-defaults '(pest-font-lock-keywords)
+        syntax-propertize-function pest-syntax-propertize-function
+        comment-start "//"
+        comment-start-skip "//+\\s-*")
 
-  (add-hook 'completion-at-point-functions
-            #'pest-completion-at-point nil t))
+  (add-hook 'completion-at-point-functions #'pest-completion-at-point nil t)
+  (setf imenu-generic-expression pest-imenu-generic-expression))
 
 (provide 'pest-mode)
 ;;; pest-mode.el ends here
