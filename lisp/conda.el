@@ -128,13 +128,15 @@
   "Activate the environment named ENVIRONMENT.
 When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive
-   (list (unless (file-remote-p default-directory)
-           (completing-read "Environment: "
-                            (conda--get-environments)
-                            nil t))
+   (list (and (not (file-remote-p default-directory))
+              (memq system-type '(gnu/linux darwin))
+              (completing-read "Environment: " (conda--get-environments)
+                               nil t))
          t))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
+  (unless (memq system-type '(gnu/linux darwin))
+    (user-error "Current operating system not supported"))
   (when (string-empty-p (or environment ""))
     (user-error "Conda environment not specified"))
 
@@ -181,6 +183,8 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive (list t))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
+  (unless (memq system-type '(gnu/linux darwin))
+    (user-error "Current operating system not supported"))
   (unless conda--current-environment-spec
     (user-error "No current conda environment"))
 
