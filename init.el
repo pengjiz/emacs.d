@@ -2162,9 +2162,6 @@
 (use-package latex
   :ensure auctex
   :defer t
-  :bind (;; -
-         :map LaTeX-math-keymap
-         ("o" . LaTeX-math-frac))
   :hook (LaTeX-mode . LaTeX-math-mode)
   :config
   (setf LaTeX-babel-hyphen nil)
