@@ -102,7 +102,7 @@
 
 (defvar gnuplot-mode-syntax-table
   (let ((table (make-syntax-table)))
-    (dolist (char '(?+ ?- ?* ?/ ?% ?| ?& ?=))
+    (dolist (char '(?+ ?- ?* ?/ ?% ?| ?& ?< ?> ?=))
       (modify-syntax-entry char "." table))
     (modify-syntax-entry ?' "\"" table)
     (modify-syntax-entry ?` "\"" table)
