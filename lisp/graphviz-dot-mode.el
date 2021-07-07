@@ -60,32 +60,40 @@
 ;;; Font-lock
 
 (defvar graphviz-dot-font-lock-keywords
-  `((,(rx (group "strict")
-          (1+ (syntax whitespace))
-          (or "graph" "digraph"))
-     (1 font-lock-warning-face))
+  `((,(regexp-opt '("--" "->")) . font-lock-keyword-face)
     (,(regexp-opt graphviz-dot-terminal-keywords 'symbols)
      (1 font-lock-keyword-face))
+    (,(rx symbol-start
+          (group "strict")
+          (1+ space) (or "graph" "digraph")
+          symbol-end)
+     (1 font-lock-warning-face))
     (,(regexp-opt graphviz-dot-attribute-keywords 'symbols)
      (1 font-lock-variable-name-face))
-    (,(regexp-opt '("--" "->"))
-     . font-lock-builtin-face))
+    (,(rx symbol-start (or "graph" "digraph" "subgraph") (1+ space)
+          (group (1+ (or word (syntax symbol)))))
+     (1 font-lock-function-name-face)))
   "Font-lock keywords for `graphviz-dot-mode'.")
 
 ;;; Syntax
 
 (defvar graphviz-dot-mode-syntax-table
   (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?_ "_" table)
-    (dolist (char '(?- ?= ?< ?>))
+    (dolist (char '(?- ?=))
       (modify-syntax-entry char "." table))
-    (modify-syntax-entry ?\" "\"" table)
-    (modify-syntax-entry ?\\ "\\" table)
+    (modify-syntax-entry ?< "(>" table)
+    (modify-syntax-entry ?> ")<" table)
     (modify-syntax-entry ?/ ". 124" table)
     (modify-syntax-entry ?* ". 23b" table)
     (modify-syntax-entry ?\n ">" table)
     table)
   "Syntax table for `graphviz-dot-mode'.")
+
+(defvar graphviz-dot-syntax-propertize-function
+  (syntax-propertize-rules
+   ("^#" (0 "<"))
+   ("-\\(>\\)" (1 ".")))
+  "Function to apply syntax properties for `graphviz-dot-mode'.")
 
 ;;; Indentation
 
@@ -124,6 +132,15 @@
                                graphviz-dot-attribute-keywords)))
           :annotation-function #'graphviz-dot--annotate-candidate)))
 
+;;; Imenu
+
+(defvar graphviz-dot-imenu-generic-expression
+  `((nil
+     ,(rx symbol-start (or "graph" "digraph" "subgraph") (1+ space)
+          (group (1+ (or word (syntax symbol)))))
+     1))
+  "Imenu generic expression for `graphviz-dot-mode'.")
+
 ;;; Compilation
 
 (defvar compilation-error-regexp-alist-alist)
@@ -149,21 +166,23 @@
 (define-derived-mode graphviz-dot-mode prog-mode "DOT"
   "Major mode for the Graphviz DOT language."
   (make-local-variable 'indent-line-function)
+  (make-local-variable 'electric-indent-chars)
   (setf indent-line-function #'graphviz-dot-indent-line)
-
-  (setf font-lock-defaults '(graphviz-dot-font-lock-keywords))
+  (dolist (char '(?\; ?\}))
+    (push char electric-indent-chars))
 
   (make-local-variable 'syntax-propertize-function)
-  (setf syntax-propertize-function (syntax-propertize-rules ("^#" (0 "<"))))
   (make-local-variable 'comment-start)
-  (setf comment-start "//")
   (make-local-variable 'comment-start-skip)
-  (setf comment-start-skip (rx "/"
-                               (or (1+ "*") (1+ "/"))
-                               (0+ (syntax whitespace))))
+  (setf font-lock-defaults '(graphviz-dot-font-lock-keywords)
+        syntax-propertize-function graphviz-dot-syntax-propertize-function
+        comment-start "//"
+        comment-start-skip (rx "/" (or (1+ "*") (1+ "/"))
+                               (0+ space)))
 
   (add-hook 'completion-at-point-functions
-            #'graphviz-dot-completion-at-point nil t))
+            #'graphviz-dot-completion-at-point nil t)
+  (setf imenu-generic-expression graphviz-dot-imenu-generic-expression))
 
 (provide 'graphviz-dot-mode)
 ;;; graphviz-dot-mode.el ends here
