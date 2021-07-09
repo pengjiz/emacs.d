@@ -1113,7 +1113,7 @@
     (company-mode))
   :config
   (setf company-idle-delay 0.5)
-  (setf company-show-numbers t
+  (setf company-show-quick-access t
         company-format-margin-function nil))
 
 (use-package company-dabbrev
