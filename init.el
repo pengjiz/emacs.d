@@ -1197,7 +1197,6 @@
           python-mode
           sh-mode
           LaTeX-mode
-          markdown-mode
           ledger-mode)
          . flycheck-mode)
   :config (setf flycheck-check-syntax-automatically '(save mode-enabled)))
