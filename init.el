@@ -991,19 +991,17 @@
          ("C-c w w" . ace-window))
   :init
   (setf aw-dispatch-alist
-        '((?c aw-split-window-fair "Split Fair Window")
-          (?v aw-split-window-vert "Split Vert Window")
-          (?b aw-split-window-horz "Split Horz Window")
-          (?m delete-other-windows "Delete Other Windows")
+        '((?r aw-swap-window "Swap Window")
           (?y aw-copy-window "Copy Window")
           (?t aw-move-window "Move Window")
-          (?x aw-execute-command-other-window "Execute Command Other Window")
-          (?o aw-flip-window)
+          (?q aw-delete-window "Delete Window")
+          (?o delete-other-windows "Delete Other Windows")
+          (?b aw-switch-buffer-other-window "Switch Buffer")
+          (?x aw-execute-command-other-window "Execute Command")
+          (?z aw-flip-window)
           (?? aw-show-dispatch-help)))
   (setf aw-make-frame-char nil)
-  :config
-  (setf aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-  (setf aw-minibuffer-flag t))
+  :config (setf aw-minibuffer-flag t))
 
 (use-package tab-bar
   :defer t
