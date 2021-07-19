@@ -777,15 +777,6 @@
   :after dired
   :bind (:map dired-mode-map ("[" . dired-git-info-mode)))
 
-(use-package dired-rsync
-  :ensure t
-  :defer t
-  :after dired
-  :bind (:map dired-mode-map ("V" . dired-rsync))
-  :init
-  (with-eval-after-load 'dired-x
-    (bind-key "V" #'dired-rsync dired-mode-map)))
-
 (use-package dired-atool
   :load-path "lisp"
   :defer t
