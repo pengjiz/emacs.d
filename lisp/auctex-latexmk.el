@@ -75,11 +75,14 @@
 
 ;;; Entry point
 
+(defconst auctex-latexmk--command-name "Latexmk"
+  "Command name for Latexmk.")
+
 (defconst auctex-latexmk--command
-  '("Latexmk"
+  `(,auctex-latexmk--command-name
     "latexmk%(latexmkopts) %S%(mode)%(file-line-error) %(extraopts) %t"
-    auctex-latexmk--run
-    nil (latex-mode) :help "Run Latexmk")
+    auctex-latexmk--run nil (latex-mode)
+    :help "Run Latexmk")
   "Command for Latexmk.")
 
 ;; NOTE: In addition to the next command from the output buffer, AUCTeX also
@@ -95,7 +98,7 @@
 ;; set it by the mode hook.
 (defun auctex-latexmk--set-default ()
   "Set Latexmk as the default command."
-  (setf TeX-command-default (car auctex-latexmk--command)))
+  (setf TeX-command-default auctex-latexmk--command-name))
 
 (defun auctex-latexmk-setup ()
   "Setup Latexmk support for AUCTeX."

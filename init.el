@@ -2104,16 +2104,18 @@
   (setf TeX-source-correlate-method 'synctex)
   (setf TeX-clean-confirm nil)
   (setf TeX-command-list
-        '(("View" "%V" TeX-run-discard-or-function t t :help "Run Viewer")
-          ("TeXcount" "texcount -unicode -inc %t" TeX-run-shell nil
-           (latex-mode) :help "Run TeXcount")
+        '(("View" "%V" TeX-run-discard-or-function t t
+           :help "Run Viewer")
+          ("TeXcount" "texcount -unicode -inc %t" TeX-run-shell nil (latex-mode)
+           :help "Run TeXcount")
           ("ChkTeX" "chktex -v6 %s" TeX-run-compile nil (latex-mode)
            :help "Check LaTeX file for common mistakes")
           ("Clean" "TeX-clean" TeX-run-function nil t
            :help "Delete generated intermediate files")
           ("Clean All" "(TeX-clean t)" TeX-run-function nil t
            :help "Delete generated intermediate and output files")
-          ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
+          ("Other" "" TeX-run-command t t
+           :help "Run an arbitrary command"))))
 
 (use-package tex-buf
   :ensure auctex
