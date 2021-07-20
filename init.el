@@ -282,8 +282,7 @@
          ("C-c t T" . typo-change-language)))
 
 (progn ; mule-cmds
-  (setf default-input-method "TeX")
-  (bind-key "C-c t i" #'toggle-input-method))
+  (setf default-input-method "TeX"))
 
 (use-package kkc
   :defer t
@@ -642,7 +641,8 @@
     (make-directory (file-name-directory buffer-file-name) t))
   (add-hook 'find-file-not-found-functions #'init--ensure-directory-for-file)
 
-  (bind-keys ("C-c b g" . revert-buffer)
+  (bind-keys ("C-c f g" . revert-buffer)
+             ("C-c b g" . revert-buffer)
              ("C-c b r" . rename-buffer)
              ("C-c b R" . rename-uniquely)))
 
@@ -650,7 +650,7 @@
   :defer t
   :bind (("C-c f v" . add-file-local-variable)
          ("C-c f V" . add-file-local-variable-prop-line)
-         ("C-c f b" . add-dir-local-variable)))
+         ("C-c f d" . add-dir-local-variable)))
 
 (use-package files-extras
   :load-path "lisp"
@@ -959,16 +959,10 @@
            (preserve-size . (nil . t))
            (reusable-frames . nil))))
 
-  (bind-keys ("C-c w s" . split-window-below)
-             ("C-c w v" . split-window-right)
-             ("C-c w k" . delete-window)
-             ("C-c w o" . delete-other-windows)
+  (bind-keys ("C-c w f" . fit-window-to-buffer)
              ("C-c w l" . delete-other-windows-vertically)
              ("C-c w t" . window-toggle-side-windows)
-             ("C-x C-z" . window-toggle-side-windows)
-             ("C-c w =" . balance-windows)
-             ("C-c w f" . fit-window-to-buffer)
-             ("C-c b d" . display-buffer)))
+             ("C-x C-z" . window-toggle-side-windows)))
 
 (use-package window-extras
   :load-path "lisp"
@@ -987,8 +981,6 @@
   :ensure t
   :defer t
   :bind* ("M-o" . ace-window)
-  :bind (([remap other-window] . ace-window)
-         ("C-c w w" . ace-window))
   :init
   (setf aw-dispatch-alist
         '((?r aw-swap-window "Swap Window")
@@ -1005,15 +997,9 @@
 
 (use-package tab-bar
   :defer t
-  :bind (("C-c s c" . tab-bar-new-tab)
-         ("C-c s k" . tab-bar-close-tab)
-         ("C-c s o" . tab-bar-close-other-tabs)
-         ("C-c s j" . tab-bar-select-tab-by-name)
-         ("C-c s s" . tab-bar-switch-to-recent-tab)
+  :bind (("C-c s s" . tab-bar-switch-to-recent-tab)
          ("C-c s n" . tab-bar-switch-to-next-tab)
-         ("C-c s p" . tab-bar-switch-to-prev-tab)
-         ("C-c s m" . tab-bar-move-tab)
-         ("C-c s r" . tab-bar-rename-tab))
+         ("C-c s p" . tab-bar-switch-to-prev-tab))
   :config
   (setf tab-bar-show nil)
   (setf tab-bar-new-tab-choice "*scratch*")
