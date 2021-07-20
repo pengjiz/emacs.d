@@ -710,28 +710,14 @@
   :bind (([remap list-directory] . dired)
          :map dired-mode-map
          ("e" . browse-url-of-dired-file)
-         ("K" . dired-kill-subdir))
+         ("K" . dired-kill-subdir)
+         ("C-+" . dired-create-empty-file))
   :config
-  (setf dired-recursive-copies 'always
-        dired-recursive-deletes 'top)
-  (setf dired-auto-revert-buffer t)
+  (setf dired-listing-switches "-alhFv --group-directories-first"
+        dired-auto-revert-buffer #'dired-directory-changed-p)
+  (setf dired-recursive-copies 'always)
   (setf dired-dwim-target t)
-  (setf dired-listing-switches "-alhFv --group-directories-first")
-  (setf dired-garbage-files-regexp
-        (rx bos
-            (or (and (1+ nonl)
-                     (or (and "." (or "aux" "bbl" "blg" "brf"
-                                      "log" "nav" "snm" "toc"
-                                      "vrb" "bcf" "idx" "fls"
-                                      "run.xml" "synctex.gz" "fdb_latexmk"
-                                      "out" "pyc" "elc" "o" "egg-info"
-                                      "bak" "orig" "rej"))
-                         "-blx.bib"))
-                "__pycache__"
-                "auto"
-                "ltxpng"
-                (and "__minted" (1+ nonl)))
-            eos))
+  (setf dired-garbage-files-regexp (rx "." (or "bak" "orig" "old") eos))
 
   (dolist (key '("c" "Z" "P"))
     (unbind-key key dired-mode-map)))
@@ -743,7 +729,7 @@
 
 (use-package dired-aux
   :defer t
-  :config (setf dired-isearch-filenames 'dwim))
+  :config (setf dired-create-destination-dirs 'ask))
 
 (use-package dired-x
   :defer t
@@ -753,11 +739,12 @@
   :hook (dired-mode . dired-omit-mode)
   :init
   (setf dired-bind-info nil
-        dired-bind-vm nil
         dired-bind-man nil)
   :config
-  (setf dired-omit-files "\\`[#.]\\|[#~]\\'"
-        dired-omit-extensions nil))
+  (setf dired-omit-files "\\`\\."
+        dired-omit-extensions nil)
+
+  (unbind-key "V" dired-mode-map))
 
 ;; More colors in Dired
 (use-package diredfl
@@ -776,7 +763,7 @@
   :ensure t
   :defer t
   :after dired
-  :bind (:map dired-mode-map ("[" . dired-git-info-mode)))
+  :bind (:map dired-mode-map ("{" . dired-git-info-mode)))
 
 (use-package dired-atool
   :load-path "lisp"
@@ -800,12 +787,15 @@
   :ensure t
   :defer t
   :after dired
-  :bind (:map dired-mode-map ("]" . disk-usage-here)))
+  :bind (:map dired-mode-map ("}" . disk-usage-here)))
 
 (use-package trashed
   :ensure t
   :defer t
-  :bind ("C-c f t" . trashed))
+  :bind ("C-c f t" . trashed)
+  :init
+  (with-eval-after-load 'dired
+    (bind-key "`" #'trashed dired-mode-map)))
 
 ;;; Security
 
