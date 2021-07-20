@@ -859,7 +859,6 @@
           (,(rx bos (or "*Man"
                         "*Help*"
                         "*help"
-                        "*Org Help*"
                         "*TeX Help*"
                         "*Anaconda*"
                         "*tide-documentation*"
@@ -2282,7 +2281,7 @@
 
 (use-package org-goto
   :defer t
-  :config (setf org-goto-interface 'outline-path-completion))
+  :config (setf org-goto-auto-isearch nil))
 
 (use-package org-refile
   :defer t
@@ -2290,8 +2289,7 @@
   (setf org-refile-targets '((nil . (:maxlevel . 5))
                              (org-agenda-files . (:maxlevel . 5)))
         org-refile-allow-creating-parent-nodes 'confirm)
-  (setf org-refile-use-outline-path 'file
-        org-outline-path-complete-in-steps nil))
+  (setf org-refile-use-outline-path 'file))
 
 (use-package org-archive
   :defer t
@@ -2390,22 +2388,22 @@
 
 (use-package ox-latex
   :defer t
+  :init
+  (setf org-latex-classes
+        '(("article"
+           "\\documentclass[11pt]{scrartcl}"
+           ("\\section{%s}" . "\\section*{%s}")
+           ("\\subsection{%s}" . "\\subsection*{%s}")
+           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+           ("\\paragraph{%s}" . "\\paragraph*{%s}")
+           ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
   :config
+  (setf org-latex-subtitle-format "\\subtitle{%s}"
+        org-latex-subtitle-separate t)
   (setf org-latex-compiler "lualatex"
-        org-latex-pdf-process '("latexmk %f"))
-
-  (setf org-latex-listings t)
-  (push '("" "listings") org-latex-packages-alist)
-  (push '("" "color") org-latex-packages-alist)
-
-  (push '("koma-article"
-          "\\documentclass[11pt]{scrartcl}"
-          ("\\section{%s}" . "\\section*{%s}")
-          ("\\subsection{%s}" . "\\subsection*{%s}")
-          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-          ("\\paragraph{%s}" . "\\paragraph*{%s}")
-          ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
-        org-latex-classes))
+        org-latex-bib-compiler "biber")
+  (setf org-latex-pdf-process
+        '("latexmk -%latex -interaction=nonstopmode -outdir=%o %f")))
 
 (use-package ox-html
   :defer t

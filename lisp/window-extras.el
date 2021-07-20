@@ -25,11 +25,21 @@
                 #'window-extras--avoid-fitting-to-buffer)))
 
 ;; Org mode
+(declare-function org-goto-location "org-goto")
+
+(defun window-extras--prefer-split-below (fn &rest args)
+  "Apply FN on ARGS but prefer to split window below."
+  (let (split-width-threshold)
+    (apply fn args)))
+
 (defun window-extras--setup-org ()
   "Setup Org mode integration."
   (with-eval-after-load 'org
     (setf (symbol-function 'org-switch-to-buffer-other-window)
-          #'switch-to-buffer-other-window)))
+          #'switch-to-buffer-other-window))
+  (with-eval-after-load 'org-goto
+    (advice-add #'org-goto-location :around
+                #'window-extras--prefer-split-below)))
 
 ;; Calc
 (declare-function calc "calc")
