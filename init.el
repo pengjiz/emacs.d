@@ -698,7 +698,8 @@
   :init (setf bookmark-default-file (init--var "bookmarks"))
   :config
   (unless (file-exists-p bookmark-default-file)
-    (dolist (bookmark '(("finances" . "ledger/finances.ledger")))
+    (dolist (bookmark '(("athenaeum" . "athenaeum/catalogue.org")
+                        ("finances" . "ledger/finances.ledger")))
       (let ((name (car bookmark))
             (file (init--sync (cdr bookmark))))
         (when (file-exists-p file)
