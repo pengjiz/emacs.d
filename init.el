@@ -106,7 +106,7 @@
 
 (use-package modus-themes
   :ensure t
-  :bind ("C-c t n" . modus-themes-toggle)
+  :bind ("C-c t m" . modus-themes-toggle)
   :init (modus-themes-load-themes)
   :config (modus-themes-load-vivendi))
 
@@ -291,7 +291,7 @@
 (use-package change-language
   :load-path "lisp"
   :defer t
-  :bind ("C-c t m" . change-language))
+  :bind ("C-c t i" . change-language))
 
 (use-package re-builder
   :defer t
@@ -708,11 +708,7 @@
 
 (use-package dired
   :defer t
-  :bind (([remap list-directory] . dired)
-         :map dired-mode-map
-         ("e" . browse-url-of-dired-file)
-         ("K" . dired-kill-subdir)
-         ("C-+" . dired-create-empty-file))
+  :bind ([remap list-directory] . dired)
   :config
   (setf dired-listing-switches "-alhFv --group-directories-first"
         dired-auto-revert-buffer #'dired-directory-changed-p)
