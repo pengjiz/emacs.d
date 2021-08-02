@@ -107,6 +107,7 @@
 
 ;;; Mode line helper
 
+;; Core
 (eval-and-compile
   (defvar liteline--segment-fn-alist nil "Functions of segments.")
 
@@ -136,14 +137,6 @@ Return forms that can be passed directly to `format-mode-line'."
          ,@body)
        (cl-pushnew (cons ',name #',symbol) liteline--segment-fn-alist
                    :test #'eq :key #'car))))
-
-(defun liteline--window-active-p ()
-  "Return t if the selected window is active."
-  (or (eq (selected-window) (old-selected-window))
-      (and (not (zerop (minibuffer-depth)))
-           (eq (selected-window)
-               (with-selected-window (minibuffer-window)
-                 (minibuffer-selected-window))))))
 
 (defvar liteline--mode-line-fn-alist nil "Functions of mode lines.")
 
@@ -191,6 +184,26 @@ If DEFAULT is non-nil, set the default value."
             (default-value 'mode-line-format)
           mode-line-format)
         (list "%e" (liteline--prepare-mode-line name))))
+
+;; Active window
+(defvar liteline--active-window nil "Current active window.")
+
+(defun liteline--set-active-window (&rest _)
+  "Set the current active window."
+  (let ((window (selected-window)))
+    (setf liteline--active-window
+          (if (minibuffer-window-active-p window)
+              (minibuffer-selected-window)
+            window))))
+
+(defun liteline--window-active-p ()
+  "Return t if the selected window is active."
+  (eq (selected-window) liteline--active-window))
+
+(defun liteline--setup-active-window ()
+  "Setup active window detection."
+  (liteline--set-active-window)
+  (add-hook 'pre-redisplay-functions #'liteline--set-active-window))
 
 ;;; Basic segment
 
@@ -256,15 +269,20 @@ If DEFAULT is non-nil, set the default value."
                      (image-mode-window-get 'page)
                      (doc-view-last-page-number))))
     (otherwise
-     (concat
-      " "
-      (and size-indication-mode "%I ")
-      (let ((column (or (and column-number-indicator-zero-based "%c") "%C")))
-        (cond ((and line-number-mode column-number-mode)
-               (concat "%l:" column " "))
-              (line-number-mode "L%l ")
-              (column-number-mode (concat "C" column " "))))
-      "%p "))))
+     (let (position)
+       (when mode-line-percent-position
+         (push 'mode-line-percent-position position)
+         (push " " position))
+       (let ((column (or (and column-number-indicator-zero-based "%c") "%C")))
+         (cond ((and line-number-mode column-number-mode)
+                (push (concat " %l:" column) position))
+               (line-number-mode
+                (push " L%l" position))
+               (column-number-mode
+                (push (concat " C" column) position))))
+       (when size-indication-mode
+         (push " %I" position))
+       (and position `("" ,@position " "))))))
 
 ;; Coding system
 (liteline-define-segment coding-system
@@ -555,6 +573,7 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline-setup ()
   "Setup mode line."
+  (liteline--setup-active-window)
   (liteline--setup-conda)
   (liteline--setup-reftex)
   (liteline--setup-flycheck)
