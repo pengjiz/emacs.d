@@ -118,5 +118,22 @@ substring of other words."
   (completion-at-point)
   (word-complete--post-completion-cleanup))
 
+;;; Company integration
+
+(defvar company-begin-commands)
+(defvar company-continue-commands)
+
+(with-eval-after-load 'company
+  (when (and (listp company-begin-commands)
+             (memq 'completion-at-point company-begin-commands))
+    (cl-pushnew 'word-complete company-begin-commands :test #'eq))
+  (when (and (listp company-continue-commands)
+             (memq 'completion-at-point company-continue-commands))
+    (cl-pushnew 'word-complete
+                (if (eq (car company-continue-commands) 'not)
+                    (cdr company-continue-commands)
+                  company-continue-commands)
+                :test #'eq)))
+
 (provide 'word-complete)
 ;;; word-complete.el ends here
