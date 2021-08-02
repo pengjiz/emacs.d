@@ -1431,15 +1431,7 @@
   :init
   (make-directory (init--var "eww/") t)
   (setf eww-bookmarks-directory (init--var "eww/"))
-  :config
-  (setf eww-search-prefix "https://www.google.com/search?q=")
-
-  (defun init--use-fundamental-mode-for-eww (fn &rest args)
-    "Apply FN on ARGS, but force using `fundamental-mode' to view page source."
-    (cl-letf (((symbol-function 'mhtml-mode) #'fundamental-mode)
-              ((symbol-function 'html-mode) #'fundamental-mode))
-      (apply fn args)))
-  (advice-add #'eww-view-source :around #'init--use-fundamental-mode-for-eww))
+  :config (setf eww-search-prefix "https://www.google.com/search?q="))
 
 (use-package elfeed
   :ensure t
