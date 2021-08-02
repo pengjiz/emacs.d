@@ -203,7 +203,7 @@
 (use-package simple-extras
   :load-path "lisp"
   :config
-  (simple-extras-setup)
+  (setf mail-user-agent 'simple-extras-mail-user-agent)
   (dolist (hook '(prog-mode-hook protobuf-mode-hook))
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
@@ -834,6 +834,7 @@
                         "*Edit Formulas*"
                         "*poporg:"
                         "*edit-indirect"
+                        "*draft mail*"
                         "*Ledger Schedule*"))
            (display-buffer-reuse-window
             display-buffer-below-selected)

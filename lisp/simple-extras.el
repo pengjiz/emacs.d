@@ -57,20 +57,37 @@ EVENT is directly passed to `choose-completion'."
   (let ((completion-no-auto-exit t))
     (choose-completion event)))
 
-;;; Copy
+;;; Mail
 
-(defun simple-extras--copy-mail-address (&optional to &rest _)
-  "Copy email address TO if given."
-  (interactive)
-  (when to
-    (kill-new to)
-    (message "Email address `%s' saved to kill ring" to)))
+(defvar simple-extras--mail-send-hook nil
+  "Hook to run before sending a mail.")
 
-;;; Entry point
+(defun simple-extras--compose-mail (&rest args)
+  "Start composing a draft mail with ARGS."
+  (let ((to (or (nth 0 args) ""))
+        (subject (or (nth 1 args) ""))
+        (other-headers (nth 2 args))
+        (continue (nth 3 args))
+        (switch-fn (or (nth 4 args) #'pop-to-buffer-same-window))
+        (buffer (get-buffer-create "*draft mail*"))
+        (prompt "A draft mail exists; replace it? "))
+    (unless (and (> (buffer-size buffer) 0)
+                 (or continue (not (y-or-n-p prompt))))
+      (with-current-buffer buffer
+        (erase-buffer)
+        (text-mode)
+        (insert "To: " to "\n"
+                "Subject: " subject "\n")
+        (dolist (header other-headers)
+          (let ((name (car header)))
+            (unless (equal (downcase name) "body")
+              (insert name ": " (cdr header) "\n"))))
+        (insert mail-header-separator "\n")))
+    (funcall switch-fn buffer)))
 
-(defun simple-extras-setup ()
-  "Setup simple extensions."
-  (setf (symbol-function 'compose-mail) #'simple-extras--copy-mail-address))
+(define-mail-user-agent 'simple-extras-mail-user-agent
+  #'simple-extras--compose-mail #'ignore
+  nil 'simple-extras--mail-send-hook)
 
 (provide 'simple-extras)
 ;;; simple-extras.el ends here
