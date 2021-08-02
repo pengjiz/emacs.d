@@ -1421,10 +1421,6 @@
 
 ;;; Browser
 
-(use-package shr-color
-  :defer t
-  :config (setf shr-color-visible-luminance-min 70))
-
 (use-package eww
   :defer t
   :bind ("C-c f e" . eww-open-file)
