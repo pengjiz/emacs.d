@@ -469,9 +469,7 @@
          ("<backtab>" . bicycle-cycle-global)))
 
 (use-package hl-line
-  :config
-  (setf hl-line-sticky-flag nil)
-  (global-hl-line-mode))
+  :config (global-hl-line-mode))
 
 (use-package page-break-lines
   :ensure t
