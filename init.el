@@ -336,11 +336,6 @@
   :ensure t
   :defer t)
 
-(use-package poporg
-  :ensure t
-  :defer t
-  :bind ("C-c x o" . poporg-dwim))
-
 (use-package diff
   :defer t
   :bind (("C-c f =" . diff)
@@ -827,7 +822,6 @@
           (,(rx bos (or "CAPTURE-"
                         "*Org Src"
                         "*Edit Formulas*"
-                        "*poporg:"
                         "*edit-indirect"
                         "*draft mail*"
                         "*Ledger Schedule*"))
