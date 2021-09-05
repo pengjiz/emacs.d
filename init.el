@@ -92,7 +92,7 @@
 
   (setf initial-buffer-choice t
         initial-scratch-message nil
-        initial-major-mode #'fundamental-mode))
+        initial-major-mode #'text-mode))
 
 ;;; Initialization
 
