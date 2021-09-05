@@ -226,11 +226,6 @@
 (use-package delsel
   :config (delete-selection-mode))
 
-(use-package expand-region
-  :ensure t
-  :defer t
-  :bind* ("C-=" . er/expand-region))
-
 (use-package bug-reference
   :defer t
   :hook ((prog-mode protobuf-mode) . bug-reference-prog-mode)
