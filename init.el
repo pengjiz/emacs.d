@@ -943,15 +943,6 @@
   :load-path "lisp"
   :config (window-extras-setup))
 
-(use-package winner
-  :bind (;; -
-         :map winner-mode-map
-         ("C-c w u" . winner-undo)
-         ("C-c w r" . winner-redo))
-  :init
-  (setf winner-dont-bind-my-keys t)
-  (winner-mode))
-
 (use-package ace-window
   :ensure t
   :defer t
