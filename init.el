@@ -121,11 +121,6 @@
   :defer t
   :hook (after-init . liteline-setup))
 
-(use-package rich-title
-  :load-path "lisp"
-  :defer t
-  :hook (after-init . rich-title-setup))
-
 (use-package transient
   :ensure t
   :defer t
