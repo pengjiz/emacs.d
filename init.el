@@ -1051,6 +1051,7 @@
   :config
   (setf company-idle-delay 0.5)
   (setf company-show-quick-access t
+        company-tooltip-align-annotations t
         company-format-margin-function nil))
 
 (use-package company-dabbrev
@@ -1062,7 +1063,7 @@
   (setf company-dabbrev-ignore-buffers
         (lambda (buffer)
           (or (memq (buffer-local-value 'major-mode buffer)
-                    '(image-mode doc-view-mode dired-mode))
+                    '(image-mode doc-view-mode))
               (string-match-p "\\` \\*" (buffer-name buffer))))))
 
 (use-package company-dabbrev-code
@@ -1076,7 +1077,7 @@
          ([remap dabbrev-completion] . hippie-expand))
   :config
   (setf hippie-expand-ignore-buffers
-        '("\\` \\*" doc-view-mode image-mode dired-mode))
+        '(image-mode doc-view-mode "\\` \\*"))
   (setf hippie-expand-try-functions-list
         '(try-complete-file-name-partially
           try-complete-file-name
