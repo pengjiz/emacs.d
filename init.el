@@ -100,7 +100,7 @@
   (setf custom-file (init--var "custom.el"))
   (load custom-file t t t)
 
-  (dolist (key '("M-`" "M-=" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
+  (dolist (key '("M-`" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
                  "C-x m" "C-x 4 m" "C-x 5 m"))
     (unbind-key key)))
 
@@ -333,7 +333,8 @@
 
 (use-package edit-indirect
   :ensure t
-  :defer t)
+  :defer t
+  :bind ("C-c x i" . edit-indirect-region))
 
 (use-package diff
   :defer t
