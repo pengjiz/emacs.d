@@ -2299,8 +2299,6 @@
   :config
   (setf org-clock-out-remove-zero-time-clocks t)
   (setf org-clock-persist 'history)
-  (setf org-clock-task-overrun-text "*"
-        org-clock-clocked-in-display 'frame-title)
   (setf org-show-notification-timeout 10)
 
   (defun init--confirm-exit-when-clocking ()
