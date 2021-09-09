@@ -31,15 +31,6 @@ REGION is directly passed to `fill-paragraph'."
   (let ((fill-column (point-max)))
     (fill-paragraph nil region)))
 
-;;; Evaluate
-
-(defun simple-extras-eval-and-replace-last-sexp ()
-  "Replace the preceding sexp with its value."
-  (interactive)
-  (let ((value (eval (elisp--preceding-sexp))))
-    (backward-kill-sexp)
-    (insert (format "%S" value))))
-
 ;;; Completion
 
 (defun simple-extras-force-completion-at-point ()

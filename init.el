@@ -208,7 +208,6 @@
     (add-hook hook #'simple-extras-auto-fill-comments-mode))
 
   (bind-keys ("M-z" . simple-extras-unfill-paragraph)
-             ("M-=" . simple-extras-eval-and-replace-last-sexp)
              :map completion-in-region-mode-map
              ("C-<tab>" . simple-extras-force-completion-at-point)
              :map completion-list-mode-map
