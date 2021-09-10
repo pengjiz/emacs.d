@@ -398,7 +398,7 @@
          . init--enable-whitespace)
   :init
   (defun init--enable-whitespace ()
-    (add-hook 'hack-local-variables-hook #'whitespace-mode nil t))
+    (add-hook 'after-change-major-mode-hook #'whitespace-mode nil t))
   :config
   (setf whitespace-style '(face
                            indentation
