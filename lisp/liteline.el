@@ -140,10 +140,8 @@ Return forms that can be passed directly to `format-mode-line'."
                                   '(mouse-face help-echo keymap local-map)
                                   liteline--mode-line-right-string)
   (let* ((width (string-width liteline--mode-line-right-string))
-         (space `((space :align-to (- (+ right
-                                         right-fringe
-                                         right-margin)
-                                      ,width))))
+         (space `(space :align-to (- (+ right right-fringe right-margin)
+                                     ,width)))
          (padding (propertize " " 'display space)))
     `(,left ,padding liteline--mode-line-right-string)))
 
@@ -372,16 +370,16 @@ If DEFAULT is non-nil, set the default value."
        (format "[%s]" env)))
     ;; RefTeX
     ((reftex-index-mode)
-     (when reftex-index-restriction-indicator
-       (format "[%s]" reftex-index-restriction-indicator)))
+     (when-let* ((indicator reftex-index-restriction-indicator))
+       (substring-no-properties (format "[%s]" indicator))))
     ((reftex-select-label-mode)
      (when (bound-and-true-p reftex-refstyle)
-       (format "[%s]" reftex-refstyle)))
+       (substring-no-properties (format "[%s]" reftex-refstyle))))
     ((reftex-toc-mode)
-     (format " L:%s I:%s T:%s"
-             (or reftex-toc-include-labels-indicator "-")
-             (or reftex-toc-include-index-indicator "-")
-             (or reftex-toc-max-level-indicator "-")))
+     (let ((label (or reftex-toc-include-labels-indicator "-"))
+           (index (or reftex-toc-include-index-indicator "-"))
+           (level (or reftex-toc-max-level-indicator "-")))
+       (substring-no-properties (format " L:%s I:%s T:%s" label index level))))
     ;; Calc
     ((calc-mode)
      (when liteline--calc-extra
@@ -410,7 +408,7 @@ If DEFAULT is non-nil, set the default value."
 
 (defvar-local liteline--major-mode-extra nil
   "Extra information for major mode.")
-(put 'liteline--major-mode-extra 'risky-local-variable-p t)
+(put 'liteline--major-mode-extra 'risky-local-variable t)
 
 (liteline-define-segment modes
   "Show modes related information."
@@ -448,15 +446,14 @@ If DEFAULT is non-nil, set the default value."
           ((finished)
            (let-alist (flycheck-count-errors flycheck-current-errors)
              (if (or .error .warning .info)
-                 (concat
-                  (propertize (format "%dE" (or .error 0))
-                              'face 'liteline-flycheck-error)
-                  " "
-                  (propertize (format "%dW" (or .warning 0))
-                              'face 'liteline-flycheck-warning)
-                  " "
-                  (propertize (format "%dI" (or .info 0))
-                              'face 'liteline-flycheck-info))
+                 (concat (propertize (format "%dE" (or .error 0))
+                                     'face 'liteline-flycheck-error)
+                         " "
+                         (propertize (format "%dW" (or .warning 0))
+                                     'face 'liteline-flycheck-warning)
+                         " "
+                         (propertize (format "%dI" (or .info 0))
+                                     'face 'liteline-flycheck-info))
                (propertize "No issues"
                            'face 'liteline-flycheck-clean)))))))
 
@@ -481,7 +478,7 @@ If DEFAULT is non-nil, set the default value."
       ((Man-mode)
        '(" " Man-page-mode-string " "))
       ((Info-mode)
-       `(,(cdr mode-line-buffer-identification) " ")))))
+       `("" ,(cadr mode-line-buffer-identification) " ")))))
 
 ;;; Mode line
 
