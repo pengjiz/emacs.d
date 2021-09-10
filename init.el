@@ -981,6 +981,11 @@
   (setf tab-bar-new-button-show nil
         tab-bar-close-button-show nil))
 
+(use-package tab-bar-extras
+  :load-path "lisp"
+  :defer t
+  :hook (after-init . tab-bar-extras-setup))
+
 ;;; Completion
 
 (progn ; general completion
