@@ -972,11 +972,15 @@
   :defer t
   :bind (("C-c s s" . tab-bar-switch-to-recent-tab)
          ("C-c s n" . tab-bar-switch-to-next-tab)
-         ("C-c s p" . tab-bar-switch-to-prev-tab))
+         ("C-c s p" . tab-bar-switch-to-prev-tab)
+         ("C-c s f" . tab-bar-history-forward)
+         ("C-c s b" . tab-bar-history-back))
+  :hook ((after-init . tab-bar-history-mode)
+         (after-init . tab-bar-mode))
   :config
-  (setf tab-bar-show nil)
   (setf tab-bar-new-tab-choice "*scratch*")
-  (setf tab-bar-tab-name-function #'tab-bar-tab-name-all))
+  (setf tab-bar-new-button-show nil
+        tab-bar-close-button-show nil))
 
 ;;; Completion
 
