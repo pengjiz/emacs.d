@@ -19,11 +19,6 @@
   "A lightweight mode line."
   :group 'mode-line)
 
-(defcustom liteline-word-count-modes
-  '(text-mode bibtex-mode)
-  "Major modes in which word count is shown."
-  :type '(repeat symbol))
-
 (defcustom liteline-minor-mode-indicator-alist
   '((typo-mode . "t")
     (abbrev-mode . "r")
@@ -37,17 +32,9 @@
   :type '(alist :key-type symbol
                 :value-type string))
 
-(defface liteline-buffer-modified
-  '((t :inherit (bold warning)))
-  "Face used for modified buffers.")
-
-(defface liteline-buffer-read-only
-  '((t :inherit (bold error)))
-  "Face used for read-only buffers.")
-
-(defface liteline-buffer-narrowed
-  '((t :inherit warning))
-  "Face used for narrowed buffers.")
+(defface liteline-transient
+  '((t :inherit mode-line-highlight))
+  "Face used by transient information.")
 
 (defface liteline-buffer-name
   '((t :inherit mode-line-buffer-id))
@@ -57,9 +44,25 @@
   '((t :inherit (bold error)))
   "Face used for buffers backed by missing files.")
 
-(defface liteline-action
-  '((t :inherit mode-line-emphasis))
-  "Face used by action information.")
+(defface liteline-git-branch
+  '((t :inherit vc-up-to-date-state))
+  "Face used by Git branch names.")
+
+(defface liteline-git-new
+  '((t :inherit success))
+  "Face used for new files in Git.")
+
+(defface liteline-git-edited
+  '((t :inherit warning))
+  "Face used for edited files in Git.")
+
+(defface liteline-git-warning
+  '((t :inherit (bold warning)))
+  "Face used for warnings in Git.")
+
+(defface liteline-git-error
+  '((t :inherit (bold error)))
+  "Face used for errors in Git.")
 
 (defface liteline-flycheck-general
   '((t :inherit compilation-mode-line-run))
@@ -84,26 +87,6 @@
 (defface liteline-flycheck-error
   '((t :inherit compilation-error))
   "Face used by Flycheck error count.")
-
-(defface liteline-git-branch
-  '((t :inherit vc-up-to-date-state))
-  "Face used by Git branch names.")
-
-(defface liteline-git-new
-  '((t :inherit success))
-  "Face used for new files in Git.")
-
-(defface liteline-git-edited
-  '((t :inherit warning))
-  "Face used for edited files in Git.")
-
-(defface liteline-git-warning
-  '((t :inherit (bold warning)))
-  "Face used for warnings in Git.")
-
-(defface liteline-git-error
-  '((t :inherit (bold error)))
-  "Face used for errors in Git.")
 
 ;;; Mode line helper
 
@@ -205,51 +188,49 @@ If DEFAULT is non-nil, set the default value."
   (liteline--set-active-window)
   (add-hook 'pre-redisplay-functions #'liteline--set-active-window))
 
-;;; Basic segment
+;;; Segment
 
-;; Buffer information
-(defun liteline--get-buffer-modification ()
-  "Return buffer modification status."
-  (let ((read-only buffer-read-only)
-        (modified (buffer-modified-p)))
-    (cond ((and read-only modified)
-           (concat (propertize "%%" 'face 'liteline-buffer-read-only)
-                   (propertize "*" 'face 'liteline-buffer-modified)))
-          (read-only
-           (propertize "%%%%" 'face 'liteline-buffer-read-only))
-          (modified
-           (propertize "**" 'face 'liteline-buffer-modified))
-          (t "--"))))
+;; Transient information
+(defun liteline--get-macro-indicator ()
+  "Return an indicator when defining keyboard macros."
+  (and defining-kbd-macro "M>"))
 
+(defun liteline--get-recursive-editing-depth ()
+  "Return recursion depth when in recursive editing."
+  (let ((depth (- (recursion-depth) (minibuffer-depth))))
+    (when (> depth 0)
+      (format "@%d" depth))))
+
+(liteline-define-segment transient
+  "Show transient information."
+  (when (liteline--window-active-p)
+    (let (indicators)
+      (dolist (fn '(liteline--get-macro-indicator
+                    liteline--get-recursive-editing-depth))
+        (when-let* ((indicator (funcall fn)))
+          (push " " indicators)
+          (push indicator indicators)))
+      (when indicators
+        (propertize (apply #'concat " " indicators)
+                    'face 'liteline-transient)))))
+
+;; Basic buffer information
 (defun liteline--get-buffer-name ()
   "Return buffer name."
-  (let* ((face (cond ((not buffer-file-name)
-                      'liteline-buffer-name)
-                     ((and (file-remote-p buffer-file-name)
-                           (not (file-remote-p buffer-file-name nil t)))
-                      'liteline-buffer-file-missing)
-                     ((not (file-exists-p buffer-file-name))
-                      'liteline-buffer-file-missing)
-                     (t 'liteline-buffer-name))))
-    (concat
-     (when (buffer-narrowed-p)
-       (propertize "~" 'face 'liteline-buffer-narrowed))
-     (propertize (buffer-name) 'face face))))
+  (let ((face (cond ((not buffer-file-name) 'liteline-buffer-name)
+                    ((and (file-remote-p buffer-file-name)
+                          (not (file-remote-p buffer-file-name nil t)))
+                     'liteline-buffer-file-missing)
+                    ((not (file-exists-p buffer-file-name))
+                     'liteline-buffer-file-missing)
+                    (t 'liteline-buffer-name))))
+    (propertize "%b" 'face face)))
 
-(defun liteline--get-buffer-hostname ()
-  "Return the hostname for remote buffers."
-  (when-let* ((root default-directory)
-              (host (file-remote-p root 'host)))
-    (concat "@" host)))
-
-(liteline-define-segment buffer-info
-  "Show buffer information."
-  (concat " "
-          (liteline--get-buffer-modification)
-          " "
-          (liteline--get-buffer-name)
-          (liteline--get-buffer-hostname)
-          " "))
+(liteline-define-segment basic
+  "Show basic buffer information."
+  (let ((narrow (or (and (buffer-narrowed-p) "#") "-"))
+        (name (liteline--get-buffer-name)))
+    `(" %Z%*%+" ,narrow "%@ " ,name " ")))
 
 ;; Position
 (declare-function image-get-display-property "image-mode")
@@ -284,43 +265,79 @@ If DEFAULT is non-nil, set the default value."
          (push " %I" position))
        (and position `("" ,@position " "))))))
 
-;; Coding system
-(liteline-define-segment coding-system
-  "Show coding system information."
-  (and (liteline--window-active-p)
-       (concat
-        " "
-        (let ((system (coding-system-plist buffer-file-coding-system)))
-          (if (memq (plist-get system :category)
-                    '(coding-category-undecided coding-category-utf-8))
-              "UTF-8"
-            (upcase (symbol-name (plist-get system :name)))))
-        " "
-        (cl-case (coding-system-eol-type buffer-file-coding-system)
-          ((0) "LF ")
-          ((1) "CRLF ")
-          ((2) "CR ")))))
+;; Git
+(defvar-local liteline--git nil "Current Git status.")
+(put 'liteline--git 'risky-local-variable t)
 
-;; Input method
-(liteline-define-segment input-method
-  "Show input method information."
-  (and (liteline--window-active-p)
-       current-input-method
-       (concat " " current-input-method-title " ")))
+(defun liteline--get-git ()
+  "Return current Git status."
+  (if vc-display-status
+      (concat (propertize (substring-no-properties vc-mode 5)
+                          'face 'liteline-git-branch)
+              ":"
+              (cl-case (vc-state buffer-file-name 'Git)
+                ((up-to-date) "-")
+                ((edited) (propertize "*" 'face 'liteline-git-edited))
+                ((added) (propertize "+" 'face 'liteline-git-new))
+                ((conflict) (propertize "=" 'face 'liteline-git-error))
+                ((removed) (propertize "!" 'face 'liteline-git-warning))
+                ((needs-update) (propertize "^" 'face 'liteline-git-warning))
+                ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
+                ((ignored) "~")
+                (otherwise (propertize "?" 'face 'liteline-git-error))))
+    "Git"))
 
-;; Major mode
+(defun liteline--update-git (&rest _)
+  "Update `liteline--git'."
+  (if (and buffer-file-name
+           vc-mode
+           (eq (vc-backend buffer-file-name) 'Git))
+      (setf liteline--git (liteline--get-git))
+    (setf liteline--git nil))
+  (force-mode-line-update))
+
+(defun liteline--setup-git ()
+  "Setup Git integration."
+  (advice-add #'vc-mode-line :after #'liteline--update-git))
+
+(liteline-define-segment git
+  "Show Git status."
+  (and (liteline--window-active-p)
+       liteline--git
+       '(" " liteline--git " ")))
+
+;; Modes
+(defvar gud-minor-mode)
 (defvar reftex-index-restriction-indicator)
 (defvar reftex-toc-include-labels-indicator)
 (defvar reftex-toc-include-index-indicator)
 (defvar reftex-toc-max-level-indicator)
+(declare-function calc-set-mode-line "calc")
 (declare-function reftex-offer-label-menu "reftex-ref")
 (declare-function conda-get-current-environment "ext:conda")
 
-(defun liteline--setup-conda ()
-  "Setup conda."
-  (with-eval-after-load 'conda
-    (add-hook 'conda-post-activate-hook #'force-mode-line-update)
-    (add-hook 'conda-post-deactivate-hook #'force-mode-line-update)))
+(defun liteline--get-minor-modes ()
+  "Return indicators for certain enabled minor modes."
+  (let (indicators)
+    (dolist (mode liteline-minor-mode-indicator-alist)
+      (let ((symbol (car mode)))
+        (when (and (boundp symbol) (symbol-value symbol))
+          (push (cdr mode) indicators))))
+    (when indicators
+      (push " " indicators)
+      (cons "" (nreverse indicators)))))
+
+(defvar-local liteline--calc-extra nil "Extra information for Calc.")
+
+(defun liteline--update-calc-extra (&rest _)
+  "Update `liteline--calc-extra'."
+  (when (eq major-mode 'calc-mode)
+    (let* ((name mode-line-buffer-identification)
+           (index (string-match-p ":" name))
+           (extra (string-trim (substring-no-properties name (1+ index)))))
+      (if (string-empty-p extra)
+          (setf liteline--calc-extra nil)
+        (setf liteline--calc-extra extra)))))
 
 (defun liteline--clear-local-mode-line ()
   "Unset the local `mode-line-format'."
@@ -332,8 +349,8 @@ If DEFAULT is non-nil, set the default value."
 (setf (symbol-function 'liteline--get-buffer-size)
       (symbol-function 'buffer-size))
 
-;; HACK: buffer-size happens to be called right after modifying
-;; mode-line-format. So here we manipulate buffer-size to clear the mode line.
+;; HACK: Here we modify a function that happens to be called right after setting
+;; the RefTeX mode line.
 (defun liteline--avoid-reftex-mode-line (fn &rest args)
   "Apply FN on ARGS with protection on the mode line."
   (cl-letf (((symbol-function 'buffer-size)
@@ -341,6 +358,39 @@ If DEFAULT is non-nil, set the default value."
                (liteline--clear-local-mode-line)
                (liteline--get-buffer-size buffer))))
     (apply fn args)))
+
+(defun liteline--get-major-mode-extra ()
+  "Return extra information for major mode."
+  (cl-case (or (and (eq major-mode 'gud-mode)
+                    (eq gud-minor-mode 'pdb)
+                    'gud-pdb-mode)
+               major-mode)
+    ;; Python environment
+    ((python-mode inferior-python-mode gud-pdb-mode)
+     (when-let* ((env (and (fboundp #'conda-get-current-environment)
+                           (conda-get-current-environment))))
+       (format "[%s]" env)))
+    ;; RefTeX
+    ((reftex-index-mode)
+     (when reftex-index-restriction-indicator
+       (format "[%s]" reftex-index-restriction-indicator)))
+    ((reftex-select-label-mode)
+     (when (bound-and-true-p reftex-refstyle)
+       (format "[%s]" reftex-refstyle)))
+    ((reftex-toc-mode)
+     (format " L:%s I:%s T:%s"
+             (or reftex-toc-include-labels-indicator "-")
+             (or reftex-toc-include-index-indicator "-")
+             (or reftex-toc-max-level-indicator "-")))
+    ;; Calc
+    ((calc-mode)
+     (when liteline--calc-extra
+       (concat " " liteline--calc-extra)))))
+
+(defun liteline--setup-calc ()
+  "Setup Calc."
+  (with-eval-after-load 'calc
+    (advice-add #'calc-set-mode-line :after #'liteline--update-calc-extra)))
 
 (defun liteline--setup-reftex ()
   "Setup RefTeX."
@@ -352,101 +402,34 @@ If DEFAULT is non-nil, set the default value."
     (advice-add #'reftex-offer-label-menu :around
                 #'liteline--avoid-reftex-mode-line)))
 
-(defun liteline--get-major-mode-extra-info ()
-  "Return the extra information for the current major mode."
-  (cl-case major-mode
-    ;; Python environment
-    ((python-mode inferior-python-mode)
-     (when-let* ((env (and (fboundp #'conda-get-current-environment)
-                           (conda-get-current-environment))))
-       (format "[%s]" env)))
-    ;; RefTeX index
-    ((reftex-index-mode)
-     (when reftex-index-restriction-indicator
-       (format "[%s]" reftex-index-restriction-indicator)))
-    ;; RefTeX reference style
-    ((reftex-select-label-mode)
-     (when (bound-and-true-p reftex-refstyle)
-       (format "[%s]" reftex-refstyle)))
-    ;; RefTeX TOC
-    ((reftex-toc-mode)
-     (format " L:%s I:%s T:%s"
-             (or reftex-toc-include-labels-indicator "-")
-             (or reftex-toc-include-index-indicator "-")
-             (or reftex-toc-max-level-indicator "-")))
-    ;; Calc modes
-    ((calc-mode)
-     (let* ((name mode-line-buffer-identification)
-            (info (replace-regexp-in-string "\\`Calc.*: " "" name))
-            (string (substring-no-properties (string-trim info))))
-       (unless (string-empty-p string)
-         (concat " " string))))))
+(defun liteline--setup-conda ()
+  "Setup conda."
+  (with-eval-after-load 'conda
+    (add-hook 'conda-post-activate-hook #'force-mode-line-update)
+    (add-hook 'conda-post-deactivate-hook #'force-mode-line-update)))
 
-(liteline-define-segment major-mode
-  "Show major mode information."
-  '(" "
+(defvar-local liteline--major-mode-extra nil
+  "Extra information for major mode.")
+(put 'liteline--major-mode-extra 'risky-local-variable-p t)
+
+(liteline-define-segment modes
+  "Show modes related information."
+  (setf liteline--major-mode-extra (liteline--get-major-mode-extra))
+  `(" "
+    (current-input-method ("" current-input-method-title " "))
+    ,(liteline--get-minor-modes)
     mode-name
-    (:eval (liteline--get-major-mode-extra-info))
+    liteline--major-mode-extra
     mode-line-process
     " "))
 
-;;; Additional segment & third-party integration
-
-;; Keyboard macro
-(defun liteline--get-macro-indicator ()
-  "Return an indicator when defining keyboard macros."
-  (and defining-kbd-macro "M>"))
-
-;; Recursive editing
-(defun liteline--get-recursive-editing-depth ()
-  "Return recursion depth when in recursive editing."
-  (let ((depth (- (recursion-depth) (minibuffer-depth))))
-    (when (> depth 0)
-      (format "@%d" depth))))
-
-;; Selection
-(defsubst liteline--get-column (position)
-  "Return the column number at POSITION."
-  (save-excursion
-    (goto-char position)
-    (current-column)))
-
-(defun liteline--get-selection-info ()
-  "Return the selection information."
-  (when mark-active
-    (let* ((start (region-beginning))
-           (end (region-end))
-           (lines (count-lines start end)))
-      (concat (cond ((bound-and-true-p rectangle-mark-mode)
-                     (format "%dx%dB"
-                             lines
-                             (abs (- (liteline--get-column end)
-                                     (liteline--get-column start)))))
-                    ((> lines 1) (format "%dC %dL" (- end start) lines))
-                    (t (format "%dC" (- end start))))
-              (when (apply #'derived-mode-p liteline-word-count-modes)
-                (format " %dW" (count-words start end)))))))
-
-(liteline-define-segment action
-  "Show action information."
-  (when (liteline--window-active-p)
-    (let (action)
-      (dolist (fn '(liteline--get-selection-info
-                    liteline--get-recursive-editing-depth
-                    liteline--get-macro-indicator))
-        (when-let* ((string (funcall fn)))
-          (push " " action)
-          (push string action)))
-      (when action
-        (propertize (apply #'concat " " action) 'face 'liteline-action)))))
-
 ;; Flycheck
-(defvar-local liteline--flycheck nil "Current Flycheck status.")
-(put 'liteline--flycheck 'risky-local-variable t)
-
 (defvar flycheck-current-errors)
 (defvar flycheck-last-status-change)
 (declare-function flycheck-count-errors "ext:flycheck")
+
+(defvar-local liteline--flycheck nil "Current Flycheck status.")
+(put 'liteline--flycheck 'risky-local-variable t)
 
 (defun liteline--update-flycheck (&optional status)
   "Update `liteline--flycheck' according to STATUS."
@@ -488,97 +471,35 @@ If DEFAULT is non-nil, set the default value."
   "Show Flycheck status."
   (and (liteline--window-active-p)
        liteline--flycheck
-       (concat " " liteline--flycheck " ")))
-
-;; Git
-(defvar-local liteline--git nil "Current Git status.")
-(put 'liteline--git 'risky-local-variable t)
-
-(defun liteline--get-git ()
-  "Return current Git status."
-  (if vc-display-status
-      (concat (propertize (substring-no-properties vc-mode 5)
-                          'face 'liteline-git-branch)
-              ":"
-              (cl-case (vc-state buffer-file-name 'Git)
-                ((up-to-date) "-")
-                ((edited) (propertize "*" 'face 'liteline-git-edited))
-                ((added) (propertize "+" 'face 'liteline-git-new))
-                ((conflict) (propertize "=" 'face 'liteline-git-error))
-                ((removed) (propertize "!" 'face 'liteline-git-warning))
-                ((needs-update) (propertize "^" 'face 'liteline-git-warning))
-                ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
-                ((ignored) "~")
-                (otherwise (propertize "?" 'face 'liteline-git-error))))
-    "Git"))
-
-(defun liteline--update-git (&rest _)
-  "Update `liteline--git'."
-  (if (and buffer-file-name
-           vc-mode
-           (eq (vc-backend buffer-file-name) 'Git))
-      (setf liteline--git (liteline--get-git))
-    (setf liteline--git nil))
-  (force-mode-line-update))
-
-(defun liteline--setup-git ()
-  "Setup Git integration."
-  (advice-add #'vc-mode-line :after #'liteline--update-git))
-
-(liteline-define-segment git
-  "Show Git status."
-  (and (liteline--window-active-p)
-       liteline--git
-       (concat " " liteline--git " ")))
-
-;; Minor mode
-(liteline-define-segment minor-modes
-  "Show indicators for certain minor modes."
-  (when (liteline--window-active-p)
-    (let (indicators)
-      (dolist (mode liteline-minor-mode-indicator-alist)
-        (let ((symbol (car mode)))
-          (when (and (boundp symbol) (symbol-value symbol))
-            (push (cdr mode) indicators))))
-      (when indicators
-        (push " " indicators)
-        (apply #'concat " " (nreverse indicators))))))
+       '(" " liteline--flycheck " ")))
 
 ;; Misc information
 (liteline-define-segment misc
   "Show misc information."
-  (and (liteline--window-active-p)
-       (memq 'org-timer-mode-line-string global-mode-string)
-       (bound-and-true-p org-timer-mode-line-string)
-       (concat " "
-               (substring-no-properties org-timer-mode-line-string 2 -1)
-               " ")))
-
-;; Two-column
-(defvar 2C-mode-line-format)
-
-(defun litelite--setup-two-column ()
-  "Setup two-column."
-  (with-eval-after-load 'two-column
-    (setf 2C-mode-line-format (default-value 'mode-line-format))))
+  (when (liteline--window-active-p)
+    (cl-case major-mode
+      ((Man-mode)
+       '(" " Man-page-mode-string " "))
+      ((Info-mode)
+       `(,(cdr mode-line-buffer-identification) " ")))))
 
 ;;; Mode line
 
 ;; Main
 (liteline-define-mode-line main
-  (action buffer-info position)
-  (misc git coding-system input-method minor-modes major-mode flycheck))
+  (transient basic position)
+  (git modes flycheck misc))
 
 ;;; Entry point
 
 (defun liteline-setup ()
   "Setup mode line."
   (liteline--setup-active-window)
-  (liteline--setup-conda)
-  (liteline--setup-reftex)
-  (liteline--setup-flycheck)
   (liteline--setup-git)
-  (litelite--setup-two-column)
+  (liteline--setup-calc)
+  (liteline--setup-reftex)
+  (liteline--setup-conda)
+  (liteline--setup-flycheck)
 
   (liteline-set-mode-line 'main t))
 

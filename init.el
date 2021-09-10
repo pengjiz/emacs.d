@@ -119,7 +119,19 @@
 (use-package liteline
   :load-path "lisp"
   :defer t
-  :hook (after-init . liteline-setup))
+  :hook (after-init . liteline-setup)
+  :config
+  (defvar calendar-mode-line-format)
+  (with-eval-after-load 'calendar
+    (setf calendar-mode-line-format nil
+          (symbol-function 'calendar-set-mode-line) #'init-ignore))
+
+  (defvar 2C-mode-line-format)
+  (with-eval-after-load 'two-column
+    (setf 2C-mode-line-format (default-value 'mode-line-format)))
+
+  (with-eval-after-load 'ediff-wind
+    (setf (symbol-function 'ediff-refresh-mode-lines) #'init-ignore)))
 
 (use-package transient
   :ensure t
@@ -1533,9 +1545,7 @@
         calendar-chinese-all-holidays-flag t)
   (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
   (setf calendar-date-display-form calendar-iso-date-display-form)
-  (calendar-set-date-style 'iso)
-  (setf calendar-mode-line-format nil
-        (symbol-function 'calendar-set-mode-line) #'init-ignore))
+  (calendar-set-date-style 'iso))
 
 (use-package holidays
   :defer t
