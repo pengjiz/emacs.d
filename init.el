@@ -204,8 +204,7 @@
   (setf completion-show-help nil)
   (setf kill-do-not-save-duplicates t)
   (setf set-mark-command-repeat-pop t)
-  (setf shell-command-dont-erase-buffer 'end-last-out
-        async-shell-command-display-buffer nil))
+  (setf async-shell-command-display-buffer nil))
 
 (use-package simple-extras
   :load-path "lisp"
@@ -1366,9 +1365,7 @@
 
 (use-package em-glob
   :defer t
-  :config
-  (setf eshell-glob-case-insensitive t
-        eshell-error-if-no-glob t))
+  :config (setf eshell-error-if-no-glob t))
 
 (use-package em-hist
   :defer t
