@@ -2186,7 +2186,14 @@
            ("Account" . "register %(account)")
            ("Expenses (weekly)" . "register Expenses -W")
            ("Expenses (monthly)" . "register Expenses -M")
-           ("Cash flow (this month)" . "balance Income Expenses --invert -p %(month)")))))
+           ("Cash flow (this month)" . "balance Income Expenses --invert -p %(month)"))))
+
+  (defun init--avoid-flycheck-for-ledger-schedule (fn &rest args)
+    "Apply FN on ARGS but avoid activating Flycheck."
+    (cl-letf (((symbol-function 'flycheck-mode) #'ignore))
+      (apply fn args)))
+  (advice-add #'ledger-schedule-create-auto-buffer :around
+              #'init--avoid-flycheck-for-ledger-schedule))
 
 (use-package flycheck-ledger
   :ensure t
