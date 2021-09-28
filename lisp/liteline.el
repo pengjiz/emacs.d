@@ -232,16 +232,27 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Position
 (declare-function image-get-display-property "image-mode")
+(declare-function image-display-size "image-mode")
 (declare-function image-mode-window-get "image-mode")
 (declare-function doc-view-last-page-number "doc-view")
+
+(defvar-local liteline--image-size nil "Current image size.")
+(put 'liteline--image-size 'risky-local-variable t)
 
 (liteline-define-segment position
   "Show position information."
   (cl-case major-mode
     ((image-mode)
-     (let ((size (image-size (image-get-display-property) :pixels)))
-       (concat (and size-indication-mode " %I")
-               (format " %dx%d " (car size) (cdr size)))))
+     ;; NOTE: It may fail to get the desired display property when ace-window is
+     ;; active because ace-window adds additional overlays to windows.
+     (when-let* ((spec (and (not (bound-and-true-p ace-window-mode))
+                            (image-get-display-property))))
+       (setf liteline--image-size (image-display-size spec t)))
+     (concat (and size-indication-mode " %I")
+             (and liteline--image-size
+                  (format " %dx%d "
+                          (car liteline--image-size)
+                          (cdr liteline--image-size)))))
     ((doc-view-mode)
      (concat (and size-indication-mode " %I")
              (format " %d/%d "
@@ -326,6 +337,7 @@ If DEFAULT is non-nil, set the default value."
       (cons "" (nreverse indicators)))))
 
 (defvar-local liteline--calc-extra nil "Extra information for Calc.")
+(put 'liteline--calc-extra 'risky-local-variable t)
 
 (defun liteline--update-calc-extra (&rest _)
   "Update `liteline--calc-extra'."
