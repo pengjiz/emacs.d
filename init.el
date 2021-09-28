@@ -582,7 +582,6 @@
          :map ibuffer-mode-map
          ("C-c C-o" . ibuffer-visit-buffer-1-window))
   :config
-  (setf ibuffer-use-other-window t)
   (let ((state '(mark modified read-only locked " "))
         (info '((name 18 18 :left :elide) " "
                 (size 9 -1 :right) " "
@@ -825,7 +824,7 @@
                         "*Edit Formulas*"
                         "*edit-indirect"
                         "*draft mail*"
-                        "*Ledger Schedule*"))
+                        "*Bookmark Annotation Compose*"))
            (display-buffer-reuse-window
             display-buffer-below-selected)
            (window-height . 20)
@@ -864,8 +863,9 @@
                         "*Org Clock*"
                         "*Clock Task Select*"
                         "*Calendar*"
+                        "*Ledger Report*"
+                        "*Reconcile*"
                         "*RefTeX Select*"
-                        "*Bookmark List*"
                         "*Key*"
                         "*Keys*"
                         "*Proced*"
@@ -874,7 +874,6 @@
                         "*TeX errors*"
                         "*BibTeX validation errors*"
                         "*R dired*"
-                        "*Ibuffer*"
                         "*eshell"
                         (and (1+ nonl) "-eshell*")))
            (display-buffer-reuse-window
@@ -892,9 +891,8 @@
                         "*Async Shell Command*"
                         "*firestarter*"
                         "*Macroexpansion*"
-                        "*Ledger Report*"
-                        "*Ledger Error*"
                         "*Gnuplot Trail*"
+                        "*Ledger Error*"
                         "*skewer-error*"
                         "*cider-error*"
                         "*cider-test-report*"
@@ -918,7 +916,8 @@
                         "*Local Variables*"
                         "*Disabled Command*"
                         "*Messages*"
-                        "*Reconcile*"
+                        "*Bookmark Annotation*"
+                        "*Ledger Schedule*"
                         "*Fancy Diary Entries*"
                         "*Holidays*"
                         "*Phases of Moon*"
