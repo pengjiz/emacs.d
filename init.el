@@ -1214,9 +1214,12 @@
   :defer t
   :config
   (setf git-commit-summary-max-length 50)
-  (defun init--setup-git-commit-mode ()
-    (setf fill-column 72))
-  (add-hook 'git-commit-mode-hook #'init--setup-git-commit-mode)
+  (defun init--set-git-commit-fill-column (&rest _)
+    "Set fill column for Git commit messages when appropriate."
+    (unless (local-variable-p 'fill-column)
+      (setf fill-column 72)))
+  (advice-add #'git-commit-turn-on-auto-fill :before
+              #'init--set-git-commit-fill-column)
   (add-hook 'git-commit-setup-hook #'git-commit-turn-on-flyspell))
 
 ;; Show edits
