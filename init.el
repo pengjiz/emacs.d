@@ -223,11 +223,6 @@
   :init (setf savehist-file (init--var "savehist"))
   :config (savehist-mode))
 
-(use-package undo-propose
-  :ensure t
-  :defer t
-  :bind ("C-x u" . undo-propose))
-
 (use-package delsel
   :config (delete-selection-mode))
 
