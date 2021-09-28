@@ -1209,6 +1209,11 @@
   (magit-add-section-hook 'magit-status-sections-hook #'magit-insert-modules
                           #'magit-insert-stashes t))
 
+(use-package magit-extras
+  :ensure magit
+  :defer t
+  :init (setf magit-bind-magit-project-status nil))
+
 (use-package git-commit
   :ensure t
   :defer t
@@ -1257,10 +1262,13 @@
   :init (setf project-list-file (init--var "projects"))
   :config
   (setf project-vc-merge-submodules nil)
-  (setf project-switch-commands '((project-find-file "Find file")
-                                  (project-find-regexp "Find regexp")
-                                  (project-dired "Dired")
-                                  (project-eshell "Eshell")))
+  (setf project-switch-commands
+        `((project-find-file "Find file")
+          ,(if (fboundp 'project-find-dir)
+               '(project-find-dir "Find directory")
+             '(project-dired "Dired"))
+          (project-find-regexp "Find regexp")
+          (project-eshell "Eshell")))
 
   (dolist (key '("s" "v"))
     (unbind-key key project-prefix-map)))
