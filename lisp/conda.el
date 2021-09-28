@@ -74,7 +74,7 @@
   (when-let* ((root (conda--get-environment-root environment))
               (filename (expand-file-name "bin" root))
               (bin (and (file-directory-p filename) filename)))
-    `((name . ,environment)
+    `((name . ,(substring-no-properties environment))
       (root . ,root)
       (bin . ,bin))))
 
@@ -85,6 +85,7 @@
 
 (defvar conda--current-environment-spec nil
   "Spec of the current environment.")
+(put 'conda--current-environment-spec 'risky-local-variable t)
 
 (defun conda-get-current-environment ()
   "Return the name of the current environment."
