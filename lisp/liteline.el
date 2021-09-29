@@ -323,7 +323,6 @@ If DEFAULT is non-nil, set the default value."
 (defvar reftex-toc-max-level-indicator)
 (declare-function calc-set-mode-line "calc")
 (declare-function reftex-offer-label-menu "reftex-ref")
-(declare-function conda-get-current-environment "ext:conda")
 
 (defun liteline--get-minor-modes ()
   "Return indicators for certain enabled minor modes."
@@ -377,7 +376,7 @@ If DEFAULT is non-nil, set the default value."
                major-mode)
     ;; Python environment
     ((python-mode inferior-python-mode gud-pdb-mode)
-     (when-let* ((env (and (fboundp #'conda-get-current-environment)
+     (when-let* ((env (and (fboundp 'conda-get-current-environment)
                            (conda-get-current-environment))))
        (format "[%s]" env)))
     ;; RefTeX

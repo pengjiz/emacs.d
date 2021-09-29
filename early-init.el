@@ -16,8 +16,8 @@
 
 (setf load-prefer-newer t)
 
-(when (fboundp #'tool-bar-mode) (tool-bar-mode 0))
-(when (fboundp #'scroll-bar-mode) (scroll-bar-mode 0))
+(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 (menu-bar-mode 0)
 (setf (default-value 'mode-line-format) nil)
 

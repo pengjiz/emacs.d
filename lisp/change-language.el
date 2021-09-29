@@ -86,11 +86,9 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
 
 ;;; Typography style
 
-(declare-function typo-change-language "ext:typo")
-
 (defun change-language-change-typo-language (language)
   "Change to the typo language for LANGUAGE."
-  (when (fboundp #'typo-change-language)
+  (when (fboundp 'typo-change-language)
     (let* ((names change-language-typo-language-alist)
            (name (and language (cdr (assoc language names)))))
       (typo-change-language (or name (default-value 'typo-language))))))

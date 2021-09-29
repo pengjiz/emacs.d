@@ -34,7 +34,7 @@
 
 (defun appt-extras--notify (title body)
   "Show notification with TITLE and BODY text."
-  (if (fboundp #'notifications-notify)
+  (if (fboundp 'notifications-notify)
       (notifications-notify :title title :body body)
     (message "%s: %s" title body)))
 

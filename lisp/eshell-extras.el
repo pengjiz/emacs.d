@@ -95,8 +95,6 @@
 
 ;;; Prompt
 
-(declare-function conda-get-current-environment "ext:conda")
-
 (defun eshell-extras--get-directory ()
   "Get the current directory."
   (let* ((directory (abbreviate-file-name (eshell/pwd)))
@@ -130,7 +128,7 @@ Return the first line of output if any. Otherwise return nil."
 (defun eshell-extras--get-prompt ()
   "Return a prompt for Eshell."
   (let* ((directory (eshell-extras--get-directory))
-         (env (and (fboundp #'conda-get-current-environment)
+         (env (and (fboundp 'conda-get-current-environment)
                    (conda-get-current-environment)))
          (branch (eshell-extras--get-git-branch))
          (status (and branch (eshell-extras--get-git-status)))
