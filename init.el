@@ -587,7 +587,9 @@
                 (size 9 -1 :right) " "
                 (mode 16 16 :left :elide) " ")))
     (setf ibuffer-formats `((,@state ,@info filename)
-                            (,@state ,@info process)))))
+                            (,@state ,@info process))))
+
+  (unbind-key "P" ibuffer-mode-map))
 
 (use-package ibuf-ext
   :defer t
@@ -643,8 +645,8 @@
 (use-package files-extras
   :load-path "lisp"
   :defer t
-  :bind (("C-c f r" . files-extras-find-recent-file)
-         ("C-c f R" . files-extras-find-recent-file-other-window)))
+  :bind (("C-x m" . files-extras-find-recent-file)
+         ("C-x 4 m" . files-extras-find-recent-file-other-window)))
 
 (use-package ffap
   :defer t
@@ -1333,20 +1335,12 @@
 
 (use-package eshell
   :defer t
-  :bind (("C-x m" . eshell)
-         ("C-c a e" . eshell)))
+  :bind ("C-c a e" . eshell))
 
 (use-package esh-mode
   :defer t
   :init (setf eshell-directory-name (init--var "eshell/"))
-  :config
-  (setf eshell-scroll-to-bottom-on-input 'this)
-
-  (defun init--setup-eshell-mode ()
-    (bind-keys :map eshell-mode-map
-               ("C-x m" . eshell-life-is-too-much)
-               ("C-c a a" . eshell-life-is-too-much)))
-  (add-hook 'eshell-mode-hook #'init--setup-eshell-mode))
+  :config (setf eshell-scroll-to-bottom-on-input 'this))
 
 (use-package esh-var
   :defer t
