@@ -1253,10 +1253,8 @@
   :config
   (setf project-vc-merge-submodules nil)
   (setf project-switch-commands
-        `((project-find-file "Find file")
-          ,(if (fboundp 'project-find-dir)
-               '(project-find-dir "Find directory")
-             '(project-dired "Dired"))
+        '((project-find-file "Find file")
+          (project-find-dir "Find directory")
           (project-find-regexp "Find regexp")
           (project-eshell "Eshell")))
 
