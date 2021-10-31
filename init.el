@@ -1245,15 +1245,7 @@
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
 
-(use-package gitignore-mode
-  :ensure t
-  :defer t)
-
-(use-package gitconfig-mode
-  :ensure t
-  :defer t)
-
-(use-package gitattributes-mode
+(use-package git-modes
   :ensure t
   :defer t)
 
