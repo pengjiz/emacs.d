@@ -235,16 +235,8 @@
 
 (use-package goto-addr
   :defer t
-  :hook (((prog-mode
-           TeX-mode
-           conf-mode
-           yaml-mode)
-          . goto-address-prog-mode)
-         ((rst-mode
-           comint-mode
-           cider-repl-mode
-           eshell-mode)
-          . goto-address-mode))
+  :hook (((rst-mode comint-mode cider-repl-mode eshell-mode) . goto-address-mode)
+         ((prog-mode TeX-mode conf-mode yaml-mode) . goto-address-prog-mode))
   :bind (("C-c t a" . goto-address-mode)
          ("C-c t A" . goto-address-prog-mode)
          :map goto-address-highlight-keymap
@@ -382,11 +374,7 @@
   :bind (("C-c t w" . whitespace-mode)
          ("C-c t W" . whitespace-toggle-options)
          ("C-c x w" . whitespace-cleanup))
-  :hook ((prog-mode
-          text-mode
-          bibtex-mode
-          conf-mode)
-         . init--enable-whitespace)
+  :hook ((prog-mode text-mode bibtex-mode conf-mode) . init--enable-whitespace)
   :init
   (defun init--enable-whitespace ()
     (add-hook 'after-change-major-mode-hook #'whitespace-mode nil t))
@@ -486,11 +474,7 @@
 (use-package hl-todo
   :ensure t
   :defer t
-  :hook ((prog-mode
-          TeX-mode
-          conf-mode
-          yaml-mode)
-         . hl-todo-mode))
+  :hook ((prog-mode TeX-mode conf-mode yaml-mode) . hl-todo-mode))
 
 (use-package visual-fill-column
   :ensure t
@@ -554,7 +538,6 @@
 
 ;;; Buffer
 
-;; Protect a few special buffers
 (progn ; special buffers
   (defun init--protect-special-buffers ()
     "Protect special buffers from being killed."
@@ -1252,11 +1235,10 @@
   :init (setf project-list-file (init--var "projects"))
   :config
   (setf project-vc-merge-submodules nil)
-  (setf project-switch-commands
-        '((project-find-file "Find file")
-          (project-find-dir "Find directory")
-          (project-find-regexp "Find regexp")
-          (project-eshell "Eshell")))
+  (setf project-switch-commands '((project-find-file "Find file")
+                                  (project-find-dir "Find directory")
+                                  (project-find-regexp "Find regexp")
+                                  (project-eshell "Eshell")))
 
   (dolist (key '("s" "v"))
     (unbind-key key project-prefix-map)))
@@ -1418,9 +1400,7 @@
     (push "/elfeed/db/" recentf-exclude))
   :bind ("C-c m w" . elfeed)
   :config
-  ;; Load feeds
   (load (init--sync "misc/elfeed/feeds.el") t t t)
-  ;; Mark old entries as read
   (add-hook 'elfeed-new-entry-hook
             (elfeed-make-tagger :before "10 days ago"
                                 :remove 'unread)))
@@ -1613,13 +1593,10 @@
   (with-eval-after-load 'org
     (cl-pushnew '(awk . t) org-babel-load-languages :test #'eq :key #'car))
   :config
-  ;; A modified style from K&R style
   (c-add-style "common" '("k&r" (c-basic-offset . 4)))
-  ;; A style for protobuf-mode
   (c-add-style "protobuf" '("common"
                             (c-basic-offset . 2)
                             (indent-tabs-mode . nil)))
-
   (setf c-default-style '((awk-mode . "awk")
                           (protobuf-mode . "protobuf")
                           (other . "common"))))
@@ -1863,7 +1840,6 @@
   (setf nxml-slash-auto-complete-flag t)
   (setf nxml-attribute-indent 2))
 
-;; Serve files
 (use-package simple-httpd
   :ensure t
   :defer t
