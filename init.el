@@ -85,13 +85,11 @@
     nil))
 
 (progn ; startup
-  (setf inhibit-default-init t
-        inhibit-startup-screen t
+  (setf inhibit-startup-screen t
         inhibit-startup-buffer-menu t
         inhibit-startup-echo-area-message nil)
 
-  (setf initial-buffer-choice t
-        initial-scratch-message nil
+  (setf initial-scratch-message nil
         initial-major-mode #'text-mode))
 
 ;;; Initialization
