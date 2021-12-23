@@ -1348,8 +1348,8 @@
 (use-package em-script
   :defer t
   :init
-  (setf eshell-rc-script (init--etc "eshell/profile")
-        eshell-login-script (init--etc "eshell/login")))
+  (setf eshell-login-script (init--etc "eshell/login")
+        eshell-rc-script (init--etc "eshell/profile")))
 
 (use-package eshell-z
   :ensure t
@@ -1358,14 +1358,7 @@
 (use-package eshell-extras
   :load-path "lisp"
   :after eshell
-  :config
-  (eshell-extras-setup)
-
-  (bind-keys ([remap eshell-truncate-buffer] . eshell-extras-clear-buffer)
-             :map eshell-extras-autosuggest-suggestion-map
-             ([remap forward-char] . eshell-extras-accept-suggestion)
-             ([remap move-end-of-line] . eshell-extras-accept-suggestion)
-             ([remap forward-word] . eshell-extras-accept-suggestion-word)))
+  :config (eshell-extras-setup))
 
 ;;; Debugging
 

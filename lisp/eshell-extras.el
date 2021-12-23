@@ -11,9 +11,7 @@
 (require 'em-unix)
 (require 'em-dirs)
 (require 'em-prompt)
-(require 'em-hist)
 (require 'vc-git)
-(require 'ring)
 (eval-when-compile
   (require 'subr-x))
 
@@ -59,34 +57,22 @@
   "Face used by the prompt when the last command fails."
   :group 'eshell-prompt)
 
-(defface eshell-extras-autosuggest-suggestion
-  '((t :inherit shadow))
-  "Face used by autosuggest suggestions."
-  :group 'eshell-hist)
-
 ;;; Command
 
 ;; Common
 (defun eshell/mkcd (directory)
-  "Make DIRECTORY and cd to it."
+  "Create and change to DIRECTORY."
   (eshell/mkdir "-p" directory)
   (eshell/cd directory))
 
 ;; Show command status
 (defun eshell-extras--set-process (&rest _)
-  "Set `mode-line-process' when a command is started."
+  "Set `mode-line-process' for a running command."
   (setf mode-line-process ":run"))
 
 (defun eshell-extras--clear-process (&rest _)
-  "Clear `mode-line-process' when end a command is finished."
+  "Clear `mode-line-process'."
   (setf mode-line-process nil))
-
-;; Buffer content
-(defun eshell-extras-clear-buffer ()
-  "Clear Eshell buffer."
-  (interactive)
-  (let ((eshell-buffer-maximum-lines 0))
-    (eshell-truncate-buffer)))
 
 (defun eshell-extras--setup-command ()
   "Setup command related extensions."
@@ -160,92 +146,12 @@ Return the first line of output if any. Otherwise return nil."
         eshell-prompt-regexp "^.* [λΛ] "
         eshell-highlight-prompt nil))
 
-;;; Autosuggest
-
-(defvar-local eshell-extras--autosuggest-previous-input nil
-  "Previous input for offering autosuggest suggestions.")
-(defvar-local eshell-extras--autosuggest-suggestion-overlay nil
-  "Overlay used to display autosuggest suggestions.")
-
-(defvar eshell-extras-autosuggest-suggestion-map (make-sparse-keymap)
-  "Keymap used on autosuggest suggestion overlays.")
-
-(defun eshell-extras--get-input ()
-  "Get the current input for offering autosuggest suggestions."
-  (save-excursion
-    (goto-char (point-max))
-    (eshell-bol)
-    (and (/= (point) (point-max))
-         (buffer-substring-no-properties (point) (point-max)))))
-
-(defun eshell-extras--get-suggestion (input)
-  "Get the autosuggest suggestion for INPUT."
-  (catch 'done
-    (dolist (element (ring-elements eshell-history-ring))
-      (when (string-prefix-p input element)
-        (throw 'done (substring-no-properties element))))))
-
-(defun eshell-extras--show-suggestion (input)
-  "Show the autosuggest suggestion for INPUT.
-Return the overlay made."
-  (when-let* ((suggestion (eshell-extras--get-suggestion input))
-              (overlay (make-overlay (point-max) (point-max) nil nil t))
-              (string (propertize
-                       (substring suggestion (length input))
-                       'face 'eshell-extras-autosuggest-suggestion
-                       'cursor 0)))
-    (overlay-put overlay 'after-string string)
-    (overlay-put overlay 'window (selected-window))
-    (overlay-put overlay 'keymap eshell-extras-autosuggest-suggestion-map)
-    overlay))
-
-(defun eshell-extras--update-suggestion ()
-  "Update autosuggest suggestion after commands."
-  (let ((input (eshell-extras--get-input)))
-    (unless (equal input eshell-extras--autosuggest-previous-input)
-      (when eshell-extras--autosuggest-suggestion-overlay
-        (delete-overlay eshell-extras--autosuggest-suggestion-overlay)
-        (setf eshell-extras--autosuggest-suggestion-overlay nil))
-      (setf eshell-extras--autosuggest-previous-input input)
-      (when input
-        (setf eshell-extras--autosuggest-suggestion-overlay
-              (eshell-extras--show-suggestion input))))))
-
-(defun eshell-extras-accept-suggestion ()
-  "Insert the whole autosuggest suggestion."
-  (interactive "^")
-  (when-let* ((overlay eshell-extras--autosuggest-suggestion-overlay)
-              (suggestion (overlay-get overlay 'after-string)))
-    (let (deactivate-mark)
-      (insert (substring-no-properties suggestion)))))
-
-(defun eshell-extras-accept-suggestion-word (&optional arg)
-  "Insert ARG words of the autosuggest suggestion."
-  (interactive "^p")
-  (when-let* ((overlay eshell-extras--autosuggest-suggestion-overlay)
-              (suggestion (overlay-get overlay 'after-string)))
-    (let (deactivate-mark)
-      (save-excursion
-        (insert (substring-no-properties suggestion)))
-      (forward-word arg)
-      (delete-region (point) (line-end-position)))))
-
-(defun eshell-extras--turn-on-autosuggest ()
-  "Turn on Eshell autosuggest."
-  (add-hook 'post-command-hook #'eshell-extras--update-suggestion
-            nil t))
-
-(defun eshell-extras--setup-autosuggest ()
-  "Setup Eshell autosuggest."
-  (add-hook 'eshell-mode-hook #'eshell-extras--turn-on-autosuggest))
-
 ;;; Entry point
 
 (defun eshell-extras-setup ()
   "Setup Eshell extensions."
   (eshell-extras--setup-command)
-  (eshell-extras--setup-prompt)
-  (eshell-extras--setup-autosuggest))
+  (eshell-extras--setup-prompt))
 
 (provide 'eshell-extras)
 ;;; eshell-extras.el ends here
