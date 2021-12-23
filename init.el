@@ -1105,9 +1105,9 @@
   :defer t
   :bind ("C-c e t" . auto-insert)
   :init
-  (setf auto-insert t)
   (setf auto-insert-directory (init--etc "insert/")
-        auto-insert-alist nil))
+        auto-insert-alist nil)
+  :config (setf auto-insert t))
 
 ;;; Lint
 
@@ -1472,9 +1472,8 @@
 
 (use-package erc-services
   :defer t
-  :init
-  (setf erc-nickserv-identify-mode 'autodetect)
-  (setf erc-use-auth-source-for-nickserv-password t))
+  :init (setf erc-nickserv-identify-mode 'autodetect)
+  :config (setf erc-use-auth-source-for-nickserv-password t))
 
 (use-package erc-button
   :defer t
@@ -1836,7 +1835,7 @@
   :ensure t
   :defer t
   :bind ("C-c m s" . httpd-serve-directory)
-  :init
+  :config
   (setf httpd-host 'local
         httpd-port 8017))
 
