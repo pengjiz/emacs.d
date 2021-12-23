@@ -36,7 +36,8 @@
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package)
-    (package-install 'project)))
+    (package-install 'project)
+    (package-install 'erc)))
 
 (progn ; requires
   (eval-when-compile
@@ -842,6 +843,7 @@
                         "*Org Clock*"
                         "*Clock Task Select*"
                         "*Calendar*"
+                        "*Channels of"
                         "*Ledger Report*"
                         "*Reconcile*"
                         "*RefTeX Select*"
@@ -1466,7 +1468,6 @@
   (setf erc-nick "pengjiz"
         erc-try-new-nick-p nil)
   (setf erc-user-full-name "Pengji Zhang")
-  (setf erc-prompt-for-password nil)
   (setf erc-lurker-hide-list '("JOIN" "PART" "QUIT")))
 
 (use-package erc-join
@@ -1480,7 +1481,7 @@
   :defer t
   :init
   (setf erc-nickserv-identify-mode 'autodetect)
-  (setf erc-prompt-for-nickserv-password nil))
+  (setf erc-use-auth-source-for-nickserv-password t))
 
 (use-package erc-button
   :defer t
