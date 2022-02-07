@@ -1580,16 +1580,15 @@
   :defer t
   :bind (:map c-mode-base-map ("C-c C-b" . c-context-line-break))
   :init
+  (setf c-default-style nil)
+
   (with-eval-after-load 'org
     (cl-pushnew '(awk . t) org-babel-load-languages :test #'eq :key #'car))
   :config
   (c-add-style "common" '("k&r" (c-basic-offset . 4)))
-  (c-add-style "protobuf" '("common"
-                            (c-basic-offset . 2)
-                            (indent-tabs-mode . nil)))
-  (setf c-default-style '((awk-mode . "awk")
-                          (protobuf-mode . "protobuf")
-                          (other . "common"))))
+  (dolist (style '((other . "common")
+                   (awk-mode . "awk")))
+    (cl-pushnew style c-default-style :test #'eq :key #'car)))
 
 (use-package cmacexp
   :defer t
@@ -2476,11 +2475,17 @@
   :ensure t
   :defer t)
 
-;;; Protobuf
+;;; Protocol Buffers
 
 (use-package protobuf-mode
   :ensure t
-  :defer t)
+  :defer t
+  :config
+  (c-add-style "protobuf" '("k&r"
+                            (c-basic-offset . 2)
+                            (indent-tabs-mode . nil)))
+  (cl-pushnew '(protobuf-mode . "protobuf") c-default-style
+              :test #'eq :key #'car))
 
 ;;; GraphQL
 
