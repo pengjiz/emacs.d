@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-(require 'tex-buf)
+(require 'latex)
 (eval-when-compile
   (require 'rx)
   (require 'cl-lib))

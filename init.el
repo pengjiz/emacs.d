@@ -2015,6 +2015,7 @@
         (default-value 'TeX-engine) 'luatex)
   (setf TeX-parse-self t
         TeX-auto-save t)
+  (setf TeX-save-query nil)
   (setf TeX-electric-sub-and-superscript t)
   (TeX-source-correlate-mode)
   (let (commands)
@@ -2029,11 +2030,6 @@
 
   (dolist (key '("C-c C-i" "C-c ?"))
     (unbind-key key TeX-mode-map)))
-
-(use-package tex-buf
-  :ensure auctex
-  :defer t
-  :config (setf TeX-save-query nil))
 
 (use-package tex-fold
   :ensure auctex
