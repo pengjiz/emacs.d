@@ -263,13 +263,12 @@ If DEFAULT is non-nil, set the default value."
        (when mode-line-percent-position
          (push 'mode-line-percent-position position)
          (push " " position))
-       (let ((column (or (and column-number-indicator-zero-based "%c") "%C")))
-         (cond ((and line-number-mode column-number-mode)
-                (push (concat " %l:" column) position))
-               (line-number-mode
-                (push " L%l" position))
-               (column-number-mode
-                (push (concat " C" column) position))))
+       (cond ((and line-number-mode column-number-mode)
+              (push 'mode-line-position-column-line-format position))
+             (line-number-mode
+              (push 'mode-line-position-line-format position))
+             (column-number-mode
+              (push 'mode-line-position-column-format position)))
        (when size-indication-mode
          (push " %I" position))
        (and position `("" ,@position " "))))))

@@ -16,7 +16,7 @@
 
 (progn ; user interface
   (setf ring-bell-function #'ignore
-        (symbol-function 'yes-or-no-p) #'y-or-n-p
+        use-short-answers t
         echo-keystrokes 0.1)
 
   (blink-cursor-mode 0)
@@ -35,9 +35,7 @@
 
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
-    (package-install 'use-package)
-    (package-install 'project)
-    (package-install 'erc)))
+    (package-install 'use-package)))
 
 (progn ; requires
   (eval-when-compile
@@ -98,16 +96,15 @@
 (progn ; general customization
   (setf custom-file (init--var "custom.el"))
   (load custom-file t t t)
+  (setf word-wrap-by-category t)
 
   (dolist (key '("M-`" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
                  "C-x m" "C-x 4 m" "C-x 5 m"))
     (unbind-key key)))
 
-(use-package modus-themes
-  :ensure t
-  :bind ("C-c t m" . modus-themes-toggle)
-  :init (modus-themes-load-themes)
-  :config (modus-themes-load-vivendi))
+(progn ; theme
+  (load-theme 'modus-vivendi)
+  (bind-key "C-c t m" #'modus-themes-toggle))
 
 (use-package faces
   :defer t
@@ -120,6 +117,8 @@
   :defer t
   :hook (after-init . liteline-setup)
   :config
+  (setf mode-line-position-column-line-format '(" %l:%c"))
+
   (defvar calendar-mode-line-format)
   (with-eval-after-load 'calendar
     (setf calendar-mode-line-format nil
@@ -133,7 +132,6 @@
     (setf (symbol-function 'ediff-refresh-mode-lines) #'init-ignore)))
 
 (use-package transient
-  :ensure t
   :defer t
   :init
   (setf transient-history-file (init--var "transient/history.el")
@@ -181,7 +179,6 @@
          ([remap upcase-word] . upcase-dwim)
          ("C-c b c" . clone-indirect-buffer)
          ("C-c t v" . visual-line-mode)
-         ("C-c t l" . toggle-truncate-lines)
          ("C-c t q" . auto-fill-mode)
          ("C-c t p" . visible-mode)
          ("C-c a l" . list-processes)
@@ -190,8 +187,6 @@
          :map completion-in-region-mode-map
          ("M-`" . switch-to-completions)
          :map completion-list-mode-map
-         ("n" . next-completion)
-         ("p" . previous-completion)
          ("M-`" . delete-completion-window))
   :hook ((text-mode bibtex-mode) . auto-fill-mode)
   :init
@@ -373,10 +368,7 @@
   :bind (("C-c t w" . whitespace-mode)
          ("C-c t W" . whitespace-toggle-options)
          ("C-c x w" . whitespace-cleanup))
-  :hook ((prog-mode text-mode bibtex-mode conf-mode) . init--enable-whitespace)
-  :init
-  (defun init--enable-whitespace ()
-    (add-hook 'after-change-major-mode-hook #'whitespace-mode nil t))
+  :hook ((prog-mode text-mode bibtex-mode conf-mode) . whitespace-mode)
   :config
   (setf whitespace-style '(face
                            indentation
@@ -384,7 +376,8 @@
                            space-before-tab
                            tab-mark
                            trailing
-                           lines-tail)
+                           lines-tail
+                           missing-newline-at-eof)
         whitespace-line-column nil)
 
   (defun init--set-cleanup-whitespace-style (fn &rest args)
@@ -607,12 +600,7 @@
   (defun init--ensure-directory-for-file ()
     "Ensure that the directory for file exists."
     (make-directory (file-name-directory buffer-file-name) t))
-  (add-hook 'find-file-not-found-functions #'init--ensure-directory-for-file)
-
-  (bind-keys ("C-c f g" . revert-buffer)
-             ("C-c b g" . revert-buffer)
-             ("C-c b r" . rename-buffer)
-             ("C-c b R" . rename-uniquely)))
+  (add-hook 'find-file-not-found-functions #'init--ensure-directory-for-file))
 
 (use-package files-x
   :defer t
@@ -645,8 +633,11 @@
   :defer t
   :init
   (setf tramp-persistency-file-name (init--var "tramp/persistency")
-        tramp-auto-save-directory (init--var "tramp/auto-save/")
-        tramp-histfile-override t))
+        tramp-auto-save-directory (init--var "tramp/auto-save/")))
+
+(use-package tramp-sh
+  :defer t
+  :init (setf tramp-histfile-override t))
 
 (use-package saveplace
   :init (setf save-place-file (init--var "places"))
@@ -698,8 +689,6 @@
 
 (use-package dired-x
   :defer t
-  :bind* (("C-x C-j" . dired-jump)
-          ("C-x 4 C-j" . dired-jump-other-window))
   :bind (:map dired-mode-map (")" . dired-omit-mode))
   :hook (dired-mode . dired-omit-mode)
   :init
@@ -814,6 +803,7 @@
           (,(rx bos (or "*Man"
                         "*Help*"
                         "*help"
+                        "*eldoc"
                         "*TeX Help*"
                         "*Anaconda*"
                         "*tide-documentation*"
@@ -953,13 +943,23 @@
          (after-init . tab-bar-mode))
   :config
   (setf tab-bar-new-tab-choice "*scratch*")
-  (setf tab-bar-new-button-show nil
-        tab-bar-close-button-show nil))
+  (setf tab-bar-close-button-show nil
+        tab-bar-format '(tab-bar-format-tabs-groups
+                         tab-bar-separator
+                         tab-bar-format-align-right
+                         tab-bar-format-global)))
 
 (use-package tab-bar-extras
   :load-path "lisp"
   :defer t
-  :hook (after-init . tab-bar-extras-setup))
+  :hook (after-init . tab-bar-extras-setup)
+  :config
+  (setf tab-bar-format '(tab-bar-format-tabs-groups
+                         tab-bar-separator
+                         tab-bar-format-align-right
+                         tab-bar-extras-format-frame-info
+                         tab-bar-format-global
+                         tab-bar-extras-format-file-info)))
 
 ;;; Completion
 
@@ -977,7 +977,8 @@
          ("C-<tab>" . minibuffer-force-complete))
   :config
   (setf read-file-name-completion-ignore-case t)
-  (setf completion-styles '(basic substring initials partial-completion)))
+  (setf completion-styles '(basic substring initials partial-completion))
+  (setf completions-group t))
 
 (use-package mb-depth
   :config (minibuffer-depth-indicate-mode))
@@ -1255,7 +1256,7 @@
   (setf eldoc-echo-area-use-multiline-p nil)
   (setf eldoc-message-function #'message)
   ;; Describe the character at point by default
-  (setf eldoc-documentation-function #'describe-char-eldoc))
+  (add-hook 'eldoc-documentation-functions #'describe-char-eldoc t))
 
 ;;; Cross reference
 
@@ -1420,11 +1421,6 @@
   (setf doc-view-continuous t)
   (setf doc-view-resolution 300))
 
-(use-package doc-view-extras
-  :load-path "lisp"
-  :after doc-view
-  :config (doc-view-extras-setup))
-
 (use-package nov
   :ensure t
   :defer t
@@ -1448,6 +1444,7 @@
                       netsplit
                       networks
                       noncommands
+                      notifications
                       readonly
                       ring
                       services
@@ -1505,7 +1502,8 @@
   (setf calendar-mark-holidays-flag t
         calendar-chinese-all-holidays-flag t)
   (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
-  (setf calendar-date-display-form calendar-iso-date-display-form)
+  (setf calendar-date-display-form calendar-iso-date-display-form
+        calendar-time-zone-style 'numeric)
   (calendar-set-date-style 'iso))
 
 (use-package holidays
@@ -1585,7 +1583,10 @@
   (with-eval-after-load 'org
     (cl-pushnew '(awk . t) org-babel-load-languages :test #'eq :key #'car))
   :config
-  (c-add-style "common" '("k&r" (c-basic-offset . 4)))
+  (c-add-style "common" '("k&r"
+                          (c-basic-offset . 4)
+                          (c-doc-comment-style . ((c-mode . doxygen)
+                                                  (c++-mode . doxygen)))))
   (dolist (style '((other . "common")
                    (awk-mode . "awk")))
     (cl-pushnew style c-default-style :test #'eq :key #'car)))
@@ -1928,6 +1929,7 @@
   :config
   (setf python-indent-guess-indent-offset-verbose nil
         python-indent-offset 4)
+  (setf python-shell-interpreter "python")
 
   (defun init--setup-python-mode ()
     (setf fill-column 79))
@@ -2269,15 +2271,7 @@
   :config
   (setf org-clock-out-remove-zero-time-clocks t)
   (setf org-clock-persist 'history)
-  (setf org-show-notification-timeout 10)
-
-  (defun init--confirm-exit-when-clocking ()
-    "Ask for confirmation on exit with a running clock."
-    (or (not (org-clocking-p))
-        (progn
-          (org-clock-goto)
-          (yes-or-no-p "A running clock exists; exit anyway? "))))
-  (add-hook 'kill-emacs-query-functions #'init--confirm-exit-when-clocking))
+  (setf org-show-notification-timeout 10))
 
 (use-package org-mru-clock
   :ensure t

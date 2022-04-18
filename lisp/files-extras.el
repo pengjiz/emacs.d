@@ -22,7 +22,7 @@ Prompt with a formatted string using PROMPT-PREFIX."
   (let* ((table minibuffer-local-filename-syntax)
          (filenames (mapcar #'abbreviate-file-name recentf-list))
          (default (car filenames))
-         (prompt (format "%s (default %s): " prompt-prefix default)))
+         (prompt (format-prompt prompt-prefix default)))
     (minibuffer-with-setup-hook
         (:append (lambda () (set-syntax-table table)))
       (completing-read prompt

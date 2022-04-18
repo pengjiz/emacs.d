@@ -8,7 +8,6 @@
 
 (require 'tab-bar)
 (require 'vc-hooks)
-(require 'project)
 (eval-when-compile
   (require 'subr-x))
 
@@ -37,7 +36,14 @@
         (concat " " client name " ")
       "")))
 
+(defun tab-bar-extras-format-frame-info ()
+  "Return tab bar item for frame information."
+  (let ((frame (tab-bar-extras--get-frame-info)))
+    `((frame menu-item ,frame ignore :help "Frame information"))))
+
 ;; File information
+(declare-function project-root "project")
+
 (defvar-local tab-bar-extras--project-root nil
   "Project root directory for the current buffer.")
 (put 'tab-bar-extras--project-root 'risky-local-variable t)
@@ -62,6 +68,11 @@
               (abbreviate-file-name (or buffer-file-name default-directory)))
             " ")))
 
+(defun tab-bar-extras-format-file-info ()
+  "Return tab bar item for file information."
+  (let ((file (tab-bar-extras--get-file-info)))
+    `((file menu-item ,file ignore :help "File information"))))
+
 ;; Global information
 (defun tab-bar-extras--get-global-info ()
   "Return global information."
@@ -70,30 +81,18 @@
         global
       (concat " " global " "))))
 
-;; Tweak items
-(defun tab-bar-extras--tweak-keymap (result)
-  "Return a keymap for the tab bar based on RESULT."
-  (let* ((frame (tab-bar-extras--get-frame-info))
-         (file (tab-bar-extras--get-file-info))
-         (global (tab-bar-extras--get-global-info))
-         (width (+ (length frame) (length file) (length global)))
-         (space `(space :align-to (- right ,width)))
-         (padding (propertize " " 'display space)))
-    `(,(car result)
-      ,(cadr result)
-      ,@(nthcdr (or (and tab-bar-history-mode 6) 2) result)
-      (align-right menu-item ,padding ignore)
-      (frame menu-item ,frame ignore :help "Frame information")
-      (file menu-item ,file ignore :help "File information")
-      (global menu-item ,global ignore :help "Global information"))))
+(defun tab-bar-extras--format-global-info ()
+  "Return tab bar item for global information."
+  (let ((global (tab-bar-extras--get-global-info)))
+    `((global menu-item ,global ignore :help "Global information"))))
 
 ;;; Entry point
 
 (defun tab-bar-extras-setup ()
   "Setup extra extensions for the tab bar."
   (add-hook 'find-file-hook #'tab-bar-extras--update-project-root)
-  (advice-add #'tab-bar-make-keymap-1 :filter-return
-              #'tab-bar-extras--tweak-keymap))
+  (setf (symbol-function 'tab-bar-format-global)
+        #'tab-bar-extras--format-global-info))
 
 (provide 'tab-bar-extras)
 ;;; tab-bar-extras.el ends here

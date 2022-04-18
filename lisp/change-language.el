@@ -56,7 +56,7 @@
   "Change to LANGUAGE for the current buffer.
 When SHOW-MESSAGE is non-nil, display helpful messages."
   (interactive
-   (let* ((prompt "Language (default unspecified): ")
+   (let* ((prompt (format-prompt "Language" "unspecified"))
           (input (completing-read prompt change-language-languages nil t)))
      (list (and (not (string-empty-p input)) input) t)))
   (unless (or (not language)
