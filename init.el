@@ -2128,6 +2128,8 @@
 
 (progn ; `auctex'
   (init-ensure-package 'auctex)
+  (defvar japanese-TeX-error-messages)
+  (setf japanese-TeX-error-messages nil)
 
   (progn ; `tex'
     (init--require-when-compile 'tex)
