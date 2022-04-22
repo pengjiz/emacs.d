@@ -13,9 +13,7 @@
 
 (define-minor-mode simple-extras-auto-fill-comments-mode
   "Minor mode to automatically fill comments only."
-  :group 'comment
-  :lighter nil
-  :keymap nil
+  :group 'comment :lighter nil :keymap nil
   (if simple-extras-auto-fill-comments-mode
       (progn
         (make-local-variable 'comment-auto-fill-only-comments)
