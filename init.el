@@ -1349,19 +1349,17 @@
 (progn ; `calendar'
   (init--require-when-compile 'calendar)
   (declare-function calendar-mark-today "calendar")
-  (declare-function calendar-set-date-style "calendar")
 
   (let ((sync-directory (init--sync "misc/")))
     (make-directory sync-directory t)
     (setf diary-file (expand-file-name "diary" sync-directory)))
-  (setf calendar-time-zone-style 'numeric)
+  (setf calendar-date-style 'iso)
   (define-key global-map (kbd "C-c m d") #'calendar)
 
   (with-eval-after-load 'calendar
     (setf calendar-mark-holidays-flag t
           calendar-chinese-all-holidays-flag t)
-    (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
-    (calendar-set-date-style 'iso))
+    (add-hook 'calendar-today-visible-hook #'calendar-mark-today))
 
   (progn ; `holidays'
     (init--require-when-compile 'holidays)
@@ -1372,10 +1370,9 @@
 
   (progn ; `solar'
     (init--require-when-compile 'solar)
-    (with-eval-after-load 'solar
-      (setf calendar-location-name "Pittsburgh, PA"
-            calendar-latitude 40.4
-            calendar-longitude -79.9)))
+    (setf calendar-location-name "Pittsburgh, PA"
+          calendar-latitude 40.4
+          calendar-longitude -79.9))
 
   (progn ; `diary-lib'
     (init--require-when-compile 'diary-lib)
