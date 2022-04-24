@@ -139,10 +139,14 @@ Return forms that can be passed directly to `format-mode-line'."
   (remove-list-of-text-properties 0 (length liteline--mode-line-right-string)
                                   '(mouse-face help-echo keymap local-map)
                                   liteline--mode-line-right-string)
-  (let* ((width (string-width liteline--mode-line-right-string))
-         (space `(space :align-to (- (+ right right-fringe right-margin)
+  (let* ((right-scroll-bar (and (boundp 'scroll-bar-mode)
+                                (eq scroll-bar-mode 'right)
+                                '(scroll-bar)))
+         (width (string-width liteline--mode-line-right-string))
+         (space `(space :align-to (- (+ right ,@right-scroll-bar
+                                        right-fringe right-margin)
                                      ,width)))
-         (padding (propertize " " 'display space)))
+         (padding (propertize "|" 'display space)))
     `(,left ,padding liteline--mode-line-right-string)))
 
 (defmacro liteline-define-mode-line (name left &optional right)
