@@ -20,22 +20,22 @@
 
 (defcustom dired-atool-aunpack-program
   "aunpack"
-  "The program name for aunpack."
+  "Name of the aunpack program."
   :type 'string)
 
 (defcustom dired-atool-aunpack-extra-options
   '("--explain")
-  "Extra options passing to aunpack."
+  "Extra options passed to aunpack."
   :type '(repeat string))
 
 (defcustom dired-atool-apack-program
   "apack"
-  "The program name for apack."
+  "Name of the apack program."
   :type 'string)
 
 (defcustom dired-atool-apack-extra-options
   '("--explain")
-  "Extra options passing to apack."
+  "Extra options passed to apack."
   :type '(repeat string))
 
 (defcustom dired-atool-use-trash
@@ -99,7 +99,11 @@ OPERATION stores information for the current operation."
                       (mapconcat #'shell-quote-argument
                                  (cons program flat-args) " ")
                       (format-time-string "%FT%T%z"))))
-    (let ((process (apply #'start-process name buffer program flat-args)))
+    ;; NOTE: Encrypted archives are not yet supported and using a pipe here
+    ;; normally makes the process fail immediately when it tries to read a
+    ;; password from the user.
+    (let* ((process-connection-type nil)
+           (process (apply #'start-process name buffer program flat-args)))
       (process-put process 'operation operation)
       (set-process-sentinel process #'dired-atool--sentinel))))
 
