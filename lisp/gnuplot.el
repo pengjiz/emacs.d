@@ -24,12 +24,12 @@
 
 (defcustom gnuplot-program
   "gnuplot"
-  "The program name for gnuplot."
+  "Name of the gnuplot program."
   :type 'string)
 
 (defcustom gnuplot-extra-options
   '("--persist")
-  "Extra options passing to gnuplot."
+  "Extra options passed to gnuplot."
   :type '(repeat string))
 
 ;;; Keyword

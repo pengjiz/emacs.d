@@ -35,8 +35,7 @@ REGION is directly passed to `fill-paragraph'."
   "Force completion on the text around point."
   (interactive)
   (minibuffer-hide-completions)
-  (cl-letf (((symbol-function 'completion--cycle-threshold)
-             (lambda (&rest _) t)))
+  (cl-letf (((symbol-function 'completion--cycle-threshold) #'always))
     (completion-at-point)))
 
 (defun simple-extras-choose-completion-no-exit (&optional event)

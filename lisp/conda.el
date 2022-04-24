@@ -54,7 +54,7 @@
   "Get all environments."
   (mapcan (lambda (directory)
             (when (file-directory-p directory)
-              (let (environments)
+              (let ((environments nil))
                 (dolist (file (directory-files directory t "^[^.]"))
                   (when (file-directory-p file)
                     (push (file-name-nondirectory file) environments)))

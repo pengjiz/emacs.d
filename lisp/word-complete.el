@@ -66,7 +66,7 @@ The dictionary file is specified by `word-complete-dictionary'."
 
 (defun word-complete--get-completion-settings ()
   "Return alternative completion settings for words."
-  (let (settings)
+  (let ((settings nil))
     (dolist (setting (cdr (assq 'word completion-category-overrides)))
       (unless (eq (car setting) 'styles)
         (push setting settings)))

@@ -103,7 +103,7 @@ If nil use value of `fill-column'."
   "Apply FN on ARGS, but avoid line truncating."
   (cl-letf (((symbol-function 'shr-tag-table)
              (lambda (dom)
-               (let (truncate-lines)
+               (let ((truncate-lines nil))
                  (page-turner--tag-shr-table dom)))))
     (apply fn args)))
 

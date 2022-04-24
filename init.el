@@ -103,13 +103,13 @@
                  "C-x m" "C-x 4 m" "C-x 5 m"))
     (define-key global-map (kbd key) nil))
 
-  (defvar init-overriding-global-map (make-sparse-keymap)
-    "Keymap that overrides global keymaps.")
-  (define-minor-mode init-global-override-mode
-    "Minor mode to override global keymaps."
+  (defvar init-protected-map (make-sparse-keymap)
+    "Keymap with higher precedence than most of the others.")
+  (define-minor-mode init-protected-keys-mode
+    "Minor mode to activate `init-protected-map'."
     :group 'convenience :lighter nil :keymap nil
     :global t :init-value t)
-  (cl-pushnew `((init-global-override-mode . ,init-overriding-global-map))
+  (cl-pushnew `((init-protected-keys-mode . ,init-protected-map))
               emulation-mode-map-alists
               :test #'equal)
 
@@ -595,7 +595,7 @@
   (init--require-when-compile 'avy)
   (autoload 'avy-resume "avy" nil t)
 
-  (let ((map init-overriding-global-map))
+  (let ((map init-protected-map))
     (define-key map (kbd "C-;") #'avy-goto-char-in-line)
     (define-key map (kbd "C-'") #'avy-goto-char-2))
   (define-key global-map (kbd "C-z") #'avy-resume)
@@ -787,7 +787,7 @@
           (?z aw-flip-window)
           (?? aw-show-dispatch-help)))
   (setf aw-make-frame-char nil)
-  (define-key init-overriding-global-map (kbd "M-o") #'ace-window)
+  (define-key init-protected-map (kbd "M-o") #'ace-window)
 
   (with-eval-after-load 'ace-window
     (setf aw-minibuffer-flag t)))
@@ -2145,7 +2145,7 @@
       (setf TeX-electric-sub-and-superscript t)
       (TeX-source-correlate-mode)
 
-      (let (commands)
+      (let ((commands nil))
         (push '("TeXcount" "texcount -utf8 -inc %t"
                 TeX-run-background nil (latex-mode)
                 :help "Count words in the document")

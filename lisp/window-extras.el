@@ -29,7 +29,7 @@
 
 (defun window-extras--prefer-split-below (fn &rest args)
   "Apply FN on ARGS but prefer to split window below."
-  (let (split-width-threshold)
+  (let ((split-width-threshold nil))
     (apply fn args)))
 
 (defun window-extras--setup-org ()

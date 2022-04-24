@@ -78,20 +78,12 @@ destination directory automatically after operations."
                      "process exited abnormally")))
         (kill-buffer buffer)))))
 
-(defsubst dired-atool--flatten (args)
-  "Flatten ARGS by one level."
-  (apply #'append
-         (mapcar (lambda (arg) (if (listp arg)
-                                   arg
-                                 (list arg)))
-                 args)))
-
 (defun dired-atool--run (operation program &rest args)
   "Start PROGRAM with ARGS.
 OPERATION stores information for the current operation."
   (let* ((name (file-name-nondirectory program))
          (buffer (generate-new-buffer (format " *%s*" name)))
-         (flat-args (dired-atool--flatten args)))
+         (flat-args (flatten-tree args)))
     (with-current-buffer buffer
       (insert (format "%s: %s [%s]\n"
                       (capitalize (or (cdr (assq 'name operation))

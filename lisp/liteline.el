@@ -97,7 +97,7 @@
   (defun liteline--prepare-segments (segments)
     "Prepare mode line forms of SEGMENTS.
 Return forms that can be passed directly to `format-mode-line'."
-    (let (forms)
+    (let ((forms nil))
       (dolist (segment segments)
         (if (stringp segment)
             (push segment forms)
@@ -206,7 +206,7 @@ If DEFAULT is non-nil, set the default value."
 (liteline-define-segment transient
   "Show transient information."
   (when (liteline--window-active-p)
-    (let (indicators)
+    (let ((indicators nil))
       (dolist (fn '(liteline--get-macro-indicator
                     liteline--get-recursive-editing-depth))
         (when-let* ((indicator (funcall fn)))
@@ -263,7 +263,7 @@ If DEFAULT is non-nil, set the default value."
                      (image-mode-window-get 'page)
                      (doc-view-last-page-number))))
     (otherwise
-     (let (position)
+     (let ((position nil))
        (when mode-line-percent-position
          (push 'mode-line-percent-position position)
          (push " " position))
@@ -329,7 +329,7 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline--get-minor-modes ()
   "Return indicators for certain enabled minor modes."
-  (let (indicators)
+  (let ((indicators nil))
     (dolist (mode liteline-minor-mode-indicator-alist)
       (let ((symbol (car mode)))
         (when (and (boundp symbol) (symbol-value symbol))

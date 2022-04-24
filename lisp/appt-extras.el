@@ -54,7 +54,7 @@
   "Update appointments from Org agenda files."
   (when appt-timer
     ;; Keep only appointments from the diary file
-    (let (appointments)
+    (let ((appointments nil))
       (dolist (appointment appt-time-msg-list)
         (unless (nth 2 appointment)
           (push appointment appointments)))
