@@ -134,7 +134,15 @@
       (package--archives-initialize)
       (unless (assq package package-archive-contents)
         (package-refresh-contents))
-      (package-install package t))))
+      (package-install package t)))
+
+  (defun init--record-selected-package ()
+    "Record selected packages if any."
+    (when-let* ((packages (or package-selected-packages
+                              (package--find-non-dependencies))))
+      (package--save-selected-packages packages)))
+  (unless package-selected-packages
+    (add-hook 'after-init-hook #'init--record-selected-package)))
 
 (progn ; `liteline'
   (defvar calendar-mode-line-format)
