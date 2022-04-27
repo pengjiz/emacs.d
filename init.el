@@ -1178,6 +1178,10 @@
                                   eshell-tramp
                                   eshell-unix))))
 
+  (progn ; `em-alias'
+    (init--require-when-compile 'em-alias)
+    (setf eshell-aliases-file (init--etc "eshell/aliases")))
+
   (progn ; `em-glob'
     (init--require-when-compile 'em-glob)
     (with-eval-after-load 'em-glob
