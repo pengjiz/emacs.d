@@ -373,6 +373,7 @@
   (defun init--enable-company ()
     (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
                                                  'clojure-mode
+                                                 'scheme-mode
                                                  'rust-mode
                                                  'sh-mode
                                                  'css-mode
@@ -1789,7 +1790,6 @@
     (setf geiser-repl-history-filename (init--var "geiser/history"))
 
     (with-eval-after-load 'geiser-repl
-      (setf geiser-repl-company-p nil)
       (setf geiser-repl-read-only-prompt-p nil
             geiser-repl-read-only-output-p nil)
       (define-key geiser-repl-mode-map (kbd "C-c a a") #'geiser-repl-exit)))
