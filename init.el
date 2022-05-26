@@ -80,7 +80,7 @@
 
 ;;; Initialization
 
-(progn ; `startup'
+(progn ; startup
   (setf inhibit-startup-screen t
         inhibit-startup-buffer-menu t
         inhibit-startup-echo-area-message nil)
@@ -117,7 +117,7 @@
     (set-face-attribute 'fixed-pitch nil :family "Source Code Pro")
     (set-face-attribute 'variable-pitch nil :family "DejaVu Sans")))
 
-(progn ; `package'
+(progn ; package
   (require 'package)
   (setf package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                            ("melpa" . "https://melpa.org/packages/")))
@@ -227,10 +227,10 @@
    (add-hook 'prog-mode-hook #'simple-extras-auto-fill-comments-mode)
 
    (define-key global-map (kbd "M-z") #'simple-extras-unfill-paragraph)
-   (define-key completion-in-region-mode-map
-     (kbd "C-<tab>") #'simple-extras-force-completion-at-point)
-   (define-key completion-list-mode-map
-     (kbd "C-<return>") #'simple-extras-choose-completion-no-exit)))
+   (define-key completion-in-region-mode-map (kbd "C-<tab>")
+     #'simple-extras-force-completion-at-point)
+   (define-key completion-list-mode-map (kbd "C-<return>")
+     #'simple-extras-choose-completion-no-exit)))
 
 (progn ; indentation
   (setf (default-value 'indent-tabs-mode) nil
@@ -356,9 +356,9 @@
 (confige company
   :ensure t :preload t
   (:preface
-   (declare-function company-select-first "company")
-   (declare-function company-select-last "company")
-   (declare-function company-other-backend "company")
+   (declare-function company-select-first "ext:company")
+   (declare-function company-select-last "ext:company")
+   (declare-function company-other-backend "ext:company")
 
    (defun init--enable-company ()
      (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
@@ -555,7 +555,8 @@
 
 (confige visual-fill-column
   :ensure t :preload t
-  (:preface (declare-function visual-fill-column-adjust "visual-fill-column"))
+  (:preface
+   (declare-function visual-fill-column-adjust "ext:visual-fill-column"))
   (:before (define-key global-map (kbd "C-c t c") #'visual-fill-column-mode))
   (:after
    (setf (default-value 'visual-fill-column-center-text) t
@@ -571,7 +572,7 @@
 
 ;;; Multilingual environment
 
-(progn ; `mule-cmds'
+(progn ; mule-cmds
   (setf default-input-method "TeX"))
 
 (confige kkc
@@ -644,7 +645,7 @@
    (setf mouse-wheel-scroll-amount '(1 ((shift) . 5))
          mouse-wheel-progressive-speed nil)))
 
-(progn ; `window'
+(progn ; window
   (setf scroll-error-top-bottom t)
   (setf fit-window-to-buffer-horizontally t)
   (setf display-buffer-alist
@@ -834,8 +835,8 @@
 
 (confige autorevert
   (:before
-   (define-key global-map (kbd "C-c t g") #'auto-revert-mode)
-   (global-auto-revert-mode)))
+   (global-auto-revert-mode)
+   (define-key global-map (kbd "C-c t g") #'auto-revert-mode)))
 
 (confige uniquify
   :load t
@@ -876,7 +877,7 @@
 
 ;;; File
 
-(progn ; `files'
+(progn ; files
   (let ((list-prefix (init--var "auto-save/sessions/"))
         (save-directory (init--var "auto-save/saves/")))
     (make-directory save-directory t)
@@ -911,18 +912,18 @@
    (autoload 'files-extras-find-recent-file-other-window "files-extras" nil t))
   (:before
    (define-key global-map (kbd "C-x m") #'files-extras-find-recent-file)
-   (define-key global-map (kbd "C-x 4 m") #'files-extras-find-recent-file-other-window)))
+   (define-key global-map (kbd "C-x 4 m")
+     #'files-extras-find-recent-file-other-window)))
 
 (confige ffap
   :preload t
   (:after (setf ffap-machine-p-known 'reject)))
 
-;; Automatically make scripts executable
 (confige executable
   (:before
-   (add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)))
+   (add-hook 'after-save-hook
+             #'executable-make-buffer-file-executable-if-script-p)))
 
-;; Automatically update timestamps
 (confige time-stamp
   :preload t
   (:before (add-hook 'before-save-hook #'time-stamp))
@@ -996,18 +997,16 @@
      (:after
       (setf dired-omit-files "\\`\\."
             dired-omit-extensions nil)
-      (define-key dired-mode-map (kbd "V") nil)))
+      (define-key dired-mode-map (kbd "V") nil)))))
 
-   (confige wdired
-     :preload t
-     (:after (setf wdired-allow-to-change-permissions t)))))
+(confige wdired
+  :preload t
+  (:after (setf wdired-allow-to-change-permissions t)))
 
-;; More colors in Dired
 (confige diredfl
   :ensure t
   (:before (add-hook 'dired-mode-hook #'diredfl-mode)))
 
-;; Live filtering in Dired
 (confige dired-narrow
   :ensure t
   (:before
@@ -1138,10 +1137,9 @@
 (confige proced
   (:before (define-key global-map (kbd "C-c a L") #'proced)))
 
-;; Live filtering in Proced
 (confige proced-narrow
   :ensure t
-  (:preface (confige-preload 'proced))
+  (:preface (defvar proced-mode-map))
   (:before
    (with-eval-after-load 'proced
      (define-key proced-mode-map (kbd "/") #'proced-narrow))))
@@ -1248,7 +1246,7 @@
 
 (confige elfeed
   :ensure t :preload t
-  (:preface (declare-function elfeed-make-tagger "elfeed"))
+  (:preface (declare-function elfeed-make-tagger "ext:elfeed"))
   (:before
    (setf elfeed-db-directory (init--sync "misc/elfeed/db/"))
    (with-eval-after-load 'recentf
@@ -1470,9 +1468,8 @@
 
 (confige flycheck
   :ensure t :preload t
-  (:preface (declare-function flycheck-list-errors "flycheck"))
+  (:preface (declare-function flycheck-list-errors "ext:flycheck"))
   (:before
-   (define-key global-map (kbd "C-c t e") #'flycheck-mode)
    (dolist (hook '(emacs-lisp-mode-hook
                    clojure-mode-hook
                    scheme-mode-hook
@@ -1487,7 +1484,8 @@
                    sh-mode-hook
                    LaTeX-mode-hook
                    ledger-mode-hook))
-     (add-hook hook #'flycheck-mode)))
+     (add-hook hook #'flycheck-mode))
+   (define-key global-map (kbd "C-c t e") #'flycheck-mode))
   (:after
    (setf flycheck-check-syntax-automatically '(save mode-enabled))
    (define-key flycheck-mode-map (kbd "M-g l") #'flycheck-list-errors)))
@@ -1534,8 +1532,8 @@
 (confige magit
   :ensure t :preload t
   (:preface
-   (declare-function magit-display-buffer-fullframe-status-v1 "magit-mode")
-   (declare-function magit-add-section-hook "magit-section"))
+   (declare-function magit-display-buffer-fullframe-status-v1 "ext:magit-mode")
+   (declare-function magit-add-section-hook "ext:magit-section"))
   (:before
    (setf magit-define-global-key-bindings nil)
    (let ((map global-map))
@@ -1558,8 +1556,8 @@
 (confige git-commit
   :ensure t :preload t
   (:preface
-   (declare-function git-commit-turn-on-auto-fill "git-commit")
-   (declare-function git-commit-turn-on-flyspell "git-commit")
+   (declare-function git-commit-turn-on-auto-fill "ext:git-commit")
+   (declare-function git-commit-turn-on-flyspell "ext:git-commit")
 
    (defun init--set-git-commit-fill-column (&rest _)
      "Set fill column for Git commit messages when appropriate."
@@ -1571,7 +1569,6 @@
                #'init--set-git-commit-fill-column)
    (add-hook 'git-commit-setup-hook #'git-commit-turn-on-flyspell)))
 
-;; Show edits
 (confige diff-hl
   :ensure t :load t
   (:after
@@ -1646,16 +1643,9 @@
 
 (confige gnuplot
   :preload t
-  (:preface
-   (declare-function gnuplot-run-region "gnuplot")
-   (declare-function gnuplot-run-buffer "gnuplot")
-   (autoload 'gnuplot-mode "gnuplot" nil t))
+  (:preface (autoload 'gnuplot-mode "gnuplot" nil t))
   (:before
-   (cl-pushnew '("\\.gp\\'" . gnuplot-mode) auto-mode-alist :test #'equal))
-  (:after
-   (let ((map gnuplot-mode-map))
-     (define-key map (kbd "C-c C-r") #'gnuplot-run-region)
-     (define-key map (kbd "C-c C-b") #'gnuplot-run-buffer))))
+   (cl-pushnew '("\\.gp\\'" . gnuplot-mode) auto-mode-alist :test #'equal)))
 
 ;;; Emacs Lisp
 
@@ -1735,7 +1725,7 @@
 
 (confige cider
   :ensure t
-  (:preface (confige-preload 'clojure-mode))
+  (:preface (defvar clojure-mode-map))
   (:before
    (with-eval-after-load 'clojure-mode
      (define-key clojure-mode-map (kbd "C-c a a") #'cider)))
@@ -1746,7 +1736,7 @@
 
    (confige cider-repl
      :preload t
-     (:preface (declare-function cider-quit "cider-connection"))
+     (:preface (declare-function cider-quit "ext:cider-connection"))
      (:after
       (setf cider-repl-display-help-banner nil)
       (define-key cider-repl-mode-map (kbd "C-c a a") #'cider-quit)))
@@ -1765,6 +1755,7 @@
 
 (confige geiser
   :ensure t
+  (:before (make-directory (init--var "geiser/") t))
   (:postface
    (confige geiser-mode
      :preload t
@@ -1772,10 +1763,8 @@
 
    (confige geiser-repl
      :preload t
-     (:preface (declare-function geiser-repl-exit "geiser-repl"))
-     (:before
-      (make-directory (init--var "geiser/") t)
-      (setf geiser-repl-history-filename (init--var "geiser/history")))
+     (:preface (declare-function geiser-repl-exit "ext:geiser-repl"))
+     (:before (setf geiser-repl-history-filename (init--var "geiser/history")))
      (:after
       (setf geiser-repl-read-only-prompt-p nil
             geiser-repl-read-only-output-p nil)
@@ -1842,7 +1831,8 @@
    (confige haskell-interactive-mode
      :preload t
      (:preface
-      (declare-function haskell-interactive-mode-clear "haskell-interactive-mode"))
+      (declare-function haskell-interactive-mode-clear
+                        "ext:haskell-interactive-mode"))
      (:after
       (let ((map haskell-interactive-mode-map))
         (define-key map (kbd "C-c a a") #'haskell-interactive-kill)
@@ -1854,8 +1844,8 @@
    (confige haskell-collapse
      :preload t
      (:preface
-      (declare-function haskell-hide-toggle "haskell-collapse")
-      (declare-function haskell-hide-toggle-all "haskell-collapse"))
+      (declare-function haskell-hide-toggle "ext:haskell-collapse")
+      (declare-function haskell-hide-toggle-all "ext:haskell-collapse"))
      (:before
       (add-hook 'haskell-mode-hook #'haskell-collapse-mode)
       (setf haskell-collapse-mode-map (make-sparse-keymap)))
@@ -1867,9 +1857,9 @@
 (confige dante
   :ensure t :preload t
   (:preface
-   (declare-function dante-eval-block "dante")
-   (declare-function dante-type-at "dante")
-   (declare-function dante-info "dante"))
+   (declare-function dante-eval-block "ext:dante")
+   (declare-function dante-type-at "ext:dante")
+   (declare-function dante-info "ext:dante"))
   (:before
    (add-hook 'haskell-mode-hook #'dante-mode)
    (setf dante-mode-map (make-sparse-keymap)))
@@ -1901,12 +1891,12 @@
   (:postface
    (confige ess-inf
      :preload t
-     (:preface (declare-function ess-quit "ess-inf"))
+     (:preface (declare-function ess-quit "ext:ess-inf"))
      (:after (define-key inferior-ess-mode-map (kbd "C-c a a") #'ess-quit)))
 
    (confige ess-r-mode
      :preload t
-     (:preface (declare-function ess-cycle-assign "ess-s-lang"))
+     (:preface (declare-function ess-cycle-assign "ext:ess-s-lang"))
      (:after
       (let ((map ess-r-mode-map))
         (define-key map (kbd "C-c a a") #'run-ess-r)
@@ -2043,10 +2033,10 @@
 (confige anaconda-mode
   :ensure t :preload t
   (:preface
-   (declare-function anaconda-mode-show-doc "anaconda-mode")
-   (declare-function anaconda-mode-find-definitions "anaconda-mode")
-   (declare-function anaconda-mode-find-references "anaconda-mode")
-   (declare-function anaconda-mode-find-assignments "anaconda-mode")
+   (declare-function anaconda-mode-show-doc "ext:anaconda-mode")
+   (declare-function anaconda-mode-find-definitions "ext:anaconda-mode")
+   (declare-function anaconda-mode-find-references "ext:anaconda-mode")
+   (declare-function anaconda-mode-find-assignments "ext:anaconda-mode")
 
    (defun init--enable-anaconda ()
      (unless (file-remote-p default-directory)
@@ -2125,8 +2115,8 @@
    (confige tex
      :preload t
      (:preface
-      (declare-function TeX-source-correlate-mode "tex")
-      (declare-function TeX-error-overview "tex"))
+      (declare-function TeX-source-correlate-mode "ext:tex")
+      (declare-function TeX-error-overview "ext:tex"))
      (:after
       (setf (default-value 'TeX-master) nil
             (default-value 'TeX-engine) 'luatex)
@@ -2166,7 +2156,7 @@
    (confige latex
      :preload t
      (:preface
-      (declare-function LaTeX-math-mode "latex")
+      (declare-function LaTeX-math-mode "ext:latex")
       (defun init--setup-LaTeX-mode ()
         (make-local-variable 'TeX-electric-math)
         (setf TeX-electric-math '("\\(" . "\\)"))
@@ -2238,7 +2228,7 @@
 (confige ledger-mode
   :ensure t :preload t
   (:preface
-   (declare-function ledger-schedule-create-auto-buffer "ledger-schedule")
+   (declare-function ledger-schedule-create-auto-buffer "ext:ledger-schedule")
    (defun init--avoid-flycheck-for-ledger-schedule (fn &rest args)
      "Apply FN on ARGS but avoid activating Flycheck."
      (cl-letf (((symbol-function 'flycheck-mode) #'ignore))

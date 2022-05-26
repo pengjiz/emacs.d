@@ -219,6 +219,15 @@
   (setf (symbol-function 'gnuplot-send-buffer-to-gnuplot)
         #'gnuplot-run-buffer))
 
+;;; Keymap
+
+(defvar gnuplot-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-r") #'gnuplot-run-region)
+    (define-key map (kbd "C-c C-b") #'gnuplot-run-buffer)
+    map)
+  "Keymap for `gnuplot-mode'.")
+
 ;;; Mode
 
 (define-derived-mode gnuplot-mode prog-mode "Gnuplot"
