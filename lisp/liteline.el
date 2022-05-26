@@ -95,19 +95,18 @@
   (defvar liteline--segment-fn-alist nil "Functions of segments.")
 
   (defun liteline--prepare-segments (segments)
-    "Prepare mode line forms of SEGMENTS.
-Return forms that can be passed directly to `format-mode-line'."
-    (let ((forms nil))
+    "Prepare SEGMENTS into a valid mode line format."
+    (let ((format nil))
       (dolist (segment segments)
         (if (stringp segment)
-            (push segment forms)
+            (push segment format)
           (if-let* ((fn (cdr (assq segment liteline--segment-fn-alist))))
-              (push `(:eval (,fn)) forms)
-            (error "%s is not a valid segment" segment))))
-      (cons "" (nreverse forms)))))
+              (push `(:eval (,fn)) format)
+            (error "Invalid segment %S" segment))))
+      (cons "" (nreverse format)))))
 
 (defmacro liteline-define-segment (name doc &rest body)
-  "Define a mode line segment function for NAME with DOC and BODY."
+  "Define a mode line segment of NAME with DOC and BODY."
   (declare (indent defun)
            (doc-string 2)
            (debug (&define name stringp def-body)))
@@ -116,7 +115,7 @@ Return forms that can be passed directly to `format-mode-line'."
                 :test #'eq :key #'car)
     `(progn
        (defun ,symbol ()
-         ,(or doc (format "Show the %s information." name))
+         ,(or doc (format "Show %s information." name))
          ,@body)
        (cl-pushnew (cons ',name #',symbol) liteline--segment-fn-alist
                    :test #'eq :key #'car))))
@@ -131,10 +130,10 @@ Return forms that can be passed directly to `format-mode-line'."
   "Prepare the mode line of NAME."
   (if-let* ((fn (cdr (assq name liteline--mode-line-fn-alist))))
       `(:eval (,fn))
-    (error "%s is not a valid mode line" name)))
+    (error "Invalid mode line %S" name)))
 
 (defun liteline--wrap-mode-line (left right)
-  "Wrap LEFT and RIGHT segment forms into a full mode line."
+  "Wrap LEFT and RIGHT segments into a full mode line."
   (setf liteline--mode-line-right-string (format-mode-line right))
   (remove-list-of-text-properties 0 (length liteline--mode-line-right-string)
                                   '(mouse-face help-echo keymap local-map)
@@ -150,9 +149,9 @@ Return forms that can be passed directly to `format-mode-line'."
     `(,left ,padding liteline--mode-line-right-string)))
 
 (defmacro liteline-define-mode-line (name left &optional right)
-  "Define a mode line function for NAME with LEFT and RIGHT segments."
+  "Define a mode line of NAME with LEFT and RIGHT segments."
   (declare (indent 1)
-           (debug (&define name listp [&optional listp])))
+           (debug (symbolp (&rest symbolp) &optional (&rest symbolp))))
   (let ((symbol (intern (format "liteline--mode-line-%s" name))))
     `(progn
        (defun ,symbol ()
@@ -181,7 +180,7 @@ If DEFAULT is non-nil, set the default value."
               (minibuffer-selected-window)
             window))))
 
-(defun liteline--window-active-p ()
+(defun liteline-window-active-p ()
   "Return t if the selected window is active."
   (eq (selected-window) liteline--active-window))
 
@@ -205,7 +204,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment transient
   "Show transient information."
-  (when (liteline--window-active-p)
+  (when (liteline-window-active-p)
     (let ((indicators nil))
       (dolist (fn '(liteline--get-macro-indicator
                     liteline--get-recursive-editing-depth))
@@ -314,7 +313,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment git
   "Show Git status."
-  (and (liteline--window-active-p)
+  (and (liteline-window-active-p)
        liteline--git
        '(" " liteline--git " ")))
 
@@ -480,14 +479,14 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment flycheck
   "Show Flycheck status."
-  (and (liteline--window-active-p)
+  (and (liteline-window-active-p)
        liteline--flycheck
        '(" " liteline--flycheck " ")))
 
 ;; Misc information
 (liteline-define-segment misc
   "Show misc information."
-  (when (liteline--window-active-p)
+  (when (liteline-window-active-p)
     (cl-case major-mode
       ((Man-mode)
        '(" " Man-page-mode-string " "))
