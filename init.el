@@ -1128,8 +1128,7 @@
   :preload t
   (:preface (declare-function comint-send-eof "comint"))
   (:after
-   (setf comint-prompt-read-only nil
-         comint-scroll-to-bottom-on-input 'this)
+   (setf comint-prompt-read-only nil)
    (let ((map comint-mode-map))
      (define-key map [remap comint-delchar-or-maybe-eof] #'delete-char)
      (define-key map (kbd "C-c a a") #'comint-send-eof))))
@@ -1151,8 +1150,7 @@
   (:postface
    (confige esh-mode
      :preload t
-     (:before (setf eshell-directory-name (init--var "eshell/")))
-     (:after (setf eshell-scroll-to-bottom-on-input 'this)))
+     (:before (setf eshell-directory-name (init--var "eshell/"))))
 
    (confige esh-var
      :preload t
