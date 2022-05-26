@@ -973,7 +973,7 @@
   (:preface (declare-function dired-directory-changed-p "dired"))
   (:before (define-key global-map [remap list-directory] #'dired))
   (:after
-   (setf dired-listing-switches "-alhFv --group-directories-first"
+   (setf dired-listing-switches "-alhF"
          dired-auto-revert-buffer #'dired-directory-changed-p)
    (setf dired-recursive-copies 'always)
    (setf dired-dwim-target t)
