@@ -143,7 +143,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
 
   (let ((spec (conda--get-environment-spec environment)))
     (unless spec
-      (error "%s is not a valid conda environment" environment))
+      (error "Invalid conda environment %S" environment))
     (when conda--current-environment-spec
       (conda-deactivate show-message))
     (setf conda--current-environment-spec spec)

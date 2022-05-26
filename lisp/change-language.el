@@ -17,14 +17,14 @@
 
 (defcustom change-language-languages
   '("English" "German")
-  "List of registered languages."
+  "List of known language names."
   :type '(repeat string))
 
 (defcustom change-language-functions
   '(change-language-change-ispell-dictionary
     change-language-change-input-method
     change-language-change-typo-language)
-  "Hook to be run when changing language."
+  "Functions to call when changing language."
   :type 'hook)
 
 (defcustom change-language-ispell-dictionary-alist
@@ -61,7 +61,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
      (list (and (not (string-empty-p input)) input) t)))
   (unless (or (not language)
               (member language change-language-languages))
-    (error "%s is not a registered language" language))
+    (error "Invalid language name %S" language))
   (run-hook-with-args 'change-language-functions language)
   (setf change-language-current-language language)
   (when show-message

@@ -89,6 +89,8 @@ should be grouped as a list."
              (setf keyword arg))
             ((listp arg)
              (let ((key (car arg)))
+               (unless (keywordp key)
+                 (error "Invalid argument %S" arg))
                (when (confige--keyword-compact-p key)
                  (error "Invalid format for compact keyword %S" key)))
              (push arg blocks))

@@ -90,8 +90,7 @@
 (progn ; basic customization
   (setf custom-file (init--var "custom.el"))
   (load custom-file t t t)
-  (defvar init--org-babel-languages nil
-    "Languages to be loaded for Org Babel.")
+  (defvar init--org-babel-languages nil "Languages to load for Org Babel.")
 
   (dolist (key '("M-`" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
                  "C-x m" "C-x 4 m" "C-x 5 m"))
