@@ -486,8 +486,7 @@
   :preload t
   (:preface (declare-function hs-toggle-hiding "hideshow"))
   (:before
-   (dolist (hook '(prog-mode-hook bibtex-mode-hook))
-     (add-hook hook #'hs-minor-mode))
+   (add-hook 'prog-mode-hook #'hs-minor-mode)
    (setf hs-minor-mode-map (make-sparse-keymap)))
   (:after (define-key hs-minor-mode-map (kbd "C-c @ t") #'hs-toggle-hiding)))
 
