@@ -776,23 +776,6 @@
   :load t
   (:after (window-extras-setup)))
 
-(confige ace-window
-  :ensure t :preload t
-  (:before
-   (setf aw-dispatch-alist
-         '((?r aw-swap-window "Swap Window")
-           (?y aw-copy-window "Copy Window")
-           (?t aw-move-window "Move Window")
-           (?q aw-delete-window "Delete Window")
-           (?o delete-other-windows "Delete Other Windows")
-           (?b aw-switch-buffer-other-window "Switch Buffer")
-           (?x aw-execute-command-other-window "Execute Command")
-           (?z aw-flip-window)
-           (?? aw-show-dispatch-help)))
-   (setf aw-make-frame-char nil)
-   (define-key init-protected-map (kbd "M-o") #'ace-window))
-  (:after (setf aw-minibuffer-flag t)))
-
 (confige tab-bar
   (:before
    (add-hook 'after-init-hook #'tab-bar-history-mode)
