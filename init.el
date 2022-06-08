@@ -779,20 +779,22 @@
 (confige tab-bar
   (:before
    (add-hook 'after-init-hook #'tab-bar-history-mode)
-   (add-hook 'after-init-hook #'tab-bar-mode)
-   (let ((map global-map))
-     (define-key map (kbd "C-c s s") #'tab-bar-switch-to-recent-tab)
-     (define-key map (kbd "C-c s n") #'tab-bar-switch-to-next-tab)
-     (define-key map (kbd "C-c s p") #'tab-bar-switch-to-prev-tab)
-     (define-key map (kbd "C-c s f") #'tab-bar-history-forward)
-     (define-key map (kbd "C-c s b") #'tab-bar-history-back)))
+   (add-hook 'after-init-hook #'tab-bar-mode))
   (:after
    (setf tab-bar-new-tab-choice "*scratch*")
    (setf tab-bar-close-button-show nil
          tab-bar-format '(tab-bar-format-tabs-groups
                           tab-bar-separator
                           tab-bar-format-align-right
-                          tab-bar-format-global))))
+                          tab-bar-format-global))
+
+   (add-hook 'tab-bar-mode-hook #'tab-bar--undefine-keys)
+   (let ((map global-map))
+     (define-key map (kbd "C-c s s") #'tab-bar-switch-to-recent-tab)
+     (define-key map (kbd "C-c s n") #'tab-bar-switch-to-next-tab)
+     (define-key map (kbd "C-c s p") #'tab-bar-switch-to-prev-tab)
+     (define-key map (kbd "C-c s f") #'tab-bar-history-forward)
+     (define-key map (kbd "C-c s b") #'tab-bar-history-back))))
 
 (confige tab-bar-extras
   (:preface (autoload 'tab-bar-extras-setup "tab-bar-extras"))
