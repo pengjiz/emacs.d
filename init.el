@@ -132,12 +132,15 @@
 
 (confige liteline
   (:preface
+   (defvar swsw-id-format)
    (defvar calendar-mode-line-format)
    (defvar 2C-mode-line-format)
    (autoload 'liteline-setup "liteline"))
   (:before (add-hook 'after-init-hook #'liteline-setup))
   (:after
    (setf mode-line-position-column-line-format '(" %l:%c"))
+   (with-eval-after-load 'swsw
+     (setf swsw-id-format " #%s"))
    (with-eval-after-load 'calendar
      (setf calendar-mode-line-format nil
            (symbol-function 'calendar-set-mode-line) #'init-ignore))

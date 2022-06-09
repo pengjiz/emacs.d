@@ -192,28 +192,65 @@ If DEFAULT is non-nil, set the default value."
 ;;; Segment
 
 ;; Transient information
-(defun liteline--get-macro-indicator ()
-  "Return an indicator when defining keyboard macros."
-  (and defining-kbd-macro "M>"))
+(declare-function swsw-format-id "ext:swsw")
 
-(defun liteline--get-recursive-editing-depth ()
-  "Return recursion depth when in recursive editing."
+(defvar liteline--swsw-active nil "Whether swsw is active.")
+
+(defun liteline--swsw-show ()
+  "Show window indicators for swsw."
+  (setf liteline--swsw-active t)
+  (force-mode-line-update t))
+
+(defun liteline--swsw-hide ()
+  "Hide window indicators for swsw."
+  (setf liteline--swsw-active nil)
+  (force-mode-line-update t))
+
+(defun liteline--prepare-swsw-display (enable)
+  "Enable window indicator display for swsw if ENABLE is non-nil.
+Otherwise disable the display."
+  (if enable
+      (progn
+        (add-hook 'swsw-before-command-hook #'liteline--swsw-show)
+        (add-hook 'swsw-after-command-hook #'liteline--swsw-hide))
+    (remove-hook 'swsw-before-command-hook #'liteline--swsw-show)
+    (remove-hook 'swsw-after-command-hook #'liteline--swsw-hide)))
+
+(defun liteline--get-window-indicator ()
+  "Return an indicator for window selection."
+  (and (bound-and-true-p swsw-mode)
+       liteline--swsw-active
+       (swsw-format-id (selected-window))))
+
+(defun liteline--get-editing-depth ()
+  "Return editing depth when in recursive editing."
   (let ((depth (- (recursion-depth) (minibuffer-depth))))
     (when (> depth 0)
-      (format "@%d" depth))))
+      (format " @%d" depth))))
+
+(defun liteline--get-macro-indicator ()
+  "Return an indicator when defining keyboard macros."
+  (and defining-kbd-macro " M>"))
+
+(defun liteline--setup-swsw ()
+  "Setup swsw."
+  (with-eval-after-load 'swsw
+    (setf (symbol-function 'swsw-mode-line-conditional-display-function)
+          #'liteline--prepare-swsw-display)))
 
 (liteline-define-segment transient
   "Show transient information."
-  (when (liteline-window-active-p)
-    (let ((indicators nil))
-      (dolist (fn '(liteline--get-macro-indicator
-                    liteline--get-recursive-editing-depth))
-        (when-let* ((indicator (funcall fn)))
-          (push " " indicators)
-          (push indicator indicators)))
-      (when indicators
-        (propertize (apply #'concat " " indicators)
-                    'face 'liteline-transient)))))
+  (let ((active (liteline-window-active-p))
+        (indicators nil))
+    (dolist (indicator (list (liteline--get-window-indicator)
+                             (and active (liteline--get-editing-depth))
+                             (and active (liteline--get-macro-indicator))))
+      (when indicator
+        (push indicator indicators)))
+    (when indicators
+      (push " " indicators)
+      (propertize (apply #'concat (nreverse indicators))
+                  'face 'liteline-transient))))
 
 ;; Basic buffer information
 (defun liteline--get-buffer-name ()
@@ -239,23 +276,17 @@ If DEFAULT is non-nil, set the default value."
 (declare-function image-mode-window-get "image-mode")
 (declare-function doc-view-last-page-number "doc-view")
 
-(defvar-local liteline--image-size nil "Current image size.")
-(put 'liteline--image-size 'risky-local-variable t)
-
 (liteline-define-segment position
   "Show position information."
   (cl-case major-mode
     ((image-mode)
-     ;; NOTE: It may fail to get the desired display property when ace-window is
-     ;; active because ace-window adds additional overlays to windows.
-     (when-let* ((spec (and (not (bound-and-true-p ace-window-mode))
-                            (image-get-display-property))))
-       (setf liteline--image-size (image-display-size spec t)))
-     (concat (and size-indication-mode " %I")
-             (and liteline--image-size
-                  (format " %dx%d "
-                          (car liteline--image-size)
-                          (cdr liteline--image-size)))))
+     (let* ((spec (image-get-display-property))
+            (raw (ignore-errors (image-display-size spec t)))
+            (size (and raw (format "%dx%d" (car raw) (cdr raw)))))
+       (cond ((and size-indication-mode size)
+              (concat " %I " size " "))
+             (size-indication-mode " %I ")
+             (size (concat " " size " ")))))
     ((doc-view-mode)
      (concat (and size-indication-mode " %I")
              (format " %d/%d "
@@ -505,6 +536,7 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline-setup ()
   "Setup mode line."
   (liteline--setup-active-window)
+  (liteline--setup-swsw)
   (liteline--setup-git)
   (liteline--setup-calc)
   (liteline--setup-reftex)
