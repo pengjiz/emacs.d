@@ -883,11 +883,18 @@
     (make-directory directory t)
     (setf auto-save-list-file-prefix prefix
           auto-save-file-name-transforms `((".*" ,directory t))))
-  (setf backup-by-copying t
-        delete-old-versions t
-        version-control t
-        backup-directory-alist `((,tramp-file-name-regexp . nil)
-                                 ("." . ,(init--var "backups/"))))
+
+  (setf make-backup-files nil
+        backup-by-copying t
+        delete-old-versions t)
+  (put 'make-backup-files 'permanent-local t)
+  (defun init--prepare-for-making-backups (&optional arg)
+    "Prepare for making backups appropriately based on ARG."
+    (when (and (not make-backup-files)
+               (memq arg '(4 16 64)))
+      (make-local-variable 'make-backup-files)
+      (setf make-backup-files t)))
+  (advice-add #'save-buffer :before #'init--prepare-for-making-backups)
 
   (setf view-read-only t)
   (setf save-abbrevs 'silently)
