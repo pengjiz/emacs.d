@@ -1529,10 +1529,13 @@
 
 ;;; VCS
 
-(confige vc-hooks
-  (:after
+(confige vc
+  :preload t
+  (:before
    (setf vc-handled-backends '(Git))
-   (setf vc-follow-symlinks t)))
+   (setf vc-follow-symlinks t
+         vc-make-backup-files t))
+  (:after (setf vc-find-revision-no-save t)))
 
 (confige magit
   :ensure t :preload t
