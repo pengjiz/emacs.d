@@ -73,7 +73,7 @@ destination directory automatically after operations."
           (insert-buffer-substring buffer))
         (when .description
           (message "%s...%s" .description
-                   (if (string-match-p "finished" event)
+                   (if (string-search "finished" event)
                        "done"
                      "process exited abnormally")))
         (kill-buffer buffer)))))

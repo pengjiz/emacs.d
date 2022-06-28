@@ -375,7 +375,7 @@ Otherwise disable the display."
   "Update `liteline--calc-extra'."
   (when (eq major-mode 'calc-mode)
     (let* ((name mode-line-buffer-identification)
-           (index (string-match-p ":" name))
+           (index (string-search ":" name))
            (extra (string-trim (substring-no-properties name (1+ index)))))
       (if (string-empty-p extra)
           (setf liteline--calc-extra nil)

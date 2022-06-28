@@ -30,10 +30,10 @@
 
 (progn ; helpers
   (eval-and-compile
-    (let ((lisp-directory (expand-file-name "lisp" user-emacs-directory)))
-      (when (and (file-directory-p lisp-directory)
-                 (not (member lisp-directory load-path)))
-        (push lisp-directory load-path))))
+    (let ((directory (expand-file-name "lisp" user-emacs-directory)))
+      (when (and (file-directory-p directory)
+                 (not (member directory load-path)))
+        (push directory load-path))))
 
   (require 'confige)
   (eval-when-compile
@@ -122,13 +122,13 @@
                            ("nongnu" . "https://elpa.nongnu.org/nongnu/")
                            ("melpa" . "https://melpa.org/packages/")))
 
-  (defun init--record-selected-package ()
+  (defun init--record-selected-packages ()
     "Record selected packages if any."
     (when-let* ((packages (or package-selected-packages
                               (package--find-non-dependencies))))
       (package--save-selected-packages packages)))
   (unless package-selected-packages
-    (add-hook 'after-init-hook #'init--record-selected-package)))
+    (add-hook 'after-init-hook #'init--record-selected-packages)))
 
 (confige liteline
   (:preface
@@ -878,11 +878,11 @@
 ;;; File
 
 (progn ; files
-  (let ((list-prefix (init--var "auto-save/sessions/"))
-        (save-directory (init--var "auto-save/saves/")))
-    (make-directory save-directory t)
-    (setf auto-save-list-file-prefix list-prefix
-          auto-save-file-name-transforms `((".*" ,save-directory t))))
+  (let ((prefix (init--var "auto-save/sessions/"))
+        (directory (init--var "auto-save/saves/")))
+    (make-directory directory t)
+    (setf auto-save-list-file-prefix prefix
+          auto-save-file-name-transforms `((".*" ,directory t))))
   (setf backup-by-copying t
         delete-old-versions t
         version-control t
@@ -1353,9 +1353,9 @@
   :preload t
   (:preface (declare-function calendar-mark-today "calendar"))
   (:before
-   (let ((sync-directory (init--sync "misc/")))
-     (make-directory sync-directory t)
-     (setf diary-file (expand-file-name "diary" sync-directory)))
+   (let ((directory (init--sync "misc/")))
+     (make-directory directory t)
+     (setf diary-file (expand-file-name "diary" directory)))
    (setf calendar-date-style 'iso)
    (define-key global-map (kbd "C-c m d") #'calendar))
   (:after
