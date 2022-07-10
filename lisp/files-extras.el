@@ -46,12 +46,5 @@ Prompt with a formatted string using PROMPT-PREFIX."
          (filename (files-extras--read-recent-filename prefix)))
     (find-file filename)))
 
-(defun files-extras-find-recent-file-other-window ()
-  "Visit a recent file with completion in another window."
-  (interactive)
-  (let* ((prefix "Find recent file in other window")
-         (filename (files-extras--read-recent-filename prefix)))
-    (find-file-other-window filename)))
-
 (provide 'files-extras)
 ;;; files-extras.el ends here

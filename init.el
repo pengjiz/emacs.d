@@ -914,13 +914,9 @@
      (define-key map (kbd "C-c f d") #'add-dir-local-variable))))
 
 (confige files-extras
-  (:preface
-   (autoload 'files-extras-find-recent-file "files-extras" nil t)
-   (autoload 'files-extras-find-recent-file-other-window "files-extras" nil t))
+  (:preface (autoload 'files-extras-find-recent-file "files-extras" nil t))
   (:before
-   (define-key global-map (kbd "C-x m") #'files-extras-find-recent-file)
-   (define-key global-map (kbd "C-x 4 m")
-     #'files-extras-find-recent-file-other-window)))
+   (define-key global-map (kbd "C-x m") #'files-extras-find-recent-file)))
 
 (confige ffap
   :preload t
