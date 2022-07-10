@@ -920,7 +920,7 @@
 
 (confige ffap
   :preload t
-  (:after (setf ffap-machine-p-known 'reject)))
+  (:after (setf ffap-machine-p-known 'accept)))
 
 (confige executable
   (:before
