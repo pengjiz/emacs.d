@@ -785,11 +785,11 @@
    (declare-function swsw-mode-line-conditional-display-function "ext:swsw")
    (declare-function swsw-select "ext:swsw"))
   (:before
-   (setf swsw-display-function #'ignore)
+   (setf swsw-display-lighter nil)
    (setf swsw-mode-map (make-sparse-keymap))
    (add-hook 'after-init-hook #'swsw-mode t))
   (:after
-   (setf swsw-display-function #'swsw-mode-line-conditional-display-function)
+   (add-hook 'swsw-mode-hook #'swsw-mode-line-conditional-display-function)
    (define-key swsw-mode-map (kbd "M-o") #'swsw-select)))
 
 (confige tab-bar

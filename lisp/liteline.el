@@ -206,15 +206,14 @@ If DEFAULT is non-nil, set the default value."
   (setf liteline--swsw-active nil)
   (force-mode-line-update t))
 
-(defun liteline--prepare-swsw-display (enable)
-  "Enable window indicator display for swsw if ENABLE is non-nil.
-Otherwise disable the display."
-  (if enable
-      (progn
-        (add-hook 'swsw-before-command-hook #'liteline--swsw-show)
-        (add-hook 'swsw-after-command-hook #'liteline--swsw-hide))
-    (remove-hook 'swsw-before-command-hook #'liteline--swsw-show)
-    (remove-hook 'swsw-after-command-hook #'liteline--swsw-hide)))
+(defun liteline--prepare-swsw-display (&rest _)
+  "Prepare window indicator display appropriately for swsw."
+  (cond ((bound-and-true-p swsw-mode)
+         (add-hook 'swsw-before-command-hook #'liteline--swsw-show)
+         (add-hook 'swsw-after-command-hook #'liteline--swsw-hide))
+        ((boundp 'swsw-mode)
+         (remove-hook 'swsw-before-command-hook #'liteline--swsw-show)
+         (remove-hook 'swsw-after-command-hook #'liteline--swsw-hide))))
 
 (defun liteline--get-window-indicator ()
   "Return an indicator for window selection."
