@@ -1603,6 +1603,10 @@
    (setf sh-basic-offset 2)
    (define-key sh-mode-map (kbd "C-c a a") #'sh-show-shell)))
 
+(confige lisp-mode
+  (:before
+   (cl-pushnew '("\\.eld\\'" . lisp-data-mode) auto-mode-alist :test #'equal)))
+
 (confige lua-mode
   :ensure t :preload t
   (:after (setf lua-indent-level 2)))
