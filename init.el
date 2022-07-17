@@ -1254,7 +1254,14 @@
      (push "/elfeed/db/" recentf-exclude))
    (define-key global-map (kbd "C-c m w") #'elfeed))
   (:after
-   (load (init--sync "misc/elfeed/feeds.el") t nil t)
+   (setf elfeed-feeds
+         (let ((filename (init--sync "misc/elfeed/feeds.eld")))
+           (and (file-regular-p filename)
+                (ignore-errors
+                  (with-temp-buffer
+                    (insert-file-contents filename)
+                    (let ((read-circle nil))
+                      (read (current-buffer))))))))
    (add-hook 'elfeed-new-entry-hook
              (elfeed-make-tagger :before "10 days ago"
                                  :remove 'unread)))
