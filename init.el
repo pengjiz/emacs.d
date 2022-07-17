@@ -89,7 +89,7 @@
 
 (progn ; basic customization
   (setf custom-file (init--var "custom.el"))
-  (load custom-file t t t)
+  (load custom-file t nil t)
   (defvar init--org-babel-languages nil "Languages to load for Org Babel.")
 
   (dolist (key '("M-`" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
@@ -1254,7 +1254,7 @@
      (push "/elfeed/db/" recentf-exclude))
    (define-key global-map (kbd "C-c m w") #'elfeed))
   (:after
-   (load (init--sync "misc/elfeed/feeds.el") t t t)
+   (load (init--sync "misc/elfeed/feeds.el") t nil t)
    (add-hook 'elfeed-new-entry-hook
              (elfeed-make-tagger :before "10 days ago"
                                  :remove 'unread)))
