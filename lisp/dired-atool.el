@@ -122,7 +122,7 @@ ARG is directly passed to `dired-get-marked-files'."
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
     (message "%s..." description)
-    (unless (file-exists-p destination)
+    (unless (file-directory-p destination)
       (dired-create-directory destination))
     (let ((default-directory destination))
       (dired-atool--run operation
@@ -154,7 +154,7 @@ ARG is directly passed to `dired-get-marked-files'."
               (file-remote-p destination))
       (user-error "Remote hosts not supported"))
     (message "%s..." description)
-    (unless (file-exists-p destination)
+    (unless (file-directory-p destination)
       (dired-create-directory destination))
     (when (and (file-exists-p target)
                (yes-or-no-p (format "File %s exists; %s it first? "
