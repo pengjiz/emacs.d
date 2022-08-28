@@ -629,10 +629,6 @@
    (setf imenu-auto-rescan t)
    (setf imenu-space-replacement nil)))
 
-(confige beginend
-  :ensure t
-  (:before (beginend-global-mode)))
-
 ;;; Window & frame
 
 (progn ; scroll
