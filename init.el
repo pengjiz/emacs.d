@@ -1770,7 +1770,7 @@
   (:postface
    (confige geiser-mode
      :preload t
-     (:after (define-key geiser-mode-map (kbd "C-c a a") #'run-geiser)))
+     (:after (define-key geiser-mode-map (kbd "C-c a a") #'geiser)))
 
    (confige geiser-repl
      :preload t
