@@ -1917,7 +1917,7 @@
         (define-key map (kbd "C-c a a") #'run-ess-r)
         (define-key map (kbd "C-c a m") #'ess-rdired)
         (define-key map (kbd ";") #'ess-cycle-assign))
-      (let ((map inferior-ess-mode-map))
+      (let ((map inferior-ess-r-mode-map))
         (define-key map (kbd "C-c a m") #'ess-rdired)
         (define-key map (kbd ";") #'ess-cycle-assign))))))
 
