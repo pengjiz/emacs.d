@@ -42,19 +42,16 @@ If nil use value of `fill-column'."
 
 ;;; Prose style
 
-(declare-function shr-fill-line "shr")
-(declare-function face-remap-remove-relative "face-remap")
 (defvar shr-width)
 (defvar shr-use-fonts)
 (defvar shr-internal-width)
 (defvar shr-table-separator-pixel-width)
 (defvar visual-fill-column-width)
 (defvar visual-fill-column-center-text)
+(declare-function face-remap-remove-relative "face-remap")
 
 (defvar-local page-turner--face-remapping-cookies nil
   "Face remapping cookies added.")
-;; NOTE: Here we do not use minor mode because we do not want an interactive
-;; command but merely a function for hooks or advice.
 (defvar-local page-turner--in-prose-styles nil
   "Whether the current buffer is in prose styles.")
 
@@ -143,14 +140,8 @@ If nil use value of `fill-column'."
 
 ;;; EWW
 
-(declare-function eww-readable "eww")
-(declare-function eww-display-html "eww")
-
-;; NOTE: eww-readable does not create new buffer, instead it reuses the current
-;; buffer but replaces contents. Then the buffer will always be in prose styles
-;; afterwards. So here we clear styles before displaying documents.
 (defun page-turner--reset-eww-styles (&rest args)
-  "Reset styles in buffer from ARGS."
+  "Reset styles for EWW buffer in ARGS."
   (let ((buffer (nth 4 args)))
     (when (and (buffer-live-p buffer)
                (buffer-local-value 'page-turner--in-prose-styles buffer))
@@ -168,12 +159,12 @@ If nil use value of `fill-column'."
 (defun page-turner--setup-eww ()
   "Setup EWW integration."
   (with-eval-after-load 'eww
-    (advice-add #'eww-readable :around #'page-turner--disable-shr-filling)
-    (advice-add #'eww-readable :around #'page-turner--set-shr-width)
-    (advice-add #'eww-readable :after #'page-turner--set-prose-styles)
-    (advice-add #'eww-readable :around #'page-turner--adjust-shr-hr-width)
-    (advice-add #'eww-readable :around #'page-turner--avoid-shr-truncating)
-    (advice-add #'eww-display-html :before #'page-turner--reset-eww-styles)))
+    (advice-add 'eww-readable :around #'page-turner--disable-shr-filling)
+    (advice-add 'eww-readable :around #'page-turner--set-shr-width)
+    (advice-add 'eww-readable :after #'page-turner--set-prose-styles)
+    (advice-add 'eww-readable :around #'page-turner--adjust-shr-hr-width)
+    (advice-add 'eww-readable :around #'page-turner--avoid-shr-truncating)
+    (advice-add 'eww-display-html :before #'page-turner--reset-eww-styles)))
 
 ;;; Nov mode
 
@@ -189,23 +180,20 @@ If nil use value of `fill-column'."
 
 ;;; Elfeed
 
-(declare-function elfeed-insert-html "ext:elfeed-show")
-(declare-function elfeed-insert-link "ext:elfeed-show")
-
 (defun page-turner--setup-elfeed ()
   "Setup Elfeed integration."
   (with-eval-after-load 'elfeed-show
-    (advice-add #'elfeed-insert-html :around #'page-turner--disable-shr-filling)
-    (advice-add #'elfeed-insert-html :around #'page-turner--set-shr-width)
-    (advice-add #'elfeed-insert-link :around #'page-turner--set-shr-width)
-    (advice-add #'elfeed-insert-html :around #'page-turner--adjust-shr-hr-width)
-    (advice-add #'elfeed-insert-html :around #'page-turner--avoid-shr-truncating)
+    (advice-add 'elfeed-insert-html :around #'page-turner--disable-shr-filling)
+    (advice-add 'elfeed-insert-html :around #'page-turner--set-shr-width)
+    (advice-add 'elfeed-insert-link :around #'page-turner--set-shr-width)
+    (advice-add 'elfeed-insert-html :around #'page-turner--adjust-shr-hr-width)
+    (advice-add 'elfeed-insert-html :around #'page-turner--avoid-shr-truncating)
     (add-hook 'elfeed-show-mode-hook #'page-turner--set-prose-styles)))
 
 ;;; Markdown mode
 
-(declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 (defvar markdown-live-preview-window-function)
+(declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 
 ;; NOTE: Visual fill column and visual line do not play well with live
 ;; previewing for some unknown reason, so here we only set font and text width.

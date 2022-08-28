@@ -339,7 +339,7 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline--setup-git ()
   "Setup Git integration."
-  (advice-add #'vc-mode-line :after #'liteline--update-git))
+  (advice-add 'vc-mode-line :after #'liteline--update-git))
 
 (liteline-define-segment git
   "Show Git status."
@@ -353,8 +353,6 @@ If DEFAULT is non-nil, set the default value."
 (defvar reftex-toc-include-labels-indicator)
 (defvar reftex-toc-include-index-indicator)
 (defvar reftex-toc-max-level-indicator)
-(declare-function calc-set-mode-line "calc")
-(declare-function reftex-offer-label-menu "reftex-ref")
 
 (defun liteline--get-minor-modes ()
   "Return indicators for certain enabled minor modes."
@@ -431,7 +429,7 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--setup-calc ()
   "Setup Calc."
   (with-eval-after-load 'calc
-    (advice-add #'calc-set-mode-line :after #'liteline--update-calc-extra)))
+    (advice-add 'calc-set-mode-line :after #'liteline--update-calc-extra)))
 
 (defun liteline--setup-reftex ()
   "Setup RefTeX."
@@ -440,7 +438,7 @@ If DEFAULT is non-nil, set the default value."
   (with-eval-after-load 'reftex-toc
     (add-hook 'reftex-toc-mode-hook #'liteline--clear-local-mode-line))
   (with-eval-after-load 'reftex-ref
-    (advice-add #'reftex-offer-label-menu :around
+    (advice-add 'reftex-offer-label-menu :around
                 #'liteline--avoid-reftex-mode-line)))
 
 (defun liteline--setup-conda ()

@@ -121,7 +121,7 @@
   (cl-pushnew auctex-latexmk--command TeX-command-list :test #'equal :key #'car)
   (cl-pushnew "\\.fdb_latexmk" LaTeX-clean-intermediate-suffixes :test #'equal)
   (add-hook 'LaTeX-mode-hook #'auctex-latexmk--set-default)
-  (advice-add #'TeX-command-default :filter-return
+  (advice-add 'TeX-command-default :filter-return
               #'auctex-latexmk--tweak-next-command))
 
 (provide 'auctex-latexmk)

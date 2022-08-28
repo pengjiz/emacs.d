@@ -84,8 +84,8 @@
 
 (defun eshell-extras--setup-command ()
   "Setup command related extensions."
-  (advice-add #'eshell-command-started :before #'eshell-extras--set-process)
-  (advice-add #'eshell-command-finished :after #'eshell-extras--clear-process))
+  (advice-add 'eshell-command-started :before #'eshell-extras--set-process)
+  (advice-add 'eshell-command-finished :after #'eshell-extras--clear-process))
 
 ;;; Prompt
 

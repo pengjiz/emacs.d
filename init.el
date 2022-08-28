@@ -314,9 +314,9 @@
                             lines-tail
                             missing-newline-at-eof)
          whitespace-line-column nil)
-   (advice-add #'whitespace-cleanup :around
+   (advice-add 'whitespace-cleanup :around
                #'init--set-cleanup-whitespace-style)
-   (advice-add #'whitespace-cleanup-region :around
+   (advice-add 'whitespace-cleanup-region :around
                #'init--set-cleanup-whitespace-style)))
 
 (confige whitespace-cleanup-mode
@@ -564,7 +564,7 @@
    (setf (default-value 'visual-fill-column-center-text) t
          (default-value 'visual-fill-column-fringes-outside-margins) nil)
    (setf visual-fill-column-enable-sensible-window-split t)
-   (advice-add #'text-scale-adjust :after #'visual-fill-column-adjust)))
+   (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust)))
 
 (confige page-turner
   :ensure (visual-fill-column) :load t
@@ -890,7 +890,7 @@
                (memq arg '(4 16 64)))
       (make-local-variable 'make-backup-files)
       (setf make-backup-files t)))
-  (advice-add #'save-buffer :before #'init--prepare-for-making-backups)
+  (advice-add 'save-buffer :before #'init--prepare-for-making-backups)
 
   (setf view-read-only t)
   (setf save-abbrevs 'silently)
@@ -1563,16 +1563,14 @@
 (confige git-commit
   :ensure t :preload t
   (:preface
-   (declare-function git-commit-turn-on-auto-fill "ext:git-commit")
    (declare-function git-commit-turn-on-flyspell "ext:git-commit")
-
    (defun init--set-git-commit-fill-column (&rest _)
      "Set fill column for Git commit messages when appropriate."
      (unless (local-variable-p 'fill-column)
        (setf fill-column 72))))
   (:after
    (setf git-commit-summary-max-length 50)
-   (advice-add #'git-commit-turn-on-auto-fill :before
+   (advice-add 'git-commit-turn-on-auto-fill :before
                #'init--set-git-commit-fill-column)
    (add-hook 'git-commit-setup-hook #'git-commit-turn-on-flyspell)))
 
@@ -2239,7 +2237,6 @@
 (confige ledger-mode
   :ensure t :preload t
   (:preface
-   (declare-function ledger-schedule-create-auto-buffer "ext:ledger-schedule")
    (defun init--avoid-flycheck-for-ledger-schedule (fn &rest args)
      "Apply FN on ARGS but avoid activating Flycheck."
      (cl-letf (((symbol-function 'flycheck-mode) #'ignore))
@@ -2261,7 +2258,7 @@
             ("Expenses (weekly)" . "register Expenses -W")
             ("Expenses (monthly)" . "register Expenses -M")
             ("Cash flow (this month)" . "balance Income Expenses --invert -p %(month)"))))
-   (advice-add #'ledger-schedule-create-auto-buffer :around
+   (advice-add 'ledger-schedule-create-auto-buffer :around
                #'init--avoid-flycheck-for-ledger-schedule)))
 
 (confige flycheck-ledger
