@@ -1466,7 +1466,7 @@
 (confige rmsbolt
   :ensure t :preload t
   (:before (define-key global-map (kbd "C-c c r") #'rmsbolt-mode))
-  (:after (setf rmsbolt-automatic-recompile nil)))
+  (:after (setf rmsbolt-automatic-recompile 'on-save)))
 
 ;;; Lint
 
