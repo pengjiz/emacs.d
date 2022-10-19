@@ -667,7 +667,6 @@
                         "*TeX Help*"
                         "*Anaconda*"
                         "*tide-documentation*"
-                        "*Racer Help*"
                         "*cider-doc*"
                         "*cider-inspect*"
                         "*Geiser documentation*"))
@@ -1793,11 +1792,6 @@
 
 (confige rust-mode
   :ensure t)
-
-(confige racer
-  :ensure t :preload t
-  (:before (add-hook 'rust-mode-hook #'racer-mode))
-  (:after (setf racer-complete-insert-argument-placeholders nil)))
 
 (confige flycheck-rust
   :ensure t
