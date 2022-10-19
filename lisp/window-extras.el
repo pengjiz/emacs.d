@@ -84,6 +84,19 @@
   (dolist (hook '(ediff-quit-hook ediff-suspend-hook))
     (add-hook hook #'window-extras--restore-pre-ediff-configuration t)))
 
+;; Man
+(defun window-extras--add-man-reuse-hint (buffer)
+  "Add a Man window reuse hint in BUFFER when appropriate."
+  (with-current-buffer buffer
+    (unless (derived-mode-p 'Man-mode)
+      (setf major-mode 'Man-mode))))
+
+(defun window-extras--setup-man ()
+  "Setup Man integration."
+  (with-eval-after-load 'man
+    (advice-add 'Man-notify-when-ready :before
+                #'window-extras--add-man-reuse-hint)))
+
 ;;; Entry point
 
 (defun window-extras-setup ()
@@ -92,7 +105,8 @@
   (window-extras--setup-org)
   (window-extras--setup-calc)
   (window-extras--setup-ielm)
-  (window-extras--setup-ediff))
+  (window-extras--setup-ediff)
+  (window-extras--setup-man))
 
 (provide 'window-extras)
 ;;; window-extras.el ends here
