@@ -824,8 +824,7 @@
 (progn ; special buffers
   (defun init--protect-special-buffers ()
     "Protect special buffers from being killed."
-    (or (not (member (buffer-name (current-buffer))
-                     '("*scratch*" "*Messages*")))
+    (or (not (member (buffer-name) '("*scratch*" "*Messages*")))
         (ignore (bury-buffer))))
   (add-hook 'kill-buffer-query-functions #'init--protect-special-buffers))
 
@@ -1811,6 +1810,13 @@
 (confige haskell-mode
   :ensure t :preload t
   (:after
+   (setf haskell-completing-read-function #'completing-read)
+   (setf haskell-interactive-popup-errors nil
+         haskell-interactive-mode-read-only nil
+         haskell-interactive-prompt-read-only nil)
+   (setf haskell-process-auto-import-loaded-modules t
+         haskell-process-suggest-remove-import-lines t
+         haskell-process-show-overlays nil)
    (dolist (key '("C-c C-l" "C-c C-b" "C-c C-t" "C-c C-i"))
      (define-key haskell-mode-map (kbd key) nil)))
   (:postface
@@ -1820,14 +1826,6 @@
       (setf interactive-haskell-mode-map (make-sparse-keymap))
       (add-hook 'haskell-mode-hook #'interactive-haskell-mode))
      (:after
-      (setf haskell-completing-read-function #'completing-read)
-      (setf haskell-interactive-popup-errors nil
-            haskell-interactive-mode-read-only nil
-            haskell-interactive-prompt-read-only nil)
-      (setf haskell-process-auto-import-loaded-modules t
-            haskell-process-suggest-remove-import-lines t
-            haskell-process-show-overlays nil)
-
       (let ((map interactive-haskell-mode-map))
         (define-key map (kbd "C-c a a") #'haskell-interactive-bring)
         (define-key map (kbd "C-c C-l") #'haskell-process-load-file)
@@ -2233,10 +2231,11 @@
 (confige ledger-mode
   :ensure t :preload t
   (:preface
-   (defun init--avoid-flycheck-for-ledger-schedule (fn &rest args)
-     "Apply FN on ARGS but avoid activating Flycheck."
-     (cl-letf (((symbol-function 'flycheck-mode) #'ignore))
-       (apply fn args))))
+   (defun init--early-setup-ledger-mode ()
+     (when (and (derived-mode-p 'ledger-mode)
+                (equal (buffer-name) ledger-schedule-buffer-name))
+       (make-local-variable 'ledger-mode-hook)
+       (remove-hook 'ledger-mode-hook #'flycheck-mode t))))
   (:after
    (setf ledger-default-date-format ledger-iso-date-format
          ledger-post-amount-alignment-at :decimal
@@ -2254,8 +2253,7 @@
             ("Expenses (weekly)" . "register Expenses -W")
             ("Expenses (monthly)" . "register Expenses -M")
             ("Cash flow (this month)" . "balance Income Expenses --invert -p %(month)"))))
-   (advice-add 'ledger-schedule-create-auto-buffer :around
-               #'init--avoid-flycheck-for-ledger-schedule)))
+   (add-hook 'change-major-mode-after-body-hook #'init--early-setup-ledger-mode)))
 
 (confige flycheck-ledger
   :ensure t :preload t
@@ -2462,11 +2460,13 @@
 (confige yaml-mode
   :ensure t
   (:preface
-   (defun init--setup-yaml-mode ()
-     (flyspell-mode 0)
-     (auto-fill-mode 0)
-     (abbrev-mode 0)))
-  (:before (add-hook 'yaml-mode-hook #'init--setup-yaml-mode)))
+   (defun init--early-setup-yaml-mode ()
+     (when (derived-mode-p 'yaml-mode)
+       (make-local-variable 'text-mode-hook)
+       (dolist (fn '(flyspell-mode auto-fill-mode abbrev-mode))
+         (remove-hook 'text-mode-hook fn t)))))
+  (:after
+   (add-hook 'change-major-mode-after-body-hook #'init--early-setup-yaml-mode)))
 
 (confige csv-mode
   :ensure t)
