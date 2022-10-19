@@ -367,7 +367,6 @@
      (when-let* ((backends (cond ((derived-mode-p 'emacs-lisp-mode
                                                   'clojure-mode
                                                   'scheme-mode
-                                                  'rust-mode
                                                   'sh-mode
                                                   'css-mode
                                                   'latex-mode
@@ -375,6 +374,8 @@
                                   '(company-capf))
                                  ((derived-mode-p 'c-mode 'c++-mode)
                                   '(company-c-headers company-etags))
+                                 ((derived-mode-p 'rust-mode)
+                                  '(company-etags))
                                  ((derived-mode-p 'js2-mode 'typescript-mode)
                                   '(company-tide))
                                  ((derived-mode-p 'python-mode)
@@ -1819,6 +1820,7 @@
       (setf interactive-haskell-mode-map (make-sparse-keymap))
       (add-hook 'haskell-mode-hook #'interactive-haskell-mode))
      (:after
+      (setf haskell-completing-read-function #'completing-read)
       (setf haskell-interactive-popup-errors nil
             haskell-interactive-mode-read-only nil
             haskell-interactive-prompt-read-only nil)
