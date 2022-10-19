@@ -531,6 +531,9 @@
    (dolist (hook '(compilation-mode-hook help-mode-hook))
      (add-hook hook #'page-break-lines-mode))))
 
+(confige ansi-color
+  (:before (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)))
+
 (confige rainbow-delimiters
   :ensure t
   (:before (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)))
