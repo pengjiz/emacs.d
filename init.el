@@ -1445,14 +1445,10 @@
 
 (confige compile
   :preload t
-  (:preface (autoload 'recompile "compile" nil t))
-  (:before
-   (define-key global-map (kbd "C-c c c") #'compile)
-   (define-key global-map (kbd "C-c c C") #'recompile))
+  (:before (define-key global-map (kbd "C-c c c") #'compile))
   (:after
-   (setf compilation-ask-about-save nil
-         compilation-always-kill t)
-   (setf compilation-scroll-output 'first-error)))
+   (setf (default-value 'compile-command) "make")
+   (setf compilation-ask-about-save nil)))
 
 (confige firestarter
   :ensure t :preload t
