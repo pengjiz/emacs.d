@@ -313,7 +313,7 @@
                             trailing
                             lines-tail
                             missing-newline-at-eof)
-         whitespace-line-column nil)
+         (default-value 'whitespace-line-column) nil)
    (advice-add 'whitespace-cleanup :around
                #'init--set-cleanup-whitespace-style)
    (advice-add 'whitespace-cleanup-region :around
@@ -482,7 +482,7 @@
    (setf auto-insert-directory (init--etc "insert/")
          auto-insert-alist nil)
    (define-key global-map (kbd "C-c e t") #'auto-insert))
-  (:after (setf auto-insert t)))
+  (:after (setf (default-value 'auto-insert) t)))
 
 ;;; Editing visual
 
@@ -928,7 +928,8 @@
 (confige time-stamp
   :preload t
   (:before (add-hook 'before-save-hook #'time-stamp))
-  (:after (setf time-stamp-format "%Y-%02m-%02dT%02H:%02M:%02S%:z")))
+  (:after
+   (setf (default-value 'time-stamp-format) "%Y-%02m-%02dT%02H:%02M:%02S%:z")))
 
 (confige tramp
   :preload t
