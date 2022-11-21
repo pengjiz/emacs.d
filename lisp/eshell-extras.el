@@ -127,7 +127,7 @@ Return the first line of output if any. Otherwise return nil."
          (branch (eshell-extras--get-git-branch))
          (status (and branch (eshell-extras--get-git-status)))
          (separator (if (file-remote-p default-directory) "Λ" "λ"))
-         (exit (if (zerop eshell-last-command-status)
+         (exit (if (eshell-exit-success-p)
                    'eshell-extras-prompt-exit-success
                  'eshell-extras-prompt-exit-error)))
     (concat

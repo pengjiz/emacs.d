@@ -235,11 +235,6 @@
    (define-key completion-list-mode-map (kbd "C-<return>")
      #'simple-extras-choose-completion-no-exit)))
 
-(progn ; indentation
-  (setf (default-value 'indent-tabs-mode) nil
-        (default-value 'tab-width) 8)
-  (setf tab-always-indent t))
-
 (confige paren
   (:before (setf show-paren-when-point-inside-paren t)))
 
@@ -278,9 +273,9 @@
 
 ;;; Whitespace
 
-(progn ; general whitespace
-  (setf (default-value 'fill-column) 80
-        word-wrap-by-category t)
+(progn ; basic whitespace
+  (setf (default-value 'indent-tabs-mode) nil)
+  (setf (default-value 'fill-column) 80)
   (setf sentence-end-double-space nil))
 
 (confige whitespace
@@ -576,9 +571,10 @@
    (setf page-turner-prose-family "DejaVu Serif")
    (page-turner-setup)))
 
-;;; Multilingual environment
+;;; Multilingual
 
-(progn ; mule-cmds
+(progn ; basic multilingual
+  (setf word-wrap-by-category t)
   (setf default-input-method "TeX"))
 
 (confige kkc
