@@ -1509,17 +1509,21 @@
    (dolist (hook '(text-mode-hook bibtex-mode-hook))
      (add-hook hook #'flyspell-mode))
    (add-hook 'prog-mode-hook #'flyspell-prog-mode)
-   (define-key global-map (kbd "C-c t s") #'flyspell-mode)
-   (define-key global-map (kbd "C-c x s") #'flyspell-region))
+   (define-key global-map (kbd "C-c t s") #'flyspell-mode))
   (:after
    (setf flyspell-abbrev-p t
-         flyspell-use-global-abbrev-table-p t)))
+         flyspell-use-global-abbrev-table-p t)
+   (define-key flyspell-mode-map (kbd "C-c $ $") #'flyspell-region)))
 
 (confige flyspell-correct
   :ensure t
   (:before
    (with-eval-after-load 'flyspell
-     (define-key flyspell-mode-map (kbd "M-$") #'flyspell-correct-at-point))))
+     (let ((map flyspell-mode-map))
+       (define-key map (kbd "M-$") #'flyspell-correct-at-point)
+       (define-key map (kbd "C-c $ c") #'flyspell-correct-at-point)
+       (define-key map (kbd "C-c $ p") #'flyspell-correct-previous)
+       (define-key map (kbd "C-c $ n") #'flyspell-correct-next)))))
 
 ;;; VCS
 
