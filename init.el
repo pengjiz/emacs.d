@@ -1275,8 +1275,7 @@
 (confige doc-view
   :preload t
   (:after
-   (setf doc-view-continuous t)
-   (setf doc-view-resolution 300)
+   (setf doc-view-resolution 150)
    (define-key doc-view-mode-map (kbd "&") #'browse-url-of-file)))
 
 (confige nov
