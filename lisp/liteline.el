@@ -191,34 +191,34 @@ If DEFAULT is non-nil, set the default value."
 ;;; Segment
 
 ;; Transient information
-(declare-function swsw-format-id "ext:swsw")
+(declare-function wincom-format-id "ext:window-commander")
 
-(defvar liteline--swsw-active nil "Whether swsw is active.")
+(defvar liteline--wincom-active nil "Whether Window Commander is active.")
 
-(defun liteline--swsw-show ()
-  "Show window indicators for swsw."
-  (setf liteline--swsw-active t)
+(defun liteline--wincom-show ()
+  "Show indicators for Window Commander."
+  (setf liteline--wincom-active t)
   (force-mode-line-update t))
 
-(defun liteline--swsw-hide ()
-  "Hide window indicators for swsw."
-  (setf liteline--swsw-active nil)
+(defun liteline--wincom-hide ()
+  "Hide indicators for Window Commander."
+  (setf liteline--wincom-active nil)
   (force-mode-line-update t))
 
-(defun liteline--prepare-swsw-display (&rest _)
-  "Prepare window indicator display appropriately for swsw."
-  (cond ((bound-and-true-p swsw-mode)
-         (add-hook 'swsw-before-command-hook #'liteline--swsw-show)
-         (add-hook 'swsw-after-command-hook #'liteline--swsw-hide))
-        ((boundp 'swsw-mode)
-         (remove-hook 'swsw-before-command-hook #'liteline--swsw-show)
-         (remove-hook 'swsw-after-command-hook #'liteline--swsw-hide))))
+(defun liteline--prepare-wincom-display (&rest _)
+  "Prepare indicator display appropriately for Window Commander."
+  (cond ((bound-and-true-p wincom-mode)
+         (add-hook 'wincom-before-command-hook #'liteline--wincom-show)
+         (add-hook 'wincom-after-command-hook #'liteline--wincom-hide))
+        ((boundp 'wincom-mode)
+         (remove-hook 'wincom-before-command-hook #'liteline--wincom-show)
+         (remove-hook 'wincom-after-command-hook #'liteline--wincom-hide))))
 
 (defun liteline--get-window-indicator ()
   "Return an indicator for window selection."
-  (and (bound-and-true-p swsw-mode)
-       liteline--swsw-active
-       (swsw-format-id (selected-window))))
+  (and (bound-and-true-p wincom-mode)
+       liteline--wincom-active
+       (wincom-format-id (selected-window))))
 
 (defun liteline--get-editing-depth ()
   "Return editing depth when in recursive editing."
@@ -230,11 +230,11 @@ If DEFAULT is non-nil, set the default value."
   "Return an indicator when defining keyboard macros."
   (and defining-kbd-macro " M>"))
 
-(defun liteline--setup-swsw ()
-  "Setup swsw."
-  (with-eval-after-load 'swsw
-    (setf (symbol-function 'swsw-mode-line-conditional-display-function)
-          #'liteline--prepare-swsw-display)))
+(defun liteline--setup-wincom ()
+  "Setup Window Commander."
+  (with-eval-after-load 'window-commander
+    (setf (symbol-function 'wincom-display-mode-line-conditional)
+          #'liteline--prepare-wincom-display)))
 
 (liteline-define-segment transient
   "Show transient information."
@@ -532,7 +532,7 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline-setup ()
   "Setup mode line."
   (liteline--setup-active-window)
-  (liteline--setup-swsw)
+  (liteline--setup-wincom)
   (liteline--setup-git)
   (liteline--setup-calc)
   (liteline--setup-reftex)

@@ -132,15 +132,15 @@
 
 (confige liteline
   (:preface
-   (defvar swsw-id-format)
+   (defvar wincom-id-format)
    (defvar calendar-mode-line-format)
    (defvar 2C-mode-line-format)
    (autoload 'liteline-setup "liteline"))
   (:before (add-hook 'after-init-hook #'liteline-setup))
   (:after
    (setf mode-line-position-column-line-format '(" %l:%c"))
-   (with-eval-after-load 'swsw
-     (setf swsw-id-format " #%s"))
+   (with-eval-after-load 'window-commander
+     (setf wincom-id-format " #%s"))
    (with-eval-after-load 'calendar
      (setf calendar-mode-line-format nil
            (symbol-function 'calendar-set-mode-line) #'init-ignore))
@@ -767,18 +767,18 @@
   :load t
   (:after (window-extras-setup)))
 
-(confige swsw
+(confige window-commander
   :ensure t :preload t
   (:preface
-   (declare-function swsw-mode-line-conditional-display-function "ext:swsw")
-   (declare-function swsw-select "ext:swsw"))
+   (declare-function wincom-display-mode-line-conditional "ext:window-commander")
+   (declare-function wincom-select "ext:window-commander"))
   (:before
-   (setf swsw-display-lighter nil)
-   (setf swsw-mode-map (make-sparse-keymap))
-   (add-hook 'after-init-hook #'swsw-mode t))
+   (setf wincom-display-lighter nil)
+   (setf wincom-mode-map (make-sparse-keymap))
+   (add-hook 'after-init-hook #'wincom-mode t))
   (:after
-   (add-hook 'swsw-mode-hook #'swsw-mode-line-conditional-display-function)
-   (define-key swsw-mode-map (kbd "M-o") #'swsw-select)))
+   (add-hook 'wincom-mode-hook #'wincom-display-mode-line-conditional)
+   (define-key wincom-mode-map (kbd "M-o") #'wincom-select)))
 
 (confige tab-bar
   (:before
