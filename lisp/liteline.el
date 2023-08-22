@@ -20,8 +20,7 @@
   :group 'mode-line)
 
 (defcustom liteline-minor-mode-indicator-alist
-  '((typo-mode . "t")
-    (abbrev-mode . "r")
+  '((abbrev-mode . "r")
     (auto-fill-function . "q")
     (visual-line-mode . "v")
     (visible-mode . "p")

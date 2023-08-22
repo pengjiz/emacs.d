@@ -7,7 +7,6 @@
 ;;; Code:
 
 (require 'ispell)
-(require 'typo nil t)
 
 ;;; Option
 
@@ -22,8 +21,7 @@
 
 (defcustom change-language-functions
   '(change-language-change-ispell-dictionary
-    change-language-change-input-method
-    change-language-change-typo-language)
+    change-language-change-input-method)
   "Functions to call when changing language."
   :type 'hook)
 
@@ -37,13 +35,6 @@
 (defcustom change-language-input-method-alist
   '(("German" . "german-postfix"))
   "Input methods for languages."
-  :type '(alist :key-type string
-                :value-type string))
-
-(defcustom change-language-typo-language-alist
-  '(("English" . "English")
-    ("German" . "German"))
-  "Language names used by typo for languages."
   :type '(alist :key-type string
                 :value-type string))
 
@@ -83,15 +74,6 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
   (let* ((methods change-language-input-method-alist)
          (method (and language (cdr (assoc language methods)))))
     (activate-input-method method)))
-
-;;; Typography style
-
-(defun change-language-change-typo-language (language)
-  "Change to the typo language for LANGUAGE."
-  (when (fboundp 'typo-change-language)
-    (let* ((names change-language-typo-language-alist)
-           (name (and language (cdr (assoc language names)))))
-      (typo-change-language (or name (default-value 'typo-language))))))
 
 (provide 'change-language)
 ;;; change-language.el ends here

@@ -581,13 +581,6 @@
   :preload t
   (:before (setf kkc-init-file-name (init--var "kkcrc"))))
 
-(confige typo
-  :ensure t
-  (:preface (autoload 'typo-change-language "typo" nil t))
-  (:before
-   (define-key global-map (kbd "C-c t t") #'typo-mode)
-   (define-key global-map (kbd "C-c t T") #'typo-change-language)))
-
 (confige change-language
   (:preface (autoload 'change-language "change-language" nil t))
   (:before (define-key global-map (kbd "C-c t i") #'change-language)))
