@@ -200,7 +200,6 @@
      (add-hook hook #'auto-fill-mode))
 
    (let ((map global-map))
-     (define-key map [remap just-one-space] #'cycle-spacing)
      (define-key map [remap downcase-word] #'downcase-dwim)
      (define-key map [remap capitalize-word] #'capitalize-dwim)
      (define-key map [remap upcase-word] #'upcase-dwim)
@@ -217,23 +216,18 @@
    (setf async-shell-command-display-buffer nil)
 
    (define-key minibuffer-local-completion-map
-     (kbd "M-`") #'switch-to-completions)
+               (kbd "M-`") #'switch-to-completions)
    (define-key completion-in-region-mode-map
-     (kbd "M-`") #'switch-to-completions)
+               (kbd "M-`") #'switch-to-completions)
    (define-key completion-list-mode-map
-     (kbd "M-`") #'delete-completion-window)))
+               (kbd "M-`") #'delete-completion-window)))
 
 (confige simple-extras
   :load t
   (:after
    (setf mail-user-agent 'simple-extras-mail-user-agent)
    (add-hook 'prog-mode-hook #'simple-extras-auto-fill-comments-mode)
-
-   (define-key global-map (kbd "M-z") #'simple-extras-unfill-paragraph)
-   (define-key completion-in-region-mode-map (kbd "C-<tab>")
-     #'simple-extras-force-completion-at-point)
-   (define-key completion-list-mode-map (kbd "C-<return>")
-     #'simple-extras-choose-completion-no-exit)))
+   (define-key global-map (kbd "M-z") #'simple-extras-unfill-paragraph)))
 
 (confige paren
   (:before (setf show-paren-when-point-inside-paren t)))
@@ -332,18 +326,15 @@
   (:after
    (setf read-file-name-completion-ignore-case t)
    (setf completion-styles '(basic substring initials partial-completion))
-   (setf completions-group t)
-   (define-key minibuffer-local-completion-map
-     (kbd "C-<tab>") #'minibuffer-force-complete)))
+   (setf completion-auto-help 'visible)
+   (setf completions-group t)))
 
 (confige mb-depth
   (:before (minibuffer-depth-indicate-mode)))
 
 (confige minibuf-eldef
   :preload t
-  (:before
-   (setf minibuffer-eldef-shorten-default t)
-   (minibuffer-electric-default-mode)))
+  (:before (minibuffer-electric-default-mode)))
 
 (confige savehist
   :preload t
@@ -781,9 +772,7 @@
    (define-key wincom-mode-map (kbd "M-o") #'wincom-select)))
 
 (confige tab-bar
-  (:before
-   (add-hook 'after-init-hook #'tab-bar-history-mode)
-   (add-hook 'after-init-hook #'tab-bar-mode))
+  (:before (add-hook 'window-setup-hook #'tab-bar-mode))
   (:after
    (setf tab-bar-new-tab-choice "*scratch*")
    (setf tab-bar-close-button-show nil
@@ -791,12 +780,14 @@
                           tab-bar-separator
                           tab-bar-format-align-right
                           tab-bar-format-global))
+   (tab-bar-history-mode)
 
    (add-hook 'tab-bar-mode-hook #'tab-bar--undefine-keys)
    (let ((map global-map))
      (define-key map (kbd "C-c s s") #'tab-bar-switch-to-recent-tab)
      (define-key map (kbd "C-c s n") #'tab-bar-switch-to-next-tab)
-     (define-key map (kbd "C-c s p") #'tab-bar-switch-to-prev-tab)
+     (define-key map (kbd "C-c s p") #'tab-bar-switch-to-prev-tab))
+   (let ((map tab-bar-history-mode-map))
      (define-key map (kbd "C-c s f") #'tab-bar-history-forward)
      (define-key map (kbd "C-c s b") #'tab-bar-history-back))))
 
@@ -900,11 +891,6 @@
      (define-key map (kbd "C-c f V") #'add-file-local-variable-prop-line)
      (define-key map (kbd "C-c f d") #'add-dir-local-variable))))
 
-(confige files-extras
-  (:preface (autoload 'files-extras-find-recent-file "files-extras" nil t))
-  (:before
-   (define-key global-map (kbd "C-c f r") #'files-extras-find-recent-file)))
-
 (confige ffap
   :preload t
   (:after (setf ffap-machine-p-known 'accept)))
@@ -944,7 +930,8 @@
   (:after
    (setf recentf-max-saved-items 100)
    (setf recentf-exclude '("/elpa/" "/var/" "/\\.git/" "/Trash/"))
-   (recentf-mode)))
+   (recentf-mode)
+   (define-key recentf-mode-map (kbd "C-c f r") #'recentf-open)))
 
 (confige bookmark
   :preload t
@@ -969,7 +956,7 @@
    (setf dired-recursive-copies 'always)
    (setf dired-dwim-target t)
    (setf dired-garbage-files-regexp (rx "." (or "bak" "orig" "old") eos))
-   (dolist (key '("c" "Z" "P"))
+   (dolist (key '("c" "Z" "P" "N" "I"))
      (define-key dired-mode-map (kbd key) nil)))
   (:postface
    (confige dired-aux
@@ -980,8 +967,6 @@
      :preload t
      (:preface (declare-function dired-omit-mode "dired-x"))
      (:before
-      (setf dired-bind-info nil
-            dired-bind-man nil)
       (with-eval-after-load 'dired
         (add-hook 'dired-mode-hook #'dired-omit-mode)
         (define-key dired-mode-map (kbd ")") #'dired-omit-mode)))
@@ -1024,9 +1009,7 @@
   :preload t
   (:before
    (setf image-dired-dir (init--var "image-dired/")
-         image-dired-db-file (init--var "image-dired/db")
-         image-dired-gallery-dir (init--var "image-dired/gallery/")
-         image-dired-temp-image-file (init--var "image-dired/temp")
+         image-dired-tags-db-file (init--var "image-dired/db")
          image-dired-temp-rotate-image-file (init--var "image-dired/rotate-temp"))))
 
 (confige disk-usage
@@ -1125,7 +1108,9 @@
      (define-key map (kbd "C-c a a") #'comint-send-eof))))
 
 (confige proced
-  (:before (define-key global-map (kbd "C-c a L") #'proced)))
+  :preload t
+  (:before (define-key global-map (kbd "C-c a L") #'proced))
+  (:after (setf proced-enable-color-flag t)))
 
 (confige proced-narrow
   :ensure t
@@ -1153,6 +1138,7 @@
                                   eshell-basic
                                   eshell-cmpl
                                   eshell-dirs
+                                  eshell-extpipe
                                   eshell-glob
                                   eshell-hist
                                   eshell-ls
@@ -1223,7 +1209,7 @@
    (define-key global-map (kbd "C-c t A") #'goto-address-prog-mode))
   (:after
    (define-key goto-address-highlight-keymap
-     (kbd "C-c C-o") #'goto-address-at-point)))
+               (kbd "C-c C-o") #'goto-address-at-point)))
 
 (confige eww
   :preload t
@@ -1595,10 +1581,6 @@
    (setf sh-basic-offset 2)
    (define-key sh-mode-map (kbd "C-c a a") #'sh-show-shell)))
 
-(confige lisp-mode
-  (:before
-   (cl-pushnew '("\\.eld\\'" . lisp-data-mode) auto-mode-alist :test #'equal)))
-
 (confige lua-mode
   :ensure t :preload t
   (:after (setf lua-indent-level 2)))
@@ -1947,8 +1929,7 @@
 (confige js2-mode
   :ensure t :preload t
   (:before
-   (cl-pushnew '("\\.jsm?\\'" . js2-mode) auto-mode-alist :test #'equal)
-   (cl-pushnew '("node" . js2-mode) interpreter-mode-alist :test #'equal))
+   (cl-pushnew '(js-mode . js2-mode) major-mode-remap-alist :test #'equal))
   (:after
    (setf js2-skip-preprocessor-directives t)
    (setf js2-highlight-level 3
@@ -2272,7 +2253,7 @@
 
    (setf org-adapt-indentation nil)
    (setf org-special-ctrl-a/e t
-         org-catch-invisible-edits 'show-and-error)
+         org-fold-catch-invisible-edits 'show-and-error)
    (setf org-startup-folded 'content)
    (setf org-image-actual-width '(300))
    (setf org-highlight-latex-and-related '(latex entities))

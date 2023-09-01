@@ -168,26 +168,6 @@ If DEFAULT is non-nil, set the default value."
           mode-line-format)
         (list "%e" (liteline--prepare-mode-line name))))
 
-;; Active window
-(defvar liteline--active-window nil "Current active window.")
-
-(defun liteline--set-active-window (&rest _)
-  "Set the current active window."
-  (let ((window (selected-window)))
-    (setf liteline--active-window
-          (if (minibuffer-window-active-p window)
-              (minibuffer-selected-window)
-            window))))
-
-(defun liteline-window-active-p ()
-  "Return t if the selected window is active."
-  (eq (selected-window) liteline--active-window))
-
-(defun liteline--setup-active-window ()
-  "Setup active window detection."
-  (liteline--set-active-window)
-  (add-hook 'pre-redisplay-functions #'liteline--set-active-window))
-
 ;;; Segment
 
 ;; Transient information
@@ -238,7 +218,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment transient
   "Show transient information."
-  (let ((active (liteline-window-active-p))
+  (let ((active (mode-line-window-selected-p))
         (indicators nil))
     (dolist (indicator (list (liteline--get-window-indicator)
                              (and active (liteline--get-editing-depth))
@@ -342,7 +322,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment git
   "Show Git status."
-  (and (liteline-window-active-p)
+  (and (mode-line-window-selected-p)
        liteline--git
        '(" " liteline--git " ")))
 
@@ -506,14 +486,14 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment flycheck
   "Show Flycheck status."
-  (and (liteline-window-active-p)
+  (and (mode-line-window-selected-p)
        liteline--flycheck
        '(" " liteline--flycheck " ")))
 
 ;; Misc information
 (liteline-define-segment misc
   "Show misc information."
-  (when (liteline-window-active-p)
+  (when (mode-line-window-selected-p)
     (cl-case major-mode
       ((Man-mode)
        '(" " Man-page-mode-string " "))
@@ -531,7 +511,6 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline-setup ()
   "Setup mode line."
-  (liteline--setup-active-window)
   (liteline--setup-wincom)
   (liteline--setup-git)
   (liteline--setup-calc)

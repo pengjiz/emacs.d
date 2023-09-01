@@ -81,7 +81,6 @@
 ;;; Activate and deactivate environments
 
 (defvar python-shell-virtualenv-root)
-(defvar eshell-path-env)
 
 (defvar conda--current-environment-spec nil
   "Spec of the current environment.")
@@ -155,8 +154,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
         (setenv "PATH" (conda--path-add .bin (getenv "PATH")))
         (setenv "VIRTUAL_ENV" .root)
         (setenv "CONDA_PREFIX" .root)
-        (setf (default-value 'eshell-path-env) (getenv "PATH")
-              python-shell-virtualenv-root (file-name-as-directory .root)))
+        (setf python-shell-virtualenv-root (file-name-as-directory .root)))
 
       (dolist (buffer (buffer-list))
         (with-current-buffer buffer
@@ -166,9 +164,6 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
             (setenv "PATH" (conda--path-add .bin (getenv "PATH")))
             (setenv "VIRTUAL_ENV" .root)
             (setenv "CONDA_PREFIX" .root))
-          (when (and (eq major-mode 'eshell-mode)
-                     (not (file-remote-p default-directory)))
-            (setf eshell-path-env (getenv "PATH")))
           (conda--prevent-local-virtualenv)
           (when (derived-mode-p 'org-mode 'python-mode)
             (conda--unset-local-virtualenv)))))
@@ -198,8 +193,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
       (setenv "PATH" (conda--path-remove .bin (getenv "PATH")))
       (setenv "VIRTUAL_ENV" nil)
       (setenv "CONDA_PREFIX" nil)
-      (setf (default-value 'eshell-path-env) (getenv "PATH")
-            python-shell-virtualenv-root nil))
+      (setf python-shell-virtualenv-root nil))
 
     (dolist (buffer (buffer-list))
       (with-current-buffer buffer
@@ -208,10 +202,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
         (when (local-variable-p 'process-environment)
           (setenv "PATH" (conda--path-remove .bin (getenv "PATH")))
           (setenv "VIRTUAL_ENV" nil)
-          (setenv "CONDA_PREFIX" nil))
-        (when (and (eq major-mode 'eshell-mode)
-                   (not (file-remote-p default-directory)))
-          (setf eshell-path-env (getenv "PATH")))))
+          (setenv "CONDA_PREFIX" nil))))
 
     (run-hooks 'conda-post-deactivate-hook)
     (when show-message

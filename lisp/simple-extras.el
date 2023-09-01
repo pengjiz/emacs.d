@@ -6,9 +6,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl-lib))
-
 ;;; Fill and unfill
 
 (define-minor-mode simple-extras-auto-fill-comments-mode
@@ -28,22 +25,6 @@ REGION is directly passed to `fill-paragraph'."
   (interactive (list t))
   (let ((fill-column (point-max)))
     (fill-paragraph nil region)))
-
-;;; Completion
-
-(defun simple-extras-force-completion-at-point ()
-  "Force completion on the text around point."
-  (interactive)
-  (minibuffer-hide-completions)
-  (cl-letf (((symbol-function 'completion--cycle-threshold) #'always))
-    (completion-at-point)))
-
-(defun simple-extras-choose-completion-no-exit (&optional event)
-  "Choose the completion at point without exiting the minibuffer.
-EVENT is directly passed to `choose-completion'."
-  (interactive (list last-nonmenu-event))
-  (let ((completion-no-auto-exit t))
-    (choose-completion event)))
 
 ;;; Mail
 
