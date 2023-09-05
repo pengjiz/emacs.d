@@ -62,7 +62,7 @@ When SHOW-MESSAGE is non-nil, display helpful messages."
 ;;; Ispell
 
 (defun change-language-change-ispell-dictionary (language)
-  "Change to the Ispell dictionary for LANGUAGE."
+  "Change to the ispell dictionary for LANGUAGE."
   (let* ((dictionaries change-language-ispell-dictionary-alist)
          (dictionary (and language (cdr (assoc language dictionaries)))))
     (ispell-change-dictionary (or dictionary "default"))))

@@ -92,7 +92,7 @@
   (load custom-file t nil t)
   (defvar init--org-babel-languages nil "Languages to load for Org Babel.")
 
-  (dolist (key '("M-`" "M-$" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
+  (dolist (key '("M-`" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
                  "C-x m" "C-x 4 m" "C-x 5 m"))
     (define-key global-map (kbd key) nil))
 
@@ -135,7 +135,12 @@
    (defvar wincom-id-format)
    (defvar calendar-mode-line-format)
    (defvar 2C-mode-line-format)
-   (autoload 'liteline-setup "liteline"))
+   (autoload 'liteline-setup "liteline")
+
+   (defun init--avoid-ispell-mode-line (buffer)
+     "Unset ispell mode line in BUFFER."
+     (with-current-buffer buffer
+       (kill-local-variable 'mode-line-format))))
   (:before (add-hook 'after-init-hook #'liteline-setup))
   (:after
    (setf mode-line-position-column-line-format '(" %l:%c"))
@@ -147,7 +152,10 @@
    (with-eval-after-load 'two-column
      (setf 2C-mode-line-format (default-value 'mode-line-format)))
    (with-eval-after-load 'ediff-wind
-     (setf (symbol-function 'ediff-refresh-mode-lines) #'init-ignore))))
+     (setf (symbol-function 'ediff-refresh-mode-lines) #'init-ignore))
+   (with-eval-after-load 'ispell
+     (advice-add 'ispell-display-buffer :before
+                 #'init--avoid-ispell-mode-line))))
 
 (confige transient
   :preload t
@@ -1491,17 +1499,7 @@
   (:after
    (setf flyspell-abbrev-p t
          flyspell-use-global-abbrev-table-p t)
-   (define-key flyspell-mode-map (kbd "C-c $ $") #'flyspell-region)))
-
-(confige flyspell-correct
-  :ensure t
-  (:before
-   (with-eval-after-load 'flyspell
-     (let ((map flyspell-mode-map))
-       (define-key map (kbd "M-$") #'flyspell-correct-at-point)
-       (define-key map (kbd "C-c $ c") #'flyspell-correct-at-point)
-       (define-key map (kbd "C-c $ p") #'flyspell-correct-previous)
-       (define-key map (kbd "C-c $ n") #'flyspell-correct-next)))))
+   (define-key flyspell-mode-map (kbd "C-c x s") #'flyspell-region)))
 
 ;;; VCS
 
