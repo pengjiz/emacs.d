@@ -1515,6 +1515,7 @@
   :ensure t :preload t
   (:preface
    (declare-function magit-display-buffer-fullframe-status-v1 "ext:magit-mode")
+   (declare-function magit-restore-window-configuration "ext:magit-mode")
    (declare-function magit-add-section-hook "ext:magit-section"))
   (:before
    (setf magit-define-global-key-bindings nil)
@@ -1523,10 +1524,10 @@
      (define-key map (kbd "C-c g d") #'magit-dispatch)
      (define-key map (kbd "C-c g f") #'magit-file-dispatch)))
   (:after
-   (setf magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+   (setf magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1
+         magit-bury-buffer-function #'magit-restore-window-configuration)
    (setf magit-save-repository-buffers 'dontask)
-   (setf magit-revision-show-gravatars nil
-         magit-diff-refine-hunk t)
+   (setf magit-revision-show-gravatars nil)
    ;; Show submodules in status buffer
    (magit-add-section-hook 'magit-status-sections-hook #'magit-insert-modules
                            'magit-insert-stashes t))
