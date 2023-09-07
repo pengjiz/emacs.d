@@ -1588,6 +1588,7 @@
 (confige diff-hl
   :ensure t :load t
   (:after
+   (setf diff-hl-draw-borders nil)
    (global-diff-hl-mode)
    (add-hook 'dired-mode-hook #'diff-hl-dired-mode)
 
