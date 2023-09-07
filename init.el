@@ -1154,7 +1154,6 @@
 
 (confige proced-narrow
   :ensure t
-  (:preface (defvar proced-mode-map))
   (:before
    (with-eval-after-load 'proced
      (define-key proced-mode-map (kbd "/") #'proced-narrow))))
