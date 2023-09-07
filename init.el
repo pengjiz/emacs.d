@@ -725,7 +725,8 @@
                         "*S search list*"
                         "*ess-output*"
                         "*TeX background*"
-                        (and (1+ nonl) " output*")))
+                        (and (1+ nonl) (or " output*"
+                                           "-compilation*"))))
            (display-buffer-reuse-window
             display-buffer-in-side-window)
            (side . bottom)
@@ -1425,9 +1426,12 @@
 
 (confige project
   :preload t
+  (:preface (declare-function project-prefixed-buffer-name "project"))
   (:before (setf project-list-file (init--var "projects")))
   (:after
    (setf project-vc-merge-submodules nil)
+   (setf project-compilation-buffer-name-function #'project-prefixed-buffer-name
+         project-kill-buffers-display-buffer-list t)
    (setf project-switch-commands '((project-find-file "Find file")
                                    (project-find-dir "Find directory")
                                    (project-find-regexp "Find regexp")
