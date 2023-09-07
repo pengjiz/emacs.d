@@ -2448,16 +2448,13 @@
 (confige dotenv-mode
   :ensure t)
 
-(confige json-mode
-  :ensure t)
-
 (confige jq-mode
-  :ensure t
-  (:preface (defvar json-mode-map))
+  :ensure t :preload t
   (:before
    (cl-pushnew 'jq init--org-babel-languages :test #'eq)
-   (with-eval-after-load 'json-mode
-     (define-key json-mode-map (kbd "C-c C-c") #'jq-interactively))))
+   (with-eval-after-load 'js
+     (define-key js-json-mode-map (kbd "C-c C-c") #'jq-interactively)))
+  (:after (setf jq-interactive-font-lock-mode #'js-json-mode)))
 
 (confige yaml-mode
   :ensure t
