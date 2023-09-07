@@ -835,31 +835,63 @@
   (:preface (declare-function ibuffer-visit-buffer-1-window "ibuffer"))
   (:before (define-key global-map [remap list-buffers] #'ibuffer))
   (:after
-   (let ((state '(mark modified read-only locked " "))
-         (info '((name 18 18 :left :elide) " "
-                 (size 9 -1 :right) " "
-                 (mode 16 16 :left :elide) " ")))
-     (setf ibuffer-formats `((,@state ,@info filename)
-                             (,@state ,@info process))))
+   (let ((state '(mark modified read-only locked " ")))
+     (setf ibuffer-formats `((,@state
+                              (name 18 18 :left :elide) " "
+                              (size 9 -1 :right) " "
+                              (mode 16 16 :left :elide) " "
+                              filename-and-process)
+                             (,@state name))))
    (let ((map ibuffer-mode-map))
      (define-key map (kbd "C-c C-o") #'ibuffer-visit-buffer-1-window)
      (define-key map (kbd "P") nil)))
   (:postface
    (confige ibuf-ext
      :preload t
-     (:after (setf ibuffer-show-empty-filter-groups nil)))))
-
-(confige ibuffer-vc
-  :ensure t
-  (:before
-   (add-hook 'ibuffer-mode-hook #'ibuffer-vc-set-filter-groups-by-vc-root))
-  (:after
-   (let ((state '(mark modified read-only locked vc-status-mini " "))
-         (info '((name 18 18 :left :elide) " "
-                 (size 9 -1 :right) " "
-                 (mode 16 16 :left :elide) " ")))
-     (setf ibuffer-formats `((,@state ,@info vc-relative-file)
-                             (,@state ,@info process))))))
+     (:preface
+      (defun init--set-ibuffer-filter-groups ()
+        "Set default Ibuffer filter groups."
+        (setf ibuffer-filter-groups (cdar ibuffer-saved-filter-groups))))
+     (:before
+      (with-eval-after-load 'ibuffer
+        (require 'ibuf-ext))
+      (setf ibuffer-saved-filter-groups
+            '(("By purpose"
+               ("Development" (or (saved . "programming")
+                                  (saved . "configuration")))
+               ("Writing" (saved . "writing"))
+               ("Executing" (saved . "interpreter"))
+               ("Reading" (saved . "reading"))
+               ("Communication" (derived-mode . rcirc-mode)))
+              ("By association"
+               ("File" (visiting-file))
+               ("Directory" (derived-mode . dired-mode))
+               ("Process" (process)))))
+      (add-hook 'ibuffer-mode-hook #'init--set-ibuffer-filter-groups))
+     (:after
+      (setf ibuffer-show-empty-filter-groups nil)
+      (setf ibuffer-saved-filters
+            '(("programming"
+               (and (derived-mode . prog-mode)
+                    (not (derived-mode . js-json-mode))))
+              ("configuration"
+               (or (derived-mode . conf-mode)
+                   (derived-mode . js-json-mode)
+                   (derived-mode . yaml-mode)))
+              ("writing"
+               (or (and (derived-mode . text-mode)
+                        (not (derived-mode . yaml-mode)))
+                   (derived-mode . bibtex-mode)))
+              ("interpreter"
+               (or (derived-mode . comint-mode)
+                   (derived-mode . cider-repl-mode)
+                   (derived-mode . eshell-mode)))
+              ("reading"
+               (or (derived-mode . doc-view-mode)
+                   (derived-mode . nov-mode)
+                   (derived-mode . elfeed-show-mode)
+                   (derived-mode . elfeed-search-mode)
+                   (derived-mode . eww-mode)))))))))
 
 ;;; File
 
