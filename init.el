@@ -644,7 +644,6 @@
                         "*Org Src"
                         "*Edit Formulas*"
                         "*edit-indirect"
-                        "*draft mail*"
                         "*Bookmark Annotation Compose*"))
            (display-buffer-reuse-window
             display-buffer-below-selected)
@@ -669,12 +668,12 @@
            (window-min-height . 15)
            (reusable-frames . nil))
           ;; Application
-          (,(rx bos (or "Trash Can"
+          (,(rx bos (or " *Agenda Commands*"
+                        " *Org todo*"
+                        "Trash Can"
                         "*Occur"
                         "*xref*"
                         "*Apropos*"
-                        " *Agenda Commands*"
-                        " *Org todo*"
                         "*Org Select*"
                         "*Org Attach*"
                         "*Org Links*"
@@ -684,20 +683,20 @@
                         "*Org Clock*"
                         "*Clock Task Select*"
                         "*Calendar*"
-                        "*Channels of"
                         "*Ledger Report*"
                         "*Reconcile*"
                         "*RefTeX Select*"
                         "*Key*"
                         "*Keys*"
-                        "*Proced*"
+                        "*Buffer List*"
                         "*Process List*"
+                        "*Proced*"
                         "*Flycheck errors*"
                         "*TeX errors*"
                         "*BibTeX validation errors*"
                         "*R dired*"
                         "*eshell"
-                        (and (1+ nonl) "-eshell*")))
+                        (and "*" (1+ nonl) "-eshell*")))
            (display-buffer-reuse-window
             display-buffer-at-bottom)
            (window-height . 15)
@@ -725,8 +724,8 @@
                         "*S search list*"
                         "*ess-output*"
                         "*TeX background*"
-                        (and (1+ nonl) (or " output*"
-                                           "-compilation*"))))
+                        (and "*" (1+ nonl) (or " output*"
+                                               "-compilation*"))))
            (display-buffer-reuse-window
             display-buffer-in-side-window)
            (side . bottom)
@@ -736,6 +735,7 @@
            (reusable-frames . nil))
           ;; Information
           (,(rx bos (or " *Metahelp*"
+                        " *Input History*"
                         "*Local Variables*"
                         "*Disabled Command*"
                         "*Messages*"
@@ -747,7 +747,6 @@
                         "*Gnuplot Commands*"
                         "*Completions*"
                         "*Quail Completions*"
-                        " *Input History*"
                         "*cider-repl-history*"))
            (display-buffer-reuse-window
             display-buffer-in-side-window)
