@@ -1673,12 +1673,6 @@
      (define-key map (kbd "C-c C-b") #'eval-buffer)
      (define-key map (kbd "C-c a a") #'ielm))))
 
-(confige eros
-  :ensure t
-  (:before
-   (with-eval-after-load 'elisp-mode
-     (eros-mode))))
-
 (confige emacs-lisp-snippets
   (:preface
    (autoload 'emacs-lisp-snippets-file-template "emacs-lisp-snippets" nil t))
