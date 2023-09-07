@@ -43,6 +43,7 @@ If nil use value of `fill-column'."
 ;;; Prose style
 
 (defvar shr-width)
+(defvar shr-max-width)
 (defvar shr-use-fonts)
 (defvar shr-internal-width)
 (defvar shr-table-separator-pixel-width)
@@ -60,11 +61,12 @@ If nil use value of `fill-column'."
   (cl-letf (((symbol-function 'shr-fill-line) #'ignore))
     (apply fn args)))
 
-;; NOTE: Even if text filling is disabled this variable is still used when
-;; rendering some elements. So here we set it properly.
+;; NOTE: Even if text filling is disabled the width is still used for rendering
+;; some elements. So here we set the width properly.
 (defun page-turner--set-shr-width (fn &rest args)
   "Apply FN on ARGS, but force using `page-turner-text-width'."
-  (let ((shr-width (or page-turner-text-width fill-column)))
+  (let ((shr-width nil)
+        (shr-max-width (or page-turner-text-width fill-column)))
     (apply fn args)))
 
 ;; HACK: For some reason the hr line will be one character longer than expected,
@@ -199,8 +201,9 @@ If nil use value of `fill-column'."
 ;; previewing for some unknown reason, so here we only set font and text width.
 (defun page-turner--get-markdown-live-preview-buffer (file)
   "Get a buffer showing FILE with EWW."
-  (let* ((shr-width (or page-turner-text-width fill-column))
-         (buffer (markdown-live-preview-window-eww file)))
+  (let ((shr-width nil)
+        (shr-max-width (or page-turner-text-width fill-column))
+        (buffer (markdown-live-preview-window-eww file)))
     (with-current-buffer buffer
       (page-turner--set-prose-font))
     buffer))
