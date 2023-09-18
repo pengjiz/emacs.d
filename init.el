@@ -708,7 +708,6 @@
                         "*Macroexpansion*"
                         "*Gnuplot Trail*"
                         "*Ledger Error*"
-                        "*skewer-error*"
                         "*cider-error*"
                         "*cider-test-report*"
                         "*Geiser dbg*"
@@ -1917,26 +1916,6 @@
    (dolist (hook '(js2-mode-hook typescript-mode-hook))
      (add-hook hook #'init--enable-tide)))
   (:after (setf tide-completion-enable-autoimport-suggestions nil)))
-
-(confige skewer-mode
-  :ensure t :preload t
-  (:before (add-hook 'js2-mode-hook #'skewer-mode))
-  (:after (define-key skewer-mode-map (kbd "C-c a a") #'run-skewer))
-  (:postface
-   (confige skewer-repl
-     (:before
-      (with-eval-after-load 'skewer-mode
-        (define-key skewer-mode-map (kbd "C-c a m") #'skewer-repl))))
-
-   (confige skewer-css
-     :preload t
-     (:before (add-hook 'css-mode-hook #'skewer-css-mode))
-     (:after (define-key skewer-css-mode-map (kbd "C-c a a") #'run-skewer)))
-
-   (confige skewer-html
-     :preload t
-     (:before (add-hook 'html-mode-hook #'skewer-html-mode))
-     (:after (define-key skewer-html-mode-map (kbd "C-c a a") #'run-skewer)))))
 
 (confige flycheck-npm
   :ensure (flycheck)
