@@ -1865,13 +1865,6 @@
    (setf nxml-slash-auto-complete-flag t)
    (setf nxml-attribute-indent 2)))
 
-(confige simple-httpd
-  :ensure t :preload t
-  (:before (define-key global-map (kbd "C-c m s") #'httpd-serve-directory))
-  (:after
-   (setf httpd-host 'local
-         httpd-port 8017)))
-
 (confige css-mode
   :preload t
   (:preface (declare-function css-cycle-color-format "css-mode"))
