@@ -450,12 +450,6 @@
            try-expand-dabbrev-all-buffers
            try-expand-dabbrev-from-kill))))
 
-(confige word-complete
-  (:preface (autoload 'word-complete "word-complete" nil t))
-  (:before
-   (define-key global-map [remap ispell-complete-word] #'word-complete)
-   (define-key global-map (kbd "C-c e d") #'word-complete)))
-
 ;;; Expansion
 
 (confige abbrev
@@ -1456,7 +1450,9 @@
 ;;; Spell check
 
 (confige ispell
-  (:before (define-key global-map (kbd "C-c t S") #'ispell-change-dictionary)))
+  (:before
+   (define-key global-map (kbd "C-c t S") #'ispell-change-dictionary)
+   (define-key global-map (kbd "C-c e d") #'ispell-complete-word)))
 
 (confige flyspell
   :preload t
