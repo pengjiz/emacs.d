@@ -227,6 +227,8 @@ Return the first line of output if any. Otherwise return nil."
   (unless eshell-extras--autosuggest-active
     (setf eshell-extras--autosuggest-completion
           (while-no-input (eshell-extras--get-autosuggest-completion)))
+    (unless (listp eshell-extras--autosuggest-completion)
+      (setf eshell-extras--autosuggest-completion nil))
 
     (let-alist eshell-extras--autosuggest-completion
       (when (and .suffix .end)
