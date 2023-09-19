@@ -750,9 +750,10 @@
            (reusable-frames . nil))))
 
   (let ((map global-map))
+    (define-key map (kbd "C-c w t") #'window-swap-states)
     (define-key map (kbd "C-c w f") #'fit-window-to-buffer)
     (define-key map (kbd "C-c w l") #'delete-other-windows-vertically)
-    (define-key map (kbd "C-c w t") #'window-toggle-side-windows)
+    (define-key map (kbd "C-c w s") #'window-toggle-side-windows)
     (define-key map (kbd "C-x C-z") #'window-toggle-side-windows)))
 
 (confige window-extras
@@ -763,21 +764,15 @@
   :ensure t :preload t
   (:preface
    (declare-function wincom-display-mode-line-conditional "ext:window-commander")
-   (declare-function wincom-select "ext:window-commander")
-
-   (defun init--wincom-select-mru-window ()
-     "Select the most recently used window if any."
-     (interactive)
-     (when-let* ((window (get-mru-window wincom-scope t t)))
-       (select-window window))))
+   (declare-function wincom-select "ext:window-commander"))
   (:before
+   (setf wincom-scope 'current)
    (setf wincom-display-lighter nil)
    (setf wincom-mode-map (make-sparse-keymap))
    (add-hook 'after-init-hook #'wincom-mode t))
   (:after
    (add-hook 'wincom-mode-hook #'wincom-display-mode-line-conditional)
-   (define-key wincom-mode-map (kbd "M-o") #'wincom-select)
-   (define-key wincom-command-map (kbd "z") #'init--wincom-select-mru-window)))
+   (define-key wincom-mode-map (kbd "M-o") #'wincom-select)))
 
 (confige tab-bar
   (:before (add-hook 'window-setup-hook #'tab-bar-mode))
