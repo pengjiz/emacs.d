@@ -491,14 +491,44 @@ If DEFAULT is non-nil, set the default value."
        '(" " liteline--flycheck " ")))
 
 ;; Misc information
+(defvar-local liteline--ispell-misc nil "Misc information for ispell.")
+(put 'liteline--ispell-misc 'risky-local-variable t)
+
+(defun liteline--update-ispell-misc (buffer)
+  "Update `liteline--ispell-misc' in BUFFER."
+  (with-current-buffer buffer
+    (setf liteline--ispell-misc nil)
+    (when (and (local-variable-p 'mode-line-format)
+               (stringp mode-line-format))
+      (let ((indicators nil))
+        (dolist (indicator (cdr (split-string mode-line-format "  --  " t)))
+          (when-let ((start (string-search ": " indicator)))
+            (push (substring indicator (+ start 2)) indicators)))
+        (when-let* ((count (length indicators))
+                    (template (cond ((= count 3) "(%s[%s]) %s")
+                                    ((= count 2) "(%s) %s"))))
+          (setf liteline--ispell-misc
+                (apply #'format template indicators)))))
+    (liteline--clear-local-mode-line)))
+
+(defun liteline--setup-ispell ()
+  "Setup ispell."
+  (with-eval-after-load 'ispell
+    (advice-add 'ispell-display-buffer :before
+                #'liteline--update-ispell-misc)))
+
 (liteline-define-segment misc
   "Show misc information."
-  (when (mode-line-window-selected-p)
-    (cl-case major-mode
-      ((Man-mode)
-       '(" " Man-page-mode-string " "))
-      ((Info-mode)
-       `("" ,(cadr mode-line-buffer-identification) " ")))))
+  (cl-case major-mode
+    ((Man-mode)
+     (and (mode-line-window-selected-p)
+          '(" " Man-page-mode-string " ")))
+    ((Info-mode)
+     (and (mode-line-window-selected-p)
+          `("" ,(cadr mode-line-buffer-identification) " ")))
+    (otherwise
+     (and liteline--ispell-misc
+          '(" " liteline--ispell-misc " ")))))
 
 ;;; Mode line
 
@@ -517,6 +547,7 @@ If DEFAULT is non-nil, set the default value."
   (liteline--setup-reftex)
   (liteline--setup-conda)
   (liteline--setup-flycheck)
+  (liteline--setup-ispell)
 
   (liteline-set-mode-line 'main t))
 

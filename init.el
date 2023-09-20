@@ -135,12 +135,7 @@
    (defvar wincom-id-format)
    (defvar calendar-mode-line-format)
    (defvar 2C-mode-line-format)
-   (autoload 'liteline-setup "liteline")
-
-   (defun init--avoid-ispell-mode-line (buffer)
-     "Unset ispell mode line in BUFFER."
-     (with-current-buffer buffer
-       (kill-local-variable 'mode-line-format))))
+   (autoload 'liteline-setup "liteline"))
   (:before (add-hook 'after-init-hook #'liteline-setup))
   (:after
    (setf mode-line-position-column-line-format '(" %l:%c"))
@@ -152,10 +147,7 @@
    (with-eval-after-load 'two-column
      (setf 2C-mode-line-format (default-value 'mode-line-format)))
    (with-eval-after-load 'ediff-wind
-     (setf (symbol-function 'ediff-refresh-mode-lines) #'init-ignore))
-   (with-eval-after-load 'ispell
-     (advice-add 'ispell-display-buffer :before
-                 #'init--avoid-ispell-mode-line))))
+     (setf (symbol-function 'ediff-refresh-mode-lines) #'init-ignore))))
 
 (confige transient
   :preload t
