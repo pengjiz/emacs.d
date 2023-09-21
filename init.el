@@ -1301,36 +1301,33 @@
   :preload t
   (:preface
    (declare-function rcirc-omit-mode "rcirc")
-   (declare-function rcirc-next-active-buffer "rcirc")
-
-   (defvar init--rcirc-authinfo-ready nil
-     "Whether `rcirc-authinfo' is ready for authentication.")
-   (defun init--prepare-rcirc-authinfo (&rest _)
-     "Prepare `rcirc-authinfo' for authentication when appropriate."
-     (unless init--rcirc-authinfo-ready
-       (when-let* ((server "irc.libera.chat")
-                   (nickname "pengjiz")
-                   (info (list :host server
-                               :port "nickserv"
-                               :user nickname))
-                   (password (apply #'auth-source-pick-first-password
-                                    :require '(:secret) info)))
-         (push (list server 'sasl nickname password) rcirc-authinfo))
-       (setf init--rcirc-authinfo-ready t))))
+   (declare-function rcirc-next-active-buffer "rcirc"))
   (:before
+   (setf rcirc-log-directory (init--var "rcirc-log/"))
    (setf rcirc-track-minor-mode-map (make-sparse-keymap))
-   (define-key global-map (kbd "C-c m e") #'rcirc))
+   (define-key global-map (kbd "C-c m t") #'rcirc))
   (:after
    (setf rcirc-server-alist '(("irc.libera.chat" :port 6697 :encryption tls))
-         rcirc-default-nick "pengjiz")
-   (advice-add 'rcirc :before #'init--prepare-rcirc-authinfo)
+         rcirc-default-nick "pengjiz"
+         rcirc-default-user-name "pengjiz"
+         rcirc-default-full-name "Pengji Zhang")
+   (when-let* ((server "irc.libera.chat")
+               (nickname "pengjiz")
+               (target (list :host server
+                             :port "nickserv"
+                             :user nickname))
+               (password (apply #'auth-source-pick-first-password
+                                :require '(:secret) target)))
+     (push (list server 'sasl nickname password) rcirc-authinfo))
 
+   (setf rcirc-reconnect-delay 20)
+   (setf rcirc-read-only-flag nil)
    (setf rcirc-omit-responses '("JOIN" "PART" "QUIT" "NICK" "AWAY")
          rcirc-omit-unless-requested '("NAMES"))
    (add-hook 'rcirc-mode-hook #'rcirc-omit-mode)
    (rcirc-track-minor-mode)
    (define-key rcirc-track-minor-mode-map
-               (kbd "C-c m E") #'rcirc-next-active-buffer)))
+               (kbd "C-c m T") #'rcirc-next-active-buffer)))
 
 ;;; Calendar
 
