@@ -7,8 +7,6 @@
 ;;; Code:
 
 (require 'package)
-(eval-when-compile
-  (require 'subr-x))
 
 ;;; Option
 

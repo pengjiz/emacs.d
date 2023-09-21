@@ -10,7 +10,6 @@
 (require 'vc-hooks)
 (eval-when-compile
   (require 'cl-lib)
-  (require 'subr-x)
   (require 'let-alist))
 
 ;;; Face and option
@@ -443,7 +442,6 @@ If DEFAULT is non-nil, set the default value."
 
 ;; Flycheck
 (defvar flycheck-current-errors)
-(defvar flycheck-last-status-change)
 (declare-function flycheck-count-errors "ext:flycheck")
 
 (defvar-local liteline--flycheck nil "Current Flycheck status.")

@@ -195,19 +195,13 @@
     (user-error "Remote hosts not supported"))
   (when (get-buffer gnuplot--output-buffer-name)
     (kill-buffer gnuplot--output-buffer-name))
-  (let ((script (make-temp-file "gnuplot"))
-        (prefix (format "Running %s" gnuplot-program)))
-    (unwind-protect
-        (progn
-          (write-region start end script nil 'silent)
-          (message "%s..." prefix)
-          (if (eq 0 (apply #'call-process gnuplot-program
-                           nil gnuplot--output-buffer-name nil
-                           `(,@gnuplot-extra-options ,script)))
-              (message "%s...done" prefix)
-            (message "%s...process exited abnormally" prefix))
-          (deactivate-mark))
-      (delete-file script))))
+  (let* ((prefix (message "Running %s..." gnuplot-program))
+         (args `(,@gnuplot-extra-options "-"))
+         (status (apply #'call-process-region start end gnuplot-program
+                        nil gnuplot--output-buffer-name nil args)))
+    (message "%s%s" prefix (or (and (eq 0 status) "done")
+                               "process exited abnormally")))
+  (deactivate-mark))
 
 (defun gnuplot-run-buffer ()
   "Run the current buffer."

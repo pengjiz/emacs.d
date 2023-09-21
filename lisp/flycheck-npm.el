@@ -7,8 +7,6 @@
 ;;; Code:
 
 (require 'flycheck)
-(eval-when-compile
-  (require 'subr-x))
 
 ;;; Core
 

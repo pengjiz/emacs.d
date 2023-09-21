@@ -9,7 +9,6 @@
 (require 'dired)
 (require 'dired-aux)
 (eval-when-compile
-  (require 'subr-x)
   (require 'let-alist))
 
 ;;; Option
@@ -110,9 +109,9 @@ ARG is directly passed to `dired-get-marked-files'."
          (count (length files))
          (prompt (format "Unpack %s to: " (dired-mark-prompt arg files)))
          (directory (dired-dwim-target-directory))
-         (destination (expand-file-name (dired-mark-pop-up nil 'uncompress files
-                                                           #'read-directory-name
-                                                           prompt directory)))
+         (input (dired-mark-pop-up nil 'uncompress files
+                                   #'read-directory-name prompt directory))
+         (destination (file-name-as-directory (expand-file-name input)))
          (description (concat (format "Unpack: %d file" count)
                               (and (/= count 1) "s")))
          (operation `((name . "unpack")

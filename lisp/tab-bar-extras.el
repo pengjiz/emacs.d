@@ -8,8 +8,6 @@
 
 (require 'tab-bar)
 (require 'vc-hooks)
-(eval-when-compile
-  (require 'subr-x))
 
 ;;; Face
 

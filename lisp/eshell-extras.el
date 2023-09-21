@@ -15,7 +15,6 @@
 (require 'vc-git)
 (eval-when-compile
   (require 'cl-lib)
-  (require 'subr-x)
   (require 'let-alist))
 
 ;;; Face and option
