@@ -1256,29 +1256,7 @@
 
 (confige elfeed
   :ensure t :preload t
-  (:preface
-   (declare-function eww-readable "eww")
-   (declare-function elfeed-make-tagger "ext:elfeed")
-
-   (defun init--eww-readable-once ()
-     "View EWW readable parts only once."
-     (unwind-protect
-         (eww-readable)
-       (remove-hook 'eww-after-render-hook #'init--eww-readable-once t)))
-
-   (defun init--elfeed-eww (url)
-     "Browse URL with EWW for Elfeed."
-     (let ((buffer (generate-new-buffer "*elfeed-eww*")))
-       (pop-to-buffer-same-window buffer)
-       (with-current-buffer buffer
-         (eww-mode)
-         (add-hook 'eww-after-render-hook #'init--eww-readable-once nil t)
-         (eww url))))
-
-   (defun init--use-elfeed-eww (fn &rest args)
-     "Apply FN on ARGS but use EWW for Elfeed when appropriate."
-     (cl-letf (((symbol-function 'browse-url-generic) #'init--elfeed-eww))
-       (apply fn args))))
+  (:preface (declare-function elfeed-make-tagger "ext:elfeed"))
   (:before
    (setf elfeed-db-directory (init--sync "misc/elfeed/db/"))
    (with-eval-after-load 'recentf
@@ -1299,18 +1277,14 @@
   (:postface
    (confige elfeed-search
      :preload t
-     (:after
-      (setf elfeed-search-filter "@1-month-ago")
-      (advice-add 'elfeed-search-browse-url :around #'init--use-elfeed-eww)))
+     (:after (setf elfeed-search-filter "@1-month-ago")))
 
    (confige elfeed-show
      :preload t
      (:before
       (setf elfeed-enclosure-default-dir
             (expand-file-name (convert-standard-filename "Downloads/") "~")))
-     (:after
-      (setf elfeed-show-entry-switch #'pop-to-buffer-same-window)
-      (advice-add 'elfeed-show-visit :around #'init--use-elfeed-eww)))))
+     (:after (setf elfeed-show-entry-switch #'pop-to-buffer-same-window)))))
 
 (confige doc-view
   :preload t

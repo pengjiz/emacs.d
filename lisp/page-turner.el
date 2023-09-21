@@ -40,6 +40,11 @@ If nil use value of `fill-column'."
   :type '(choice number
                  (const :tag "None" nil)))
 
+(defcustom page-turner-setup-elfeed-eww
+  t
+  "Whether to setup EWW for Elfeed."
+  :type 'boolean)
+
 ;;; Prose style
 
 (defvar shr-width)
@@ -182,28 +187,56 @@ If nil use value of `fill-column'."
 
 ;;; Elfeed
 
+(declare-function eww-readable "eww")
+
+(defun page-turner--eww-readable-once ()
+  "View EWW readable parts only once."
+  (unwind-protect
+      (eww-readable)
+    (remove-hook 'eww-after-render-hook #'page-turner--eww-readable-once t)))
+
+(defun page-turner--elfeed-eww (url)
+  "Browse URL with EWW for Elfeed."
+  (let ((buffer (generate-new-buffer "*elfeed-eww*")))
+    (pop-to-buffer-same-window buffer)
+    (with-current-buffer buffer
+      (eww-mode)
+      (make-local-variable 'eww-auto-rename-buffer)
+      (setf eww-auto-rename-buffer nil)
+      (add-hook 'eww-after-render-hook #'page-turner--eww-readable-once nil t)
+      (eww url))))
+
+(defun page-turner--use-elfeed-eww (fn &rest args)
+  "Apply FN on ARGS but use EWW for Elfeed when appropriate."
+  (cl-letf (((symbol-function 'browse-url-generic) #'page-turner--elfeed-eww))
+    (apply fn args)))
+
 (defun page-turner--setup-elfeed ()
   "Setup Elfeed integration."
+  (with-eval-after-load 'elfeed-search
+    (when page-turner-setup-elfeed-eww
+      (advice-add 'elfeed-search-browse-url :around
+                  #'page-turner--use-elfeed-eww)))
   (with-eval-after-load 'elfeed-show
     (advice-add 'elfeed-insert-html :around #'page-turner--disable-shr-filling)
     (advice-add 'elfeed-insert-html :around #'page-turner--set-shr-width)
     (advice-add 'elfeed-insert-link :around #'page-turner--set-shr-width)
     (advice-add 'elfeed-insert-html :around #'page-turner--adjust-shr-hr-width)
     (advice-add 'elfeed-insert-html :around #'page-turner--avoid-shr-truncating)
-    (add-hook 'elfeed-show-mode-hook #'page-turner--set-prose-styles)))
+    (add-hook 'elfeed-show-mode-hook #'page-turner--set-prose-styles)
+    (when page-turner-setup-elfeed-eww
+      (advice-add 'elfeed-show-visit :around #'page-turner--use-elfeed-eww))))
 
 ;;; Markdown mode
 
 (defvar markdown-live-preview-window-function)
 (declare-function markdown-live-preview-window-eww "ext:markdown-mode")
 
-;; NOTE: Visual fill column and visual line do not play well with live
-;; previewing for some unknown reason, so here we only set font and text width.
 (defun page-turner--get-markdown-live-preview-buffer (file)
   "Get a buffer showing FILE with EWW."
-  (let ((shr-width nil)
-        (shr-max-width (or page-turner-text-width fill-column))
-        (buffer (markdown-live-preview-window-eww file)))
+  (let* ((shr-width nil)
+         (shr-max-width (or page-turner-text-width fill-column))
+         (buffer (markdown-live-preview-window-eww file)))
     (with-current-buffer buffer
       (page-turner--set-prose-font))
     buffer))
