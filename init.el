@@ -1295,6 +1295,43 @@
    (setf nov-save-place-file (init--var "nov-places"))
    (cl-pushnew '("\\.epub\\'" . nov-mode) auto-mode-alist :test #'equal)))
 
+;;; Chatting
+
+(confige rcirc
+  :preload t
+  (:preface
+   (declare-function rcirc-omit-mode "rcirc")
+   (declare-function rcirc-next-active-buffer "rcirc")
+
+   (defvar init--rcirc-authinfo-ready nil
+     "Whether `rcirc-authinfo' is ready for authentication.")
+   (defun init--prepare-rcirc-authinfo (&rest _)
+     "Prepare `rcirc-authinfo' for authentication when appropriate."
+     (unless init--rcirc-authinfo-ready
+       (when-let* ((server "irc.libera.chat")
+                   (nickname "pengjiz")
+                   (info (list :host server
+                               :port "nickserv"
+                               :user nickname))
+                   (password (apply #'auth-source-pick-first-password
+                                    :require '(:secret) info)))
+         (push (list server 'sasl nickname password) rcirc-authinfo))
+       (setf init--rcirc-authinfo-ready t))))
+  (:before
+   (setf rcirc-track-minor-mode-map (make-sparse-keymap))
+   (define-key global-map (kbd "C-c m e") #'rcirc))
+  (:after
+   (setf rcirc-server-alist '(("irc.libera.chat" :port 6697 :encryption tls))
+         rcirc-default-nick "pengjiz")
+   (advice-add 'rcirc :before #'init--prepare-rcirc-authinfo)
+
+   (setf rcirc-omit-responses '("JOIN" "PART" "QUIT" "NICK" "AWAY")
+         rcirc-omit-unless-requested '("NAMES"))
+   (add-hook 'rcirc-mode-hook #'rcirc-omit-mode)
+   (rcirc-track-minor-mode)
+   (define-key rcirc-track-minor-mode-map
+               (kbd "C-c m E") #'rcirc-next-active-buffer)))
+
 ;;; Calendar
 
 (confige calendar
@@ -1454,7 +1491,7 @@
    (setf flyspell-use-meta-tab nil
          flyspell-mode-map (make-sparse-keymap))
 
-   (dolist (hook '(text-mode-hook bibtex-mode-hook))
+   (dolist (hook '(text-mode-hook bibtex-mode-hook rcirc-mode-hook))
      (add-hook hook #'flyspell-mode))
    (add-hook 'prog-mode-hook #'flyspell-prog-mode)
    (define-key global-map (kbd "C-c t s") #'flyspell-mode))
