@@ -6,26 +6,49 @@
 
 ;;; Code:
 
+(require 'json)
 (eval-when-compile
-  (require 'cl-lib)
-  (require 'let-alist))
+  (require 'cl-lib))
 
 ;;; Option
 
 (defgroup conda nil
   "Integration with conda."
-  :group 'python)
+  :group 'processes)
 
 (defcustom conda-environment-directories
-  `(,(expand-file-name (convert-standard-filename ".conda/envs/") "~"))
-  "List of directories for environments."
-  :type '(repeat directory))
+  #'conda-get-configured-environment-directories
+  "List of directories for named environments.
+This could also be a function that returns such a list."
+  :type '(choice (repeat directory)
+                 function))
 
 (defcustom conda-default-environment
   nil
-  "Name of the default environment."
-  :type 'string
-  :safe #'stringp)
+  "Default environment to use when reading an environment."
+  :type '(choice string
+                 (const :tag "None" nil))
+  :safe #'string-or-null-p)
+
+(defcustom conda-preserve-envvar-names
+  '("TERM" "SHLVL" "PWD" "_")
+  "List of envvar names to preserve."
+  :type '(repeat string))
+
+(defcustom conda-ignore-envvar-names
+  '("PS1" "DISPLAY")
+  "List of envvar names to ignore."
+  :type '(repeat string))
+
+(defcustom conda-activate-command
+  "conda activate \"$0\" >&2 && env -0"
+  "Shell command to activate an environment."
+  :type 'string)
+
+(defcustom conda-deactivate-command
+  "conda deactivate >&2 && env -0"
+  "Shell command to deactivate an environment."
+  :type 'string)
 
 (defcustom conda-pre-activate-hook
   nil
@@ -47,10 +70,61 @@
   "Hook to run after deactivating an environment."
   :type 'hook)
 
-;;; Find environments
+;;; Shell command
 
-(defun conda--get-environments ()
-  "Get all environments."
+(defun conda--insert-log (logfile command args status)
+  "Insert contents of LOGFILE into the log buffer.
+Shell COMMAND and ARGS are inserted before the log, and STATUS is
+inserted after the log."
+  (with-current-buffer (get-buffer-create " *conda*")
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (insert (shell-quote-argument shell-file-name) " "
+              (shell-quote-argument shell-command-switch) " "
+              (format "'%s'" command) " "
+              (mapconcat #'shell-quote-argument args " ") "\n")
+      (insert-file-contents logfile)
+      (goto-char (point-max))
+      (insert (format "Process exited with status %s" status)))))
+
+(defvar conda--command-history nil "History for shell commands.")
+
+(defun conda--read-command (prompt &optional default)
+  "Read a shell command with PROMPT and DEFAULT command."
+  (let ((input (read-shell-command (format-prompt prompt default)
+                                   nil 'conda--command-history default)))
+    (or (and (string-empty-p (or input "")) default)
+        input)))
+
+(defun conda--shell-run (command &rest args)
+  "Run shell COMMAND with ARGS and return the output."
+  (let ((logfile (make-temp-file "emacs-conda")))
+    (unwind-protect
+        (with-temp-buffer
+          (let ((status (apply #'call-process shell-file-name
+                               nil (list t logfile) nil
+                               shell-command-switch command args)))
+            (conda--insert-log logfile command args status)
+            (when (eq status 0)
+              (buffer-substring-no-properties (point-min) (point-max)))))
+      (when (file-exists-p logfile)
+        (delete-file logfile)))))
+
+;;; Read environment
+
+(defvar conda--configured-environment-directory-command
+  "conda config --json --show envs_dirs"
+  "Shell command for getting configured environment directories.")
+
+(defun conda-get-configured-environment-directories ()
+  "Get directories for named environments by querying configuration."
+  (when-let* ((json-array-type 'list)
+              (command conda--configured-environment-directory-command)
+              (output (ignore-errors (conda--shell-run command))))
+    (cdr (assq 'envs_dirs (json-read-from-string output)))))
+
+(defun conda--get-named-environments ()
+  "Get all named environments."
   (mapcan (lambda (directory)
             (when (file-directory-p directory)
               (let ((environments nil))
@@ -58,186 +132,184 @@
                   (when (file-directory-p file)
                     (push (file-name-nondirectory file) environments)))
                 (nreverse environments))))
-          conda-environment-directories))
+          (if (functionp conda-environment-directories)
+              (funcall conda-environment-directories)
+            conda-environment-directories)))
 
-(defun conda--get-environment-root (environment)
-  "Get the root of ENVIRONMENT."
-  (catch 'done
-    (dolist (directory conda-environment-directories)
-      (let ((filename (expand-file-name environment directory)))
-        (when (file-directory-p filename)
-          (throw 'done filename))))))
+(defvar conda--directory-completion-table
+  (let ((directories (apply-partially #'completion-table-with-predicate
+                                      #'completion-file-name-table
+                                      #'file-directory-p t)))
+    (completion-table-with-quoting directories
+                                   #'substitute-in-file-name
+                                   #'completion--sifn-requote))
+  "Completion table for directories.")
 
-(defun conda--get-environment-spec (environment)
-  "Get the spec of ENVIRONMENT."
-  (when-let* ((root (conda--get-environment-root environment))
-              (filename (expand-file-name "bin" root))
-              (bin (and (file-directory-p filename) filename)))
-    `((name . ,(substring-no-properties environment))
-      (root . ,root)
-      (bin . ,bin))))
+(defun conda--get-environment-completion-table ()
+  "Get a completion table for environments."
+  (let ((names (conda--get-named-environments)))
+    (lambda (input predicate action)
+      (let ((table (if (file-name-directory input)
+                       conda--directory-completion-table
+                     names)))
+        (complete-with-action action table input predicate)))))
+
+(defun conda--environment-valid-p (environment table)
+  "Return non-nil if ENVIRONMENT is valid for completion TABLE."
+  (let ((completion-ignore-case nil))
+    (and (not (string-empty-p (or environment "")))
+         (test-completion environment table))))
+
+(defvar conda--environment-history nil "History for environments.")
+
+(defun conda--read-environment (prompt)
+  "Read an environment with PROMPT."
+  (let* ((history-add-new-input nil)
+         (minibuffer-completing-file-name t)
+         (table (conda--get-environment-completion-table))
+         (default (and (conda--environment-valid-p conda-default-environment
+                                                   table)
+                       conda-default-environment))
+         (input (completing-read (format-prompt prompt default) table nil t
+                                 nil 'conda--environment-history default))
+         (named (not (file-name-directory input)))
+         (environment (or (and named input)
+                          (substitute-in-file-name input))))
+    (add-to-history 'conda--environment-history environment)
+    (or (and named environment)
+        (expand-file-name environment))))
 
 ;;; Activate and deactivate environments
 
 (defvar python-shell-virtualenv-root)
 
-(defvar conda--current-environment-spec nil
-  "Spec of the current environment.")
-(put 'conda--current-environment-spec 'risky-local-variable t)
+(defvar conda--environment-stack nil "Stack of activated environments.")
+(put 'conda--environment-stack 'risky-local-variable t)
 
-(defun conda-get-current-environment ()
-  "Return the name of the current environment."
-  (and (not (file-remote-p default-directory))
-       (cdr (assq 'name conda--current-environment-spec))))
+(defun conda-environment-effective-p (&optional buffer)
+  "Return non-nil if environment is effective in BUFFER.
+BUFFER defaults to the current buffer."
+  (let ((directory (buffer-local-value 'default-directory
+                                       (or buffer (current-buffer)))))
+    (and (not (file-remote-p directory))
+         (not (local-variable-p 'process-environment buffer))
+         (not (local-variable-p 'exec-path buffer))
+         (not (local-variable-p 'python-shell-virtualenv-root buffer)))))
 
-(defun conda--get-path-directory-name (directory)
-  "Get the name of DIRECTORY suitable for search path."
-  (and directory (directory-file-name directory)))
+(defun conda-get-current-environment-label (&optional top)
+  "Return a label for currently active environments.
+If TOP is non-nil, return only the top one on the stack."
+  (when conda--environment-stack
+    (let ((indicators nil)
+          (active t))
+      (dolist (environment (or (and top (list (car conda--environment-stack)))
+                               conda--environment-stack))
+        (when active
+          (let ((indicator (car environment)))
+            (push (or (and (file-name-directory indicator)
+                           (abbreviate-file-name indicator))
+                      indicator)
+                  indicators)))
+        (setf active (cdr environment)))
+      (string-join (nreverse indicators) ":"))))
 
-(defun conda--path-add (directory search-path)
-  "Return a search path with DIRECTORY in SEARCH-PATH."
-  (let ((target (file-name-as-directory directory))
-        (directories (parse-colon-path search-path)))
-    (cl-pushnew target directories :test #'equal)
-    (mapconcat #'conda--get-path-directory-name
-               directories path-separator)))
+(defun conda--ignore-envvar-p (envvar)
+  "Return non-nil if ENVVAR should be ignored."
+  (catch 'done
+    (dolist (prefix (mapcar (lambda (name) (concat name "="))
+                            conda-ignore-envvar-names))
+      (when (string-prefix-p prefix envvar)
+        (throw 'done t)))))
 
-(defun conda--path-remove (directory search-path)
-  "Return a search path with DIRECTORY not in SEARCH-PATH."
-  (let ((target (file-name-as-directory directory))
-        (directories (parse-colon-path search-path)))
-    (mapconcat #'conda--get-path-directory-name
-               (delete target directories) path-separator)))
+(defun conda--update-environment (envvars)
+  "Update current environment with ENVVARS."
+  (unless envvars
+    (error "No envvars provided"))
+  (with-temp-buffer
+    (let ((new nil)
+          (saved nil))
+      (dolist (name conda-preserve-envvar-names)
+        (when-let* ((value (getenv name)))
+          (push (cons name value) saved)))
+      (dolist (envvar envvars)
+        (unless (conda--ignore-envvar-p envvar)
+          (push envvar new)))
+      (setf process-environment new)
+      (dolist (envvar saved)
+        (setenv (car envvar) (cdr envvar)))
+      (setf python-shell-virtualenv-root (getenv "CONDA_PREFIX"))
+      (when-let* ((path (getenv "PATH")))
+        (setf exec-path (nconc (parse-colon-path path)
+                               (list exec-directory)))))))
 
-(defun conda--prevent-local-virtualenv ()
-  "Prevent local virtualenv when appropriate."
-  (when (and conda--current-environment-spec
-             (not (file-remote-p default-directory)))
-    (kill-local-variable 'python-shell-virtualenv-root)))
-
-(defun conda--unset-local-virtualenv ()
-  "Unset virtualenv locally when appropriate."
-  (when (and conda--current-environment-spec
-             (file-remote-p default-directory)
-             (not (local-variable-p 'python-shell-virtualenv-root)))
-    (make-local-variable 'python-shell-virtualenv-root)
-    (setf python-shell-virtualenv-root nil)))
-
-(defun conda-activate (environment &optional show-message)
-  "Activate the environment named ENVIRONMENT.
-When SHOW-MESSAGE is non-nil, display helpful messages."
+(defun conda-activate (environment &optional command)
+  "Activate an ENVIRONMENT with shell COMMAND.
+COMMAND defaults to `conda-activate-command'."
   (interactive
-   (list (and (not (file-remote-p default-directory))
-              (memq system-type '(gnu/linux darwin))
-              (completing-read "Environment: " (conda--get-environments)
-                               nil t))
-         t))
+   (list (conda--read-environment "Activate environment")
+         (and current-prefix-arg
+              (conda--read-command "Activate command"
+                                   conda-activate-command))))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
-  (unless (memq system-type '(gnu/linux darwin))
-    (user-error "Current operating system not supported"))
   (when (string-empty-p (or environment ""))
-    (user-error "Conda environment not specified"))
+    (user-error "Environment not specified"))
 
-  (let ((spec (conda--get-environment-spec environment)))
-    (unless spec
-      (error "Invalid conda environment %S" environment))
-    (when conda--current-environment-spec
-      (conda-deactivate show-message))
-    (setf conda--current-environment-spec spec)
-    (run-hooks 'conda-pre-activate-hook)
+  (run-hooks 'conda-pre-activate-hook)
+  (let ((prefix (message "Activating environment %s..." environment))
+        (output (conda--shell-run (or command conda-activate-command)
+                                  environment)))
+    (if (not output)
+        (message "%sprocess exited abnormally" prefix)
+      (conda--update-environment (split-string output "\0" t))
+      (let* ((level (getenv "CONDA_SHLVL"))
+             (stacked (getenv (format "CONDA_STACKED_%s" level))))
+        (push (cons (getenv "CONDA_DEFAULT_ENV")
+                    (equal stacked "true"))
+              conda--environment-stack))
+      (run-hooks 'conda-post-activate-hook)
+      (message "%sdone" prefix))))
 
-    (let-alist spec
-      (with-temp-buffer
-        (cl-pushnew .bin exec-path :test #'equal)
-        (setenv "PATH" (conda--path-add .bin (getenv "PATH")))
-        (setenv "VIRTUAL_ENV" .root)
-        (setenv "CONDA_PREFIX" .root)
-        (setf python-shell-virtualenv-root (file-name-as-directory .root)))
-
-      (dolist (buffer (buffer-list))
-        (with-current-buffer buffer
-          (when (local-variable-p 'exec-path)
-            (cl-pushnew .bin exec-path :test #'equal))
-          (when (local-variable-p 'process-environment)
-            (setenv "PATH" (conda--path-add .bin (getenv "PATH")))
-            (setenv "VIRTUAL_ENV" .root)
-            (setenv "CONDA_PREFIX" .root))
-          (conda--prevent-local-virtualenv)
-          (when (derived-mode-p 'org-mode 'python-mode)
-            (conda--unset-local-virtualenv)))))
-
-    (run-hooks 'conda-post-activate-hook)
-    (when show-message
-      (message "Conda environment %s activated"
-               (or (cdr (assq 'name spec)) "unknown")))))
-
-(defun conda-deactivate (&optional show-message)
-  "Deactivate the current environment.
-When SHOW-MESSAGE is non-nil, display helpful messages."
-  (interactive (list t))
+(defun conda-deactivate (&optional command)
+  "Deactivate the top environment on stack with shell COMMAND.
+COMMAND defaults to `conda-deactivate-command'."
+  (interactive
+   (list (and current-prefix-arg
+              (conda--read-command "Deactivate command"
+                                   conda-deactivate-command))))
   (when (file-remote-p default-directory)
     (user-error "Remote hosts not supported"))
-  (unless (memq system-type '(gnu/linux darwin))
-    (user-error "Current operating system not supported"))
-  (unless conda--current-environment-spec
-    (user-error "No current conda environment"))
+  (unless conda--environment-stack
+    (user-error "No environment to deactivate"))
 
-  (let-alist conda--current-environment-spec
-    (setf conda--current-environment-spec nil)
-    (run-hooks 'conda-pre-deactivate-hook)
-
-    (with-temp-buffer
-      (setf exec-path (delete .bin exec-path))
-      (setenv "PATH" (conda--path-remove .bin (getenv "PATH")))
-      (setenv "VIRTUAL_ENV" nil)
-      (setenv "CONDA_PREFIX" nil)
-      (setf python-shell-virtualenv-root nil))
-
-    (dolist (buffer (buffer-list))
-      (with-current-buffer buffer
-        (when (local-variable-p 'exec-path)
-          (setf exec-path (delete .bin exec-path)))
-        (when (local-variable-p 'process-environment)
-          (setenv "PATH" (conda--path-remove .bin (getenv "PATH")))
-          (setenv "VIRTUAL_ENV" nil)
-          (setenv "CONDA_PREFIX" nil))))
-
-    (run-hooks 'conda-post-deactivate-hook)
-    (when show-message
-      (message "Conda environment %s deactivated" (or .name "unknown")))))
-
-(defun conda-activate-default (&optional show-message)
-  "Activate the default environment.
-When SHOW-MESSAGE is non-nil, display helpful messages."
-  (interactive (list t))
-  (if conda-default-environment
-      (conda-activate conda-default-environment show-message)
-    (error "Default conda environment not set")))
-
-;;; Basic integration
-
-(add-hook 'hack-local-variables-hook #'conda--prevent-local-virtualenv)
-(with-eval-after-load 'python
-  (add-hook 'python-mode-hook #'conda--unset-local-virtualenv))
-(with-eval-after-load 'org
-  (add-hook 'org-mode-hook #'conda--unset-local-virtualenv))
+  (run-hooks 'conda-pre-deactivate-hook)
+  (let* ((environment (conda-get-current-environment-label t))
+         (prefix (message "Deactivating environment %s..." environment))
+         (output (conda--shell-run (or command conda-deactivate-command))))
+    (if (not output)
+        (message "%sprocess exited abnormally" prefix)
+      (conda--update-environment (split-string output "\0" t))
+      (pop conda--environment-stack)
+      (run-hooks 'conda-post-deactivate-hook)
+      (message "%sdone" prefix))))
 
 ;;; Flycheck integration
 
+(declare-function flycheck-buffer "ext:flycheck")
 (declare-function flycheck-defined-checkers "ext:flycheck")
-(declare-function flycheck-checker-get "ext:flycheck")
 (declare-function flycheck-reset-enabled-checker "ext:flycheck")
 
 (defun conda--reset-flycheck-enabled-checkers ()
-  "Reset Flycheck enabled checker for all Python buffers."
+  "Reset Flycheck enabled checker for all Python and R buffers."
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
-      (when (and (eq major-mode 'python-mode)
-                 (bound-and-true-p flycheck-mode))
-        (dolist (checker (flycheck-defined-checkers 'modes))
-          (when (memq 'python-mode (flycheck-checker-get checker 'modes))
-            (flycheck-reset-enabled-checker checker)))))))
+      (when (and (bound-and-true-p flycheck-mode)
+                 (derived-mode-p 'python-mode 'ess-r-mode))
+        ;; Avoid rechecking too early
+        (cl-letf (((symbol-function 'flycheck-buffer) #'ignore))
+          (dolist (checker (flycheck-defined-checkers))
+            (flycheck-reset-enabled-checker checker)))
+        (flycheck-buffer)))))
 
 (with-eval-after-load 'flycheck
   (add-hook 'conda-post-activate-hook

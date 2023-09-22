@@ -343,6 +343,17 @@ If DEFAULT is non-nil, set the default value."
       (push " " indicators)
       (cons "" (nreverse indicators)))))
 
+(defvar liteline--conda-environment-label nil
+  "Label for currently active conda environments.")
+(put 'liteline--conda-environment-label 'risky-local-variable t)
+
+(defun liteline--update-conda-environment-label ()
+  "Update `liteline--conda-environment-label'."
+  (setf liteline--conda-environment-label
+        (and (fboundp 'conda-get-current-environment-label)
+             (conda-get-current-environment-label)))
+  (force-mode-line-update t))
+
 (defvar-local liteline--calc-extra nil "Extra information for Calc.")
 (put 'liteline--calc-extra 'risky-local-variable t)
 
@@ -382,11 +393,14 @@ If DEFAULT is non-nil, set the default value."
                     (eq gud-minor-mode 'pdb)
                     'gud-pdb-mode)
                major-mode)
-    ;; Python environment
-    ((python-mode inferior-python-mode gud-pdb-mode)
-     (when-let* ((env (and (fboundp 'conda-get-current-environment)
-                           (conda-get-current-environment))))
-       (format "[%s]" env)))
+    ;; Conda environment
+    ((gud-pdb-mode
+      python-mode inferior-python-mode
+      ess-r-mode inferior-ess-r-mode)
+     (when (and liteline--conda-environment-label
+                (fboundp 'conda-environment-effective-p)
+                (conda-environment-effective-p))
+       (format "[%s]" liteline--conda-environment-label)))
     ;; RefTeX
     ((reftex-index-mode)
      (when-let* ((indicator reftex-index-restriction-indicator))
@@ -422,8 +436,10 @@ If DEFAULT is non-nil, set the default value."
 (defun liteline--setup-conda ()
   "Setup conda."
   (with-eval-after-load 'conda
-    (add-hook 'conda-post-activate-hook #'force-mode-line-update)
-    (add-hook 'conda-post-deactivate-hook #'force-mode-line-update)))
+    (add-hook 'conda-post-activate-hook
+              #'liteline--update-conda-environment-label)
+    (add-hook 'conda-post-deactivate-hook
+              #'liteline--update-conda-environment-label)))
 
 (defvar-local liteline--major-mode-extra nil
   "Extra information for major mode.")

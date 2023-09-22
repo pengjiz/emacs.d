@@ -1999,13 +1999,11 @@
 (confige conda
   (:preface
    (autoload 'conda-activate "conda" nil t)
-   (autoload 'conda-activate-default "conda" nil t)
    (autoload 'conda-deactivate "conda" nil t))
   (:before
    (let ((map global-map))
-     (define-key map (kbd "C-c a p") #'conda-activate)
-     (define-key map (kbd "C-c a P") #'conda-activate-default)
-     (define-key map (kbd "C-c a o") #'conda-deactivate))))
+     (define-key map (kbd "C-c a c") #'conda-activate)
+     (define-key map (kbd "C-c a d") #'conda-deactivate))))
 
 (confige pip-requirements
   :ensure t)
