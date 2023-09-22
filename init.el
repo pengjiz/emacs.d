@@ -698,6 +698,7 @@
                         "*firestarter*"
                         "*Macroexpansion*"
                         "*Gnuplot Trail*"
+                        "*Flycheck error messages*"
                         "*Ledger Error*"
                         "*cider-error*"
                         "*cider-test-report*"
@@ -1447,7 +1448,11 @@
 
 (confige flycheck
   :ensure t :preload t
-  (:preface (declare-function flycheck-list-errors "ext:flycheck"))
+  (:preface
+   (declare-function flycheck-buffer "ext:flycheck")
+   (declare-function flycheck-next-error "ext:flycheck")
+   (declare-function flycheck-previous-error "ext:flycheck")
+   (declare-function flycheck-list-errors "ext:flycheck"))
   (:before
    (dolist (hook '(emacs-lisp-mode-hook
                    clojure-mode-hook
@@ -1464,14 +1469,23 @@
                    LaTeX-mode-hook
                    ledger-mode-hook))
      (add-hook hook #'flycheck-mode))
-   (define-key global-map (kbd "C-c t e") #'flycheck-mode))
+   (define-key global-map (kbd "C-c t e") #'flycheck-mode)
+   (setf flycheck-command-map (make-sparse-keymap)))
   (:after
    (setf flycheck-check-syntax-automatically '(save mode-enabled))
-   (define-key flycheck-mode-map (kbd "M-g l") #'flycheck-list-errors)))
+   (setf flycheck-standard-error-navigation nil)
+   (setf (symbol-function 'flycheck-maybe-display-error-at-point-soon)
+         #'init-ignore)
 
-(confige flycheck-inline
-  :ensure t
-  (:before (add-hook 'flycheck-mode-hook #'flycheck-inline-mode)))
+   (let ((map flycheck-mode-map))
+     (define-key map (kbd "M-n") #'flycheck-next-error)
+     (define-key map (kbd "M-p") #'flycheck-previous-error)
+     (define-key map (kbd "M-g l") #'flycheck-list-errors))
+   (let ((map flycheck-command-map))
+     (define-key map (kbd "!") #'flycheck-buffer)
+     (define-key map (kbd "n") #'flycheck-next-error)
+     (define-key map (kbd "p") #'flycheck-previous-error)
+     (define-key map (kbd "l") #'flycheck-list-errors))))
 
 ;;; Spell check
 

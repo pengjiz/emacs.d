@@ -297,18 +297,20 @@ COMMAND defaults to `conda-deactivate-command'."
 
 (declare-function flycheck-buffer "ext:flycheck")
 (declare-function flycheck-defined-checkers "ext:flycheck")
+(declare-function flycheck-checker-supports-major-mode-p "ext:flycheck")
 (declare-function flycheck-reset-enabled-checker "ext:flycheck")
 
 (defun conda--reset-flycheck-enabled-checkers ()
-  "Reset Flycheck enabled checker for all Python and R buffers."
+  "Reset Flycheck enabled checkers for all Python and R buffers."
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
       (when (and (bound-and-true-p flycheck-mode)
-                 (derived-mode-p 'python-mode 'ess-r-mode))
+                 (memq major-mode '(python-mode ess-r-mode)))
         ;; Avoid rechecking too early
         (cl-letf (((symbol-function 'flycheck-buffer) #'ignore))
           (dolist (checker (flycheck-defined-checkers))
-            (flycheck-reset-enabled-checker checker)))
+            (when (flycheck-checker-supports-major-mode-p checker)
+              (flycheck-reset-enabled-checker checker))))
         (flycheck-buffer)))))
 
 (with-eval-after-load 'flycheck
