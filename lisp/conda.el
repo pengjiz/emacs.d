@@ -30,16 +30,6 @@ This could also be a function that returns such a list."
                  (const :tag "None" nil))
   :safe #'string-or-null-p)
 
-(defcustom conda-preserve-envvar-names
-  '("TERM" "SHLVL" "PWD" "_")
-  "List of envvar names to preserve."
-  :type '(repeat string))
-
-(defcustom conda-ignore-envvar-names
-  '("PS1" "DISPLAY")
-  "List of envvar names to ignore."
-  :type '(repeat string))
-
 (defcustom conda-activate-command
   "conda activate \"$0\" >&2 && env -0"
   "Shell command to activate an environment."
@@ -49,6 +39,11 @@ This could also be a function that returns such a list."
   "conda deactivate >&2 && env -0"
   "Shell command to deactivate an environment."
   :type 'string)
+
+(defcustom conda-protected-envvar-names
+  '("_" "PS1" "SHLVL" "DISPLAY" "PWD" "OLDPWD" "TERM")
+  "List of names for envvars that should not be changed."
+  :type '(repeat string))
 
 (defcustom conda-pre-activate-hook
   nil
@@ -154,7 +149,7 @@ inserted after the log."
                      names)))
         (complete-with-action action table input predicate)))))
 
-(defun conda--environment-valid-p (environment table)
+(defun conda--valid-environment-p (environment table)
   "Return non-nil if ENVIRONMENT is valid for completion TABLE."
   (let ((completion-ignore-case nil))
     (and (not (string-empty-p (or environment "")))
@@ -167,7 +162,7 @@ inserted after the log."
   (let* ((history-add-new-input nil)
          (minibuffer-completing-file-name t)
          (table (conda--get-environment-completion-table))
-         (default (and (conda--environment-valid-p conda-default-environment
+         (default (and (conda--valid-environment-p conda-default-environment
                                                    table)
                        conda-default-environment))
          (input (completing-read (format-prompt prompt default) table nil t
@@ -213,34 +208,30 @@ If TOP is non-nil, return only the top one on the stack."
         (setf active (cdr environment)))
       (string-join (nreverse indicators) ":"))))
 
-(defun conda--ignore-envvar-p (envvar)
-  "Return non-nil if ENVVAR should be ignored."
-  (catch 'done
-    (dolist (prefix (mapcar (lambda (name) (concat name "="))
-                            conda-ignore-envvar-names))
-      (when (string-prefix-p prefix envvar)
-        (throw 'done t)))))
+(defun conda--protected-envvar-p (envvar)
+  "Return non-nil if ENVVAR should be protected."
+  (let* ((end (string-search "=" envvar))
+         (name (substring envvar 0 end)))
+    (member name conda-protected-envvar-names)))
 
 (defun conda--update-environment (envvars)
   "Update current environment with ENVVARS."
   (unless envvars
     (error "No envvars provided"))
   (with-temp-buffer
-    (let ((new nil)
-          (saved nil))
-      (dolist (name conda-preserve-envvar-names)
-        (when-let* ((value (getenv name)))
-          (push (cons name value) saved)))
-      (dolist (envvar envvars)
-        (unless (conda--ignore-envvar-p envvar)
+    (let ((new nil))
+      (dolist (envvar process-environment)
+        (when (conda--protected-envvar-p envvar)
           (push envvar new)))
-      (setf process-environment new)
-      (dolist (envvar saved)
-        (setenv (car envvar) (cdr envvar)))
-      (setf python-shell-virtualenv-root (getenv "CONDA_PREFIX"))
-      (when-let* ((path (getenv "PATH")))
-        (setf exec-path (nconc (parse-colon-path path)
-                               (list exec-directory)))))))
+      (dolist (envvar envvars)
+        (unless (conda--protected-envvar-p envvar)
+          (push envvar new)))
+      (setf process-environment (nreverse new)))
+
+    (setf python-shell-virtualenv-root (getenv "CONDA_PREFIX"))
+    (when-let* ((path (getenv "PATH")))
+      (setf exec-path (nconc (split-string path path-separator)
+                             (list exec-directory))))))
 
 (defun conda-activate (environment &optional command)
   "Activate an ENVIRONMENT with shell COMMAND.
