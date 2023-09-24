@@ -17,46 +17,36 @@
   (require 'cl-lib)
   (require 'let-alist))
 
-;;; Face and option
+;;; Face
 
-(defcustom eshell-extras-prompt-git-state-indicator-alist
-  '((clean . nil)
-    (dirty . "*"))
-  "Indicators for Git working tree states."
-  :type '(alist :key-type (choice (const clean)
-                                  (const dirty))
-                :value-type (choice string
-                                    (const :tag "None" nil)))
-  :group 'eshell-prompt)
-
-(defface eshell-extras-prompt-plain
+(defface eshell-extras-prompt
   '((t :inherit eshell-prompt))
-  "Face used by plain parts in the prompt."
+  "Face used by the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-directory
-  '((t :inherit (bold eshell-ls-directory)))
+  '((t :inherit (bold eshell-ls-directory eshell-extras-prompt)))
   "Face used by the current directory in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-git-branch
-  '((t :inherit (bold eshell-ls-special)))
-  "Face used by the current Git branch name in the prompt."
+  '((t :inherit (bold eshell-ls-special eshell-extras-prompt)))
+  "Face used by the Git branch name in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-git-status
-  '((t :inherit (bold warning)))
-  "Face used by the Git working tree status."
+  '((t :inherit (bold warning eshell-extras-prompt)))
+  "Face used by the Git status in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-exit-success
-  '((t :inherit success))
-  "Face used by the prompt when the last command succeeds."
+  '((t :inherit (success eshell-extras-prompt)))
+  "Face used by exit success indication in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-prompt-exit-error
-  '((t :inherit (bold error)))
-  "Face used by the prompt when the last command fails."
+  '((t :inherit (bold error eshell-extras-prompt)))
+  "Face used by exit error indication in the prompt."
   :group 'eshell-prompt)
 
 (defface eshell-extras-autosuggest-suggestion
@@ -96,7 +86,7 @@
         directory
       basename)))
 
-(defun eshell-extras--call-git-string (command &rest args)
+(defun eshell-extras--git-run (command &rest args)
   "Execute COMMAND and ARGS with Git.
 Return the first line of output if any. Otherwise return nil."
   (with-temp-buffer
@@ -108,15 +98,12 @@ Return the first line of output if any. Otherwise return nil."
 
 (defun eshell-extras--get-git-branch ()
   "Get the current Git branch name or short SHA."
-  (or (eshell-extras--call-git-string "symbolic-ref" "--short" "HEAD")
-      (eshell-extras--call-git-string "rev-parse" "--short" "HEAD")))
+  (or (eshell-extras--git-run "symbolic-ref" "--short" "HEAD")
+      (eshell-extras--git-run "rev-parse" "--short" "HEAD")))
 
 (defun eshell-extras--get-git-status ()
-  "Get the status of the current Git working tree."
-  (let ((state (if (eshell-extras--call-git-string "status" "--porcelain")
-                   'dirty
-                 'clean)))
-    (cdr (assq state eshell-extras-prompt-git-state-indicator-alist))))
+  "Get an indicator for the current Git status."
+  (and (eshell-extras--git-run "status" "--porcelain") "*"))
 
 (defun eshell-extras--get-prompt ()
   "Return a prompt string."
@@ -127,27 +114,26 @@ Return the first line of output if any. Otherwise return nil."
                    (conda-get-current-environment-label)))
          (branch (eshell-extras--get-git-branch))
          (status (and branch (eshell-extras--get-git-status)))
-         (separator (if (file-remote-p default-directory) "Λ" "λ"))
+         (tail (if (file-remote-p default-directory) "Λ" "λ"))
          (exit (if (eshell-exit-success-p)
                    'eshell-extras-prompt-exit-success
-                 'eshell-extras-prompt-exit-error)))
+                 'eshell-extras-prompt-exit-error))
+         (space (propertize " " 'face 'eshell-extras-prompt)))
     (concat
      ;; Conda environment
      (when env
-       (propertize (format "(%s)" env) 'face 'eshell-extras-prompt-plain))
-     (and env " ")
+       (propertize (format "(%s)" env) 'face 'eshell-extras-prompt))
+     (and env space)
      ;; Current working directory
      (propertize directory 'face 'eshell-extras-prompt-directory)
      ;; Git branch name or short SHA
      (when branch
        (propertize (concat "@" branch) 'face 'eshell-extras-prompt-git-branch))
-     ;; Git working tree status
+     ;; Git status
      (when status
        (propertize status 'face 'eshell-extras-prompt-git-status))
-     " "
-     ;; Separator with additional information
-     (propertize separator 'face exit)
-     " ")))
+     ;; Tail with additional information
+     space (propertize tail 'face exit) " ")))
 
 (defun eshell-extras--setup-prompt ()
   "Setup prompt."

@@ -35,11 +35,11 @@
 
 (defface liteline-buffer-name
   '((t :inherit mode-line-buffer-id))
-  "Face used by normal buffer names.")
+  "Face used by buffer names.")
 
-(defface liteline-buffer-file-missing
-  '((t :inherit (bold warning)))
-  "Face used for buffers backed by missing files.")
+(defface liteline-buffer-name-alert
+  '((t :inherit (warning liteline-buffer-name)))
+  "Face used by names of buffers with alerts.")
 
 ;;; Mode line helper
 
@@ -190,9 +190,9 @@ If DEFAULT is non-nil, set the default value."
   (let ((face (cond ((not buffer-file-name) 'liteline-buffer-name)
                     ((and (file-remote-p buffer-file-name)
                           (not (file-remote-p buffer-file-name nil t)))
-                     'liteline-buffer-file-missing)
+                     'liteline-buffer-name-alert)
                     ((not (file-exists-p buffer-file-name))
-                     'liteline-buffer-file-missing)
+                     'liteline-buffer-name-alert)
                     (t 'liteline-buffer-name))))
     (propertize "%b" 'face face)))
 

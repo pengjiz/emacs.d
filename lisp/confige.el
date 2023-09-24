@@ -67,8 +67,8 @@ should be grouped as a list."
   (push (list keyword :order order :handler handler :compact compact)
         confige-keyword-registry))
 
-(defun confige--keyword-compact-p (keyword)
-  "Return non-nil if KEYWORD should be compact."
+(defun confige--compact-keyword-p (keyword)
+  "Return non-nil if KEYWORD is registered as compact."
   (if-let* ((spec (cdr (assq keyword confige-keyword-registry))))
       (plist-get spec :compact)
     (error "Unregistered keyword %S" keyword)))
@@ -82,14 +82,14 @@ should be grouped as a list."
              (push (cons keyword arg) blocks)
              (setf keyword nil))
             ((keywordp arg)
-             (unless (confige--keyword-compact-p arg)
+             (unless (confige--compact-keyword-p arg)
                (error "Invalid format for extended keyword %S" arg))
              (setf keyword arg))
             ((listp arg)
              (let ((key (car arg)))
                (unless (keywordp key)
                  (error "Invalid argument %S" arg))
-               (when (confige--keyword-compact-p key)
+               (when (confige--compact-keyword-p key)
                  (error "Invalid format for compact keyword %S" key)))
              (push arg blocks))
             (t
