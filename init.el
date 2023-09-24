@@ -1321,7 +1321,6 @@
                                 :require '(:secret) target)))
      (push (list server 'sasl nickname password) rcirc-authinfo))
 
-   (setf rcirc-reconnect-delay 20)
    (setf rcirc-read-only-flag nil)
    (setf rcirc-omit-responses '("JOIN" "PART" "QUIT" "NICK" "AWAY")
          rcirc-omit-unless-requested '("NAMES"))
