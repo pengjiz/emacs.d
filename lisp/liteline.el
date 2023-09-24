@@ -7,7 +7,6 @@
 ;;; Code:
 
 (require 'compile)
-(require 'vc-hooks)
 (eval-when-compile
   (require 'cl-lib)
   (require 'let-alist))
@@ -39,52 +38,8 @@
   "Face used by normal buffer names.")
 
 (defface liteline-buffer-file-missing
-  '((t :inherit (bold error)))
-  "Face used for buffers backed by missing files.")
-
-(defface liteline-git-branch
-  '((t :inherit vc-up-to-date-state))
-  "Face used by Git branch names.")
-
-(defface liteline-git-new
-  '((t :inherit success))
-  "Face used for new files in Git.")
-
-(defface liteline-git-edited
-  '((t :inherit warning))
-  "Face used for edited files in Git.")
-
-(defface liteline-git-warning
   '((t :inherit (bold warning)))
-  "Face used for warnings in Git.")
-
-(defface liteline-git-error
-  '((t :inherit (bold error)))
-  "Face used for errors in Git.")
-
-(defface liteline-flycheck-general
-  '((t :inherit compilation-mode-line-run))
-  "Face used to show general Flycheck messages.")
-
-(defface liteline-flycheck-urgent
-  '((t :inherit compilation-mode-line-fail))
-  "Face used to show urgent Flycheck messages.")
-
-(defface liteline-flycheck-clean
-  '((t :inherit compilation-mode-line-exit))
-  "Face used to show there are no Flycheck issues.")
-
-(defface liteline-flycheck-info
-  '((t :inherit compilation-info))
-  "Face used by Flycheck information count.")
-
-(defface liteline-flycheck-warning
-  '((t :inherit compilation-warning))
-  "Face used by Flycheck warning count.")
-
-(defface liteline-flycheck-error
-  '((t :inherit compilation-error))
-  "Face used by Flycheck error count.")
+  "Face used for buffers backed by missing files.")
 
 ;;; Mode line helper
 
@@ -284,46 +239,12 @@ If DEFAULT is non-nil, set the default value."
          (push " %I" position))
        (and position `("" ,@position " "))))))
 
-;; Git
-(defvar-local liteline--git nil "Current Git status.")
-(put 'liteline--git 'risky-local-variable t)
-
-(defun liteline--get-git ()
-  "Return current Git status."
-  (if vc-display-status
-      (concat (propertize (substring-no-properties vc-mode 5)
-                          'face 'liteline-git-branch)
-              ":"
-              (cl-case (vc-state buffer-file-name 'Git)
-                ((up-to-date) "-")
-                ((edited) (propertize "*" 'face 'liteline-git-edited))
-                ((added) (propertize "+" 'face 'liteline-git-new))
-                ((conflict) (propertize "=" 'face 'liteline-git-error))
-                ((removed) (propertize "!" 'face 'liteline-git-warning))
-                ((needs-update) (propertize "^" 'face 'liteline-git-warning))
-                ((needs-merge) (propertize "&" 'face 'liteline-git-warning))
-                ((ignored) "~")
-                (otherwise (propertize "?" 'face 'liteline-git-error))))
-    "Git"))
-
-(defun liteline--update-git (&rest _)
-  "Update `liteline--git'."
-  (if (and buffer-file-name
-           vc-mode
-           (eq (vc-backend buffer-file-name) 'Git))
-      (setf liteline--git (liteline--get-git))
-    (setf liteline--git nil))
-  (force-mode-line-update))
-
-(defun liteline--setup-git ()
-  "Setup Git integration."
-  (advice-add 'vc-mode-line :after #'liteline--update-git))
-
-(liteline-define-segment git
-  "Show Git status."
+;; Version control
+(liteline-define-segment vc
+  "Show version control information."
   (and (mode-line-window-selected-p)
-       liteline--git
-       '(" " liteline--git " ")))
+       (bound-and-true-p vc-mode)
+       '("" vc-mode " ")))
 
 ;; Modes
 (defvar gud-minor-mode)
@@ -456,53 +377,70 @@ If DEFAULT is non-nil, set the default value."
     mode-line-process
     " "))
 
-;; Flycheck
+;; Linting
 (defvar flycheck-current-errors)
+(defvar flycheck-mode-line-prefix)
+(defvar flymake-mode-line-exception)
 (declare-function flycheck-count-errors "ext:flycheck")
+(declare-function flymake--mode-line-exception "flymake")
 
-(defvar-local liteline--flycheck nil "Current Flycheck status.")
-(put 'liteline--flycheck 'risky-local-variable t)
+(defvar-local liteline--flycheck-status nil "Current Flycheck status.")
+(put 'liteline--flycheck-status 'risky-local-variable t)
 
-(defun liteline--update-flycheck (&optional status)
-  "Update `liteline--flycheck' according to STATUS."
-  (setf liteline--flycheck
+(defun liteline--update-flycheck-status (&optional status)
+  "Update `liteline--flycheck-status' according to STATUS."
+  (setf liteline--flycheck-status
         (cl-case status
-          ((no-checker)
-           (propertize "No checker" 'face 'liteline-flycheck-general))
-          ((running)
-           (propertize "Running" 'face 'liteline-flycheck-general))
-          ((errored)
-           (propertize "Errored" 'face 'liteline-flycheck-urgent))
-          ((interrupted)
-           (propertize "Interrupted" 'face 'liteline-flycheck-general))
-          ((suspicious)
-           (propertize "Unknown" 'face 'liteline-flycheck-urgent))
+          ((no-checker) "-")
+          ((running) (propertize "*" 'face 'compilation-mode-line-run))
+          ((errored) (propertize "!" 'face 'compilation-mode-line-fail))
+          ((interrupted) ".")
+          ((suspicious) (propertize "?" 'face 'compilation-mode-line-fail))
           ((finished)
            (let-alist (flycheck-count-errors flycheck-current-errors)
-             (if (or .error .warning .info)
-                 (concat (propertize (format "%dE" (or .error 0))
-                                     'face 'liteline-flycheck-error)
-                         " "
-                         (propertize (format "%dW" (or .warning 0))
-                                     'face 'liteline-flycheck-warning)
-                         " "
-                         (propertize (format "%dI" (or .info 0))
-                                     'face 'liteline-flycheck-info))
-               (propertize "No issues"
-                           'face 'liteline-flycheck-clean)))))))
+             (when (or .error .warning .info)
+               (apply #'format "[%s %s %s]"
+                      (mapcar (lambda (count)
+                                (propertize (number-to-string (car count))
+                                            'face (cdr count)))
+                              `((,(or .error 0) . compilation-error)
+                                (,(or .warning 0) . compilation-warning)
+                                (,(or .info 0) . compilation-info))))))))))
+
+(defun liteline--get-flycheck-status (&rest _)
+  "Return an indicator for Flycheck status."
+  (concat " " flycheck-mode-line-prefix liteline--flycheck-status))
 
 (defun liteline--setup-flycheck ()
   "Setup Flycheck."
   (with-eval-after-load 'flycheck
-    (add-hook 'flycheck-status-changed-functions #'liteline--update-flycheck)
-    ;; Reset status
-    (add-hook 'flycheck-mode-hook #'liteline--update-flycheck)))
+    (add-hook 'flycheck-mode-hook #'liteline--update-flycheck-status)
+    (add-hook 'flycheck-status-changed-functions
+              #'liteline--update-flycheck-status)
+    (setf (symbol-function 'flycheck-mode-line-status-text)
+          #'liteline--get-flycheck-status)))
 
-(liteline-define-segment flycheck
-  "Show Flycheck status."
-  (and (mode-line-window-selected-p)
-       liteline--flycheck
-       '(" " liteline--flycheck " ")))
+(defun liteline--get-flymake-exception ()
+  "Return an indicator for exceptional Flymake status."
+  (when-let* ((indicator (cadr (flymake--mode-line-exception)))
+              (status (cadr indicator)))
+    (cl-case (aref status 0)
+      ((??) "-")
+      ((?W) (propertize "*" 'face 'compilation-mode-line-run))
+      ((?!) (propertize "!" 'face 'compilation-mode-line-fail)))))
+
+(defun liteline--setup-flymake ()
+  "Setup Flymake."
+  (setf flymake-mode-line-exception
+        '(:eval (liteline--get-flymake-exception))))
+
+(liteline-define-segment linting
+  "Show linting related information."
+  (when (mode-line-window-selected-p)
+    (cond ((bound-and-true-p flycheck-mode)
+           '("" flycheck-mode-line " "))
+          ((bound-and-true-p flymake-mode)
+           '("" flymake-mode-line-format " ")))))
 
 ;; Misc information
 (defvar-local liteline--ispell-misc nil "Misc information for ispell.")
@@ -549,18 +487,18 @@ If DEFAULT is non-nil, set the default value."
 ;; Main
 (liteline-define-mode-line main
   (transient basic position)
-  (git modes flycheck misc))
+  (vc modes linting misc))
 
 ;;; Entry point
 
 (defun liteline-setup ()
   "Setup mode line."
   (liteline--setup-wincom)
-  (liteline--setup-git)
   (liteline--setup-calc)
   (liteline--setup-reftex)
   (liteline--setup-conda)
   (liteline--setup-flycheck)
+  (liteline--setup-flymake)
   (liteline--setup-ispell)
 
   (liteline-set-mode-line 'main t))
