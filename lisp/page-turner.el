@@ -47,35 +47,54 @@ If nil use value of `fill-column'."
 
 ;;; Prose style
 
+(defvar visual-fill-column-width)
+(defvar visual-fill-column-center-text)
+(defvar visual-fill-column-fringes-outside-margins)
+(declare-function face-remap-remove-relative "face-remap")
+
+(defvar-local page-turner--font-remapping-cookies nil
+  "Face remapping cookies added for prose font.")
+
+(defun page-turner--reset-font ()
+  "Reset font to default."
+  (dolist (cookie page-turner--font-remapping-cookies)
+    (face-remap-remove-relative cookie))
+  (setf page-turner--font-remapping-cookies nil))
+
+(defun page-turner--set-prose-font ()
+  "Set font for prose."
+  (page-turner--reset-font)
+  (when page-turner-prose-family
+    (push (face-remap-add-relative 'variable-pitch :family
+                                   page-turner-prose-family)
+          page-turner--font-remapping-cookies))
+  (when page-turner-prose-height
+    (push (face-remap-add-relative 'variable-pitch :height
+                                   page-turner-prose-height)
+          page-turner--font-remapping-cookies)))
+
+(defun page-turner--set-prose-styles (&rest _)
+  "Set styles for prose."
+  (setf line-spacing page-turner-prose-line-spacing)
+  (page-turner--set-prose-font)
+  ;; NOTE: For some unknown reason it is necessary to enable the mode before
+  ;; setting the options.
+  (unless (bound-and-true-p visual-fill-column-mode)
+    (visual-fill-column-mode))
+  (setf visual-fill-column-width page-turner-text-width
+        visual-fill-column-center-text t
+        visual-fill-column-fringes-outside-margins t)
+  (unless (bound-and-true-p visual-line-mode)
+    (visual-line-mode)))
+
+;;; EWW
+
 (defvar shr-width)
 (defvar shr-max-width)
 (defvar shr-use-fonts)
 (defvar shr-internal-width)
 (defvar shr-table-separator-pixel-width)
-(defvar visual-fill-column-width)
-(defvar visual-fill-column-center-text)
-(declare-function face-remap-remove-relative "face-remap")
 
-(defvar-local page-turner--face-remapping-cookies nil
-  "Face remapping cookies added.")
-(defvar-local page-turner--in-prose-styles nil
-  "Whether the current buffer is in prose styles.")
-
-(defun page-turner--disable-shr-filling (fn &rest args)
-  "Apply FN on ARGS, but disable `shr-fill-line'."
-  (cl-letf (((symbol-function 'shr-fill-line) #'ignore))
-    (apply fn args)))
-
-;; NOTE: Even if text filling is disabled the width is still used for rendering
-;; some elements. So here we set the width properly.
-(defun page-turner--set-shr-width (fn &rest args)
-  "Apply FN on ARGS, but force using `page-turner-text-width'."
-  (let ((shr-width nil)
-        (shr-max-width (or page-turner-text-width fill-column)))
-    (apply fn args)))
-
-;; HACK: For some reason the hr line will be one character longer than expected,
-;; so here we use a hack to adjust the width.
 (defun page-turner--tag-shr-hr (_)
   "Keep the original `shr-tag-hr' function."
   nil)
@@ -83,19 +102,6 @@ If nil use value of `fill-column'."
   (setf (symbol-function 'page-turner--tag-shr-hr)
         (symbol-function 'shr-tag-hr)))
 
-(defun page-turner--adjust-shr-hr-width (fn &rest args)
-  "Apply FN on ARGS, but adjust hr line width."
-  (cl-letf (((symbol-function 'shr-tag-hr)
-             (lambda (dom)
-               (let ((shr-internal-width (if shr-use-fonts
-                                             (- shr-internal-width
-                                                shr-table-separator-pixel-width)
-                                           shr-internal-width)))
-                 (page-turner--tag-shr-hr dom)))))
-    (apply fn args)))
-
-;; HACK: When rendering tables sometimes line truncating will be turned on,
-;; which is undesirable in prose styles. So here we use a hack to avoid that.
 (defun page-turner--tag-shr-table (_)
   "Keep the original `shr-tag-table' function."
   nil)
@@ -103,91 +109,83 @@ If nil use value of `fill-column'."
   (setf (symbol-function 'page-turner--tag-shr-table)
         (symbol-function 'shr-tag-table)))
 
-(defun page-turner--avoid-shr-truncating (fn &rest args)
-  "Apply FN on ARGS, but avoid line truncating."
-  (cl-letf (((symbol-function 'shr-tag-table)
+(defun page-turner--adjust-shr-rendering (fn &rest args)
+  "Apply FN on ARGS but adjust HTML rendering."
+  (cl-letf ((shr-width nil)
+            (shr-max-width (or page-turner-text-width fill-column))
+            ;; Disable line filling
+            ((symbol-function 'shr-fill-line) #'ignore)
+            ;; Adjust length of the horizontal rule
+            ((symbol-function 'shr-tag-hr)
+             (lambda (dom)
+               (let* ((extra (and shr-use-fonts
+                                  shr-table-separator-pixel-width))
+                      (shr-internal-width (- shr-internal-width
+                                             (or extra 0))))
+                 (page-turner--tag-shr-hr dom))))
+            ;; Disable line truncating for tables
+            ((symbol-function 'shr-tag-table)
              (lambda (dom)
                (let ((truncate-lines nil))
                  (page-turner--tag-shr-table dom)))))
     (apply fn args)))
 
-(defun page-turner--reset-font ()
-  "Reset font to default."
-  (dolist (cookie page-turner--face-remapping-cookies)
-    (face-remap-remove-relative cookie))
-  (setf page-turner--face-remapping-cookies nil))
+(defvar page-turner--use-eww-prose-styles nil
+  "Whether to use prose styles for EWW.")
 
-(defun page-turner--set-prose-font ()
-  "Set font for prose."
-  (page-turner--reset-font)
-  (when page-turner-prose-family
-    (push (face-remap-add-relative 'variable-pitch
-                                   :family page-turner-prose-family)
-          page-turner--face-remapping-cookies))
-  (when page-turner-prose-height
-    (push (face-remap-add-relative 'variable-pitch
-                                   :height page-turner-prose-height)
-          page-turner--face-remapping-cookies)))
-
-(defun page-turner--set-prose-styles (&rest _)
-  "Set styles for prose."
-  (unless page-turner--in-prose-styles
-    ;; Set spacing
-    (setf line-spacing page-turner-prose-line-spacing)
-    ;; Set font
-    (page-turner--set-prose-font)
-    ;; Center text
-    (setf visual-fill-column-width page-turner-text-width
-          visual-fill-column-center-text t)
-    (unless (bound-and-true-p visual-fill-column-mode)
-      (visual-fill-column-mode))
-    (unless (bound-and-true-p visual-line-mode)
-      (visual-line-mode))
-    (setf page-turner--in-prose-styles t)))
-
-;;; EWW
-
-(defun page-turner--reset-eww-styles (&rest args)
-  "Reset styles for EWW buffer in ARGS."
+(defun page-turner--set-eww-styles (&rest args)
+  "Set styles appropriately for EWW buffer in ARGS."
   (let ((buffer (nth 4 args)))
-    (when (and (buffer-live-p buffer)
-               (buffer-local-value 'page-turner--in-prose-styles buffer))
+    (when (buffer-live-p buffer)
       (with-current-buffer buffer
-        (kill-local-variable 'line-spacing)
-        (page-turner--reset-font)
-        (kill-local-variable 'visual-fill-column-width)
-        (kill-local-variable 'visual-fill-column-center-text)
-        (when (bound-and-true-p visual-fill-column-mode)
-          (visual-fill-column-mode 0))
-        (when (bound-and-true-p visual-line-mode)
-          (visual-line-mode 0))
-        (setf page-turner--in-prose-styles nil)))))
+        (if page-turner--use-eww-prose-styles
+            (page-turner--set-prose-styles)
+          (kill-local-variable 'line-spacing)
+          (page-turner--reset-font)
+          ;; NOTE: For some unknown reason it is necessary to disable the mode
+          ;; before resetting the options.
+          (when (bound-and-true-p visual-fill-column-mode)
+            (visual-fill-column-mode 0))
+          (kill-local-variable 'visual-fill-column-width)
+          (kill-local-variable 'visual-fill-column-center-text)
+          (kill-local-variable 'visual-fill-column-fringes-outside-margins)
+          (when (bound-and-true-p visual-line-mode)
+            (visual-line-mode 0)))))))
+
+(defun page-turner--add-eww-prose-hint (fn &rest args)
+  "Apply FN on ARGS but add a hint of prose styles for EWW."
+  (let ((page-turner--use-eww-prose-styles t))
+    (apply fn args)))
 
 (defun page-turner--setup-eww ()
   "Setup EWW integration."
   (with-eval-after-load 'eww
-    (advice-add 'eww-readable :around #'page-turner--disable-shr-filling)
-    (advice-add 'eww-readable :around #'page-turner--set-shr-width)
-    (advice-add 'eww-readable :after #'page-turner--set-prose-styles)
-    (advice-add 'eww-readable :around #'page-turner--adjust-shr-hr-width)
-    (advice-add 'eww-readable :around #'page-turner--avoid-shr-truncating)
-    (advice-add 'eww-display-html :before #'page-turner--reset-eww-styles)))
-
-;;; Nov mode
-
-(defvar nov-text-width)
-(defvar nov-variable-pitch)
-
-(defun page-turner--setup-nov ()
-  "Setup nov mode integration."
-  (with-eval-after-load 'nov
-    (setf nov-text-width t
-          nov-variable-pitch t)
-    (add-hook 'nov-mode-hook #'page-turner--set-prose-styles)))
+    (advice-add 'eww-readable :around #'page-turner--adjust-shr-rendering)
+    (advice-add 'eww-readable :around #'page-turner--add-eww-prose-hint)
+    (advice-add 'eww-display-html :before #'page-turner--set-eww-styles)))
 
 ;;; Elfeed
 
+(defvar elfeed-show-entry-switch)
+(defvar elfeed-show-refresh-function)
+(declare-function elfeed-show-refresh "ext:elfeed-show")
 (declare-function eww-readable "eww")
+
+(defun page-turner--adjust-elfeed-link-length (fn &rest args)
+  "Apply FN on ARGS but adjust link text length for Elfeed."
+  (let ((shr-width (or page-turner-text-width fill-column)))
+    (apply fn args)))
+
+;; Some images are scaled based on the window size, so here we display the
+;; buffer first before rendering.
+(defun page-turner--adjust-elfeed-image-size (fn &rest args)
+  "Apply FN on ARGS but adjust image size for Elfeed."
+  (let ((buffer (let ((elfeed-show-entry-switch #'identity)
+                      (elfeed-show-refresh-function #'ignore))
+                  (apply fn args))))
+    (prog1 (funcall elfeed-show-entry-switch buffer)
+      (with-current-buffer buffer
+        (elfeed-show-refresh)))))
 
 (defun page-turner--eww-readable-once ()
   "View EWW readable parts only once."
@@ -218,12 +216,12 @@ If nil use value of `fill-column'."
       (advice-add 'elfeed-search-browse-url :around
                   #'page-turner--use-elfeed-eww)))
   (with-eval-after-load 'elfeed-show
-    (advice-add 'elfeed-insert-html :around #'page-turner--disable-shr-filling)
-    (advice-add 'elfeed-insert-html :around #'page-turner--set-shr-width)
-    (advice-add 'elfeed-insert-link :around #'page-turner--set-shr-width)
-    (advice-add 'elfeed-insert-html :around #'page-turner--adjust-shr-hr-width)
-    (advice-add 'elfeed-insert-html :around #'page-turner--avoid-shr-truncating)
+    (advice-add 'elfeed-insert-html :around #'page-turner--adjust-shr-rendering)
     (add-hook 'elfeed-show-mode-hook #'page-turner--set-prose-styles)
+    (advice-add 'elfeed-insert-link :around
+                #'page-turner--adjust-elfeed-link-length)
+    (advice-add 'elfeed-show-entry :around
+                #'page-turner--adjust-elfeed-image-size)
     (when page-turner-setup-elfeed-eww
       (advice-add 'elfeed-show-visit :around #'page-turner--use-elfeed-eww))))
 
@@ -247,6 +245,18 @@ If nil use value of `fill-column'."
     (setf markdown-live-preview-window-function
           #'page-turner--get-markdown-live-preview-buffer)))
 
+;;; Nov mode
+
+(defvar nov-text-width)
+(defvar nov-variable-pitch)
+
+(defun page-turner--setup-nov ()
+  "Setup nov mode integration."
+  (with-eval-after-load 'nov
+    (setf nov-text-width t
+          nov-variable-pitch t)
+    (add-hook 'nov-mode-hook #'page-turner--set-prose-styles)))
+
 ;;; Man
 
 (defvar Man-width)
@@ -263,9 +273,9 @@ If nil use value of `fill-column'."
 (defun page-turner-setup ()
   "Setup tweaks and hacks for improving reading experience."
   (page-turner--setup-eww)
-  (page-turner--setup-nov)
   (page-turner--setup-elfeed)
   (page-turner--setup-markdown)
+  (page-turner--setup-nov)
   (page-turner--setup-man))
 
 (provide 'page-turner)
