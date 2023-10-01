@@ -176,8 +176,6 @@ inserted after the log."
 
 ;;; Activate and deactivate environments
 
-(defvar python-shell-virtualenv-root)
-
 (defvar conda--environment-stack nil "Stack of activated environments.")
 (put 'conda--environment-stack 'risky-local-variable t)
 
@@ -227,8 +225,6 @@ If TOP is non-nil, return only the top one on the stack."
         (unless (conda--protected-envvar-p envvar)
           (push envvar new)))
       (setf process-environment (nreverse new)))
-
-    (setf python-shell-virtualenv-root (getenv "CONDA_PREFIX"))
     (when-let* ((path (getenv "PATH")))
       (setf exec-path (nconc (split-string path path-separator)
                              (list exec-directory))))))
