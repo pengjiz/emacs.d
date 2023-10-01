@@ -122,6 +122,26 @@ If DEFAULT is non-nil, set the default value."
           mode-line-format)
         (list "%e" (liteline--prepare-mode-line name))))
 
+;; Active window
+(defvar liteline--active-window nil "Currently active window.")
+
+(defun liteline--update-active-window (&rest _)
+  "Update `liteline--active-window'."
+  (let ((window (selected-window)))
+    (setf liteline--active-window
+          (if (minibuffer-window-active-p window)
+              (minibuffer-selected-window)
+            window))))
+
+(defun liteline-active-window-p ()
+  "Return non-nil if the selected window is currently active."
+  (eq (selected-window) liteline--active-window))
+
+(defun liteline--setup-active-window ()
+  "Setup active window tracking."
+  (liteline--update-active-window)
+  (add-hook 'pre-redisplay-functions #'liteline--update-active-window))
+
 ;;; Segment
 
 ;; Transient information
@@ -172,7 +192,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment transient
   "Show transient information."
-  (let ((active (mode-line-window-selected-p))
+  (let ((active (liteline-active-window-p))
         (indicators nil))
     (dolist (indicator (list (liteline--get-window-indicator)
                              (and active (liteline--get-editing-depth))
@@ -242,7 +262,7 @@ If DEFAULT is non-nil, set the default value."
 ;; Version control
 (liteline-define-segment vc
   "Show version control information."
-  (and (mode-line-window-selected-p)
+  (and (liteline-active-window-p)
        (bound-and-true-p vc-mode)
        '("" vc-mode " ")))
 
@@ -436,7 +456,7 @@ If DEFAULT is non-nil, set the default value."
 
 (liteline-define-segment linting
   "Show linting related information."
-  (when (mode-line-window-selected-p)
+  (when (liteline-active-window-p)
     (cond ((bound-and-true-p flycheck-mode)
            '("" flycheck-mode-line " "))
           ((bound-and-true-p flymake-mode)
@@ -473,10 +493,10 @@ If DEFAULT is non-nil, set the default value."
   "Show misc information."
   (cl-case major-mode
     ((Man-mode)
-     (and (mode-line-window-selected-p)
+     (and (liteline-active-window-p)
           '(" " Man-page-mode-string " ")))
     ((Info-mode)
-     (and (mode-line-window-selected-p)
+     (and (liteline-active-window-p)
           `("" ,(cadr mode-line-buffer-identification) " ")))
     (otherwise
      (and liteline--ispell-misc
@@ -493,6 +513,7 @@ If DEFAULT is non-nil, set the default value."
 
 (defun liteline-setup ()
   "Setup mode line."
+  (liteline--setup-active-window)
   (liteline--setup-wincom)
   (liteline--setup-calc)
   (liteline--setup-reftex)
