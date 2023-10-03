@@ -1413,9 +1413,7 @@
 
 (confige xref
   :preload t
-  (:after
-   (when (executable-find "rg")
-     (setf xref-search-program 'ripgrep))))
+  (:after (setf xref-search-program 'ripgrep)))
 
 (confige etags
   :preload t
