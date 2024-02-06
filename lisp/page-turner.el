@@ -49,7 +49,6 @@ If nil use value of `fill-column'."
 
 (defvar visual-fill-column-width)
 (defvar visual-fill-column-center-text)
-(defvar visual-fill-column-fringes-outside-margins)
 (declare-function face-remap-remove-relative "face-remap")
 
 (defvar-local page-turner--font-remapping-cookies nil
@@ -82,8 +81,7 @@ If nil use value of `fill-column'."
   (unless (bound-and-true-p visual-fill-column-mode)
     (visual-fill-column-mode))
   (setf visual-fill-column-width page-turner-text-width
-        visual-fill-column-center-text t
-        visual-fill-column-fringes-outside-margins t)
+        visual-fill-column-center-text t)
   (unless (bound-and-true-p visual-line-mode)
     (visual-line-mode)))
 
@@ -148,7 +146,6 @@ If nil use value of `fill-column'."
             (visual-fill-column-mode 0))
           (kill-local-variable 'visual-fill-column-width)
           (kill-local-variable 'visual-fill-column-center-text)
-          (kill-local-variable 'visual-fill-column-fringes-outside-margins)
           (when (bound-and-true-p visual-line-mode)
             (visual-line-mode 0)))))))
 

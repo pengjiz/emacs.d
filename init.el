@@ -105,9 +105,11 @@
               emulation-mode-map-alists
               :test #'equal)
 
-  ;; NOTE: Theme files are not in the load path so we cannot use autoloading or
-  ;; specify the file for this command.
+  ;; NOTE: Builtin theme files are not in the load path, so autoloading and some
+  ;; usual methods may not work for themes.
+  (defvar modus-themes-fringes)
   (declare-function modus-themes-toggle nil)
+  (setf modus-themes-fringes nil)
   (load-theme 'modus-vivendi)
   (define-key global-map (kbd "C-c t m") #'modus-themes-toggle)
 
