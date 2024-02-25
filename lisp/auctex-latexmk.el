@@ -91,7 +91,7 @@
 (defconst auctex-latexmk--command
   `(,auctex-latexmk--command-name
     "latexmk %(latexmkopts) %S%(mode)%(file-line-error) %(extraopts) %t"
-    auctex-latexmk--run nil (latex-mode doctex-mode)
+    auctex-latexmk--run nil (LaTeX-mode docTeX-mode)
     :help "Run Latexmk")
   "Command for Latexmk.")
 

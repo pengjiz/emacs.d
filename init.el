@@ -356,7 +356,7 @@
                                                   'scheme-mode
                                                   'sh-mode
                                                   'css-mode
-                                                  'latex-mode
+                                                  'LaTeX-mode
                                                   'ledger-mode)
                                   '(company-capf))
                                  ((derived-mode-p 'c-mode 'c++-mode)
@@ -2081,7 +2081,7 @@
 
       (let ((commands nil))
         (push '("TeXcount" "texcount -utf8 -inc %t"
-                TeX-run-background nil (latex-mode)
+                TeX-run-background nil (LaTeX-mode)
                 :help "Count words in the document")
               commands)
         (dolist (command TeX-command-list)
@@ -2133,7 +2133,7 @@
   (:preface (autoload 'latex-snippets-file-template "latex-snippets" nil t))
   (:before
    (with-eval-after-load 'autoinsert
-     (define-auto-insert '(latex-mode . "LaTeX file template")
+     (define-auto-insert '(LaTeX-mode . "LaTeX file template")
        #'latex-snippets-file-template))))
 
 (confige reftex
