@@ -16,56 +16,51 @@
 (defun auctex-latexmk--run (name command file)
   "Create process for NAME using COMMAND on FILE with Latexmk."
   (unless (memq TeX-engine '(default xetex luatex))
-    (error "Latexmk with %s not supported"
-           (or (cadr (assq TeX-engine (TeX-engine-alist)))
-               TeX-engine)))
-  (when (and (memq TeX-engine '(xetex luatex))
-             (or (not TeX-PDF-mode) (TeX-PDF-from-DVI)))
-    (error "Latexmk with %s only supported for direct PDF output"
-           (or (cadr (assq TeX-engine (TeX-engine-alist)))
-               TeX-engine)))
+    (error "Unsupported engine for Latexmk"))
+  (when (or (and (memq TeX-engine '(xetex luatex))
+                 (or (not TeX-PDF-mode) (TeX-PDF-from-DVI)))
+            (and (eq TeX-engine 'default)
+                 (not TeX-PDF-mode) TeX-DVI-via-PDFTeX))
+    (error "Unsupported engine and output combination for Latexmk"))
   (let ((TeX-sentinel-default-function #'auctex-latexmk--sentinel))
     (TeX-run-TeX name command file)))
 
 ;;; Command sentinel
 
-(defconst auctex-latexmk--rule-regexp
-  (rx bol
-      "Run number "
-      (1+ digit)
-      " of rule '"
-      (group (1+ (or alnum space)))
-      "'")
-  "Pattern for Latexmk rule output.")
-
 (defun auctex-latexmk--sentinel (process name)
   "Cleanup Latexmk output buffer after running PROCESS for NAME."
-  (save-excursion
-    (goto-char (point-max))
-    (forward-line -1)
-    (let ((succeeded (re-search-forward "finished at" nil t))
-          (updated (re-search-backward auctex-latexmk--rule-regexp nil t))
-          (xdv-used (equal (TeX-match-buffer 1) "xdvipdfmx")))
-      (when xdv-used
-        (re-search-backward auctex-latexmk--rule-regexp nil t))
+  (rx-let ((prefix (seq bol "Latexmk: "))
+           (rule (name) (seq bol "Run number " (1+ digit)
+                             " of rule '" name "'")))
+    (save-excursion
+      (goto-char (point-max))
       (cond
-       ((and updated (string-match-p "latex\\'" (TeX-match-buffer 1)))
+       ((re-search-backward (rx (rule (or "latex" "pdflatex"
+                                          "xelatex" "lualatex")))
+                            nil t)
         (forward-line 5)
         (let ((start (point)))
-          (re-search-forward "^Latexmk:" nil t)
+          (re-search-forward (rx prefix) nil t)
           (forward-line 0)
           (save-restriction
             (narrow-to-region start (point))
             (goto-char (point-min))
             (TeX-LaTeX-sentinel process name)))
-        (when (and xdv-used succeeded)
-          (setf TeX-output-extension "pdf"))
-        (unless succeeded
-          (setf TeX-command-next TeX-command-default)))
-       (succeeded
-        (message "%s: %s" name (or (and updated "done")
-                                   "document is up to date"))
-        (setf TeX-command-next TeX-command-Show))
+        (if (/= 0 (process-exit-status process))
+            (setf TeX-command-next TeX-command-default)
+          (when (and (equal TeX-output-extension "xdv")
+                     (re-search-forward (rx (rule "xdvipdfmx")) nil t))
+            (setf TeX-output-extension "pdf"))))
+       ((= 0 (process-exit-status process))
+        (message "%s: %s" name (if (re-search-backward (rx prefix
+                                                           "Nothing to do"
+                                                           " for '")
+                                                       nil t)
+                                   "document already up-to-date"
+                                 "done"))
+        (setf TeX-command-next (or (with-current-buffer TeX-command-buffer
+                                     (and TeX-PDF-mode (TeX-PDF-from-DVI)))
+                                   TeX-command-Show)))
        (t
         (message "%s process exited abnormally" name)
         (setf TeX-command-next TeX-command-default))))))
