@@ -686,7 +686,7 @@
                         "*BibTeX validation errors*"
                         "*R dired*"
                         "*eshell"
-                        (and "*" (1+ nonl) "-eshell*")))
+                        (seq "*" (1+ nonl) "-eshell*")))
            (display-buffer-reuse-window
             display-buffer-at-bottom)
            (window-height . 15)
@@ -714,7 +714,7 @@
                         "*S search list*"
                         "*ess-output*"
                         "*TeX background*"
-                        (and "*" (1+ nonl) (or " output*"
+                        (seq "*" (1+ nonl) (or " output*"
                                                "-compilation*"))))
            (display-buffer-reuse-window
             display-buffer-in-side-window)

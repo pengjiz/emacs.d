@@ -75,8 +75,8 @@
 (defvar pest-syntax-propertize-function
   (syntax-propertize-rules
    ((rx (group "'")
-        (or (and "\\" (or (and "u{" (** 1 6 hex) "}")
-                          (and "x" (= 2 hex))
+        (or (seq "\\" (or (seq "u{" (** 1 6 hex) "}")
+                          (seq "x" (= 2 hex))
                           (in "nrt0\'\"\\")))
             (not (in "'\\")))
         (group "'"))

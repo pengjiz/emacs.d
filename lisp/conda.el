@@ -74,10 +74,13 @@ inserted after the log."
   (with-current-buffer (get-buffer-create " *conda*")
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (insert (shell-quote-argument shell-file-name) " "
-              (shell-quote-argument shell-command-switch) " "
-              (format "'%s'" command) " "
-              (mapconcat #'shell-quote-argument args " ") "\n")
+      (insert (mapconcat #'shell-quote-argument
+                         (nconc (list shell-file-name
+                                      shell-command-switch
+                                      command)
+                                args)
+                         " ")
+              "\n")
       (insert-file-contents logfile)
       (goto-char (point-max))
       (insert (format "Process exited with status %s" status)))))
