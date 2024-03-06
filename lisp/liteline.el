@@ -418,14 +418,13 @@ If DEFAULT is non-nil, set the default value."
           ((suspicious) (propertize "?" 'face 'compilation-mode-line-fail))
           ((finished)
            (let-alist (flycheck-count-errors flycheck-current-errors)
-             (when (or .error .warning .info)
-               (apply #'format "[%s %s %s]"
-                      (mapcar (lambda (count)
-                                (propertize (number-to-string (car count))
-                                            'face (cdr count)))
-                              `((,(or .error 0) . compilation-error)
-                                (,(or .warning 0) . compilation-warning)
-                                (,(or .info 0) . compilation-info))))))))))
+             (apply #'format "[%s %s %s]"
+                    (mapcar (lambda (count)
+                              (propertize (number-to-string (car count))
+                                          'face (cdr count)))
+                            `((,(or .error 0) . compilation-error)
+                              (,(or .warning 0) . compilation-warning)
+                              (,(or .info 0) . compilation-info)))))))))
 
 (defun liteline--get-flycheck-status (&rest _)
   "Return an indicator for Flycheck status."
