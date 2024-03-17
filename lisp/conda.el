@@ -31,7 +31,7 @@ This could also be a function that returns such a list."
   :safe #'string-or-null-p)
 
 (defcustom conda-activate-command
-  "conda activate \"$0\" >&2 && env -0"
+  "conda activate \"$1\" >&2 && env -0"
   "Shell command to activate an environment."
   :type 'string)
 
@@ -77,7 +77,8 @@ inserted after the log."
       (insert (mapconcat #'shell-quote-argument
                          (nconc (list shell-file-name
                                       shell-command-switch
-                                      command)
+                                      command
+                                      shell-file-name)
                                 args)
                          " ")
               "\n")
@@ -101,7 +102,8 @@ inserted after the log."
         (with-temp-buffer
           (let ((status (apply #'call-process shell-file-name
                                nil (list t logfile) nil
-                               shell-command-switch command args)))
+                               shell-command-switch command
+                               shell-file-name args)))
             (conda--insert-log logfile command args status)
             (when (eq status 0)
               (buffer-substring-no-properties (point-min) (point-max)))))
