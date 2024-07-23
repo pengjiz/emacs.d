@@ -110,7 +110,7 @@
   (defvar modus-themes-fringes)
   (declare-function modus-themes-toggle nil)
   (setf modus-themes-fringes nil)
-  (load-theme 'modus-vivendi)
+  (load-theme 'modus-operandi)
   (define-key global-map (kbd "C-c t m") #'modus-themes-toggle)
 
   (with-eval-after-load 'faces
