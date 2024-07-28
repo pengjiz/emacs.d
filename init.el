@@ -107,9 +107,7 @@
 
   ;; NOTE: Builtin theme files are not in the load path, so autoloading and some
   ;; usual methods may not work for themes.
-  (defvar modus-themes-fringes)
   (declare-function modus-themes-toggle nil)
-  (setf modus-themes-fringes nil)
   (load-theme 'modus-operandi)
   (define-key global-map (kbd "C-c t m") #'modus-themes-toggle)
 
