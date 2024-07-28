@@ -265,6 +265,16 @@ If nil use value of `fill-column'."
     (setf Man-width nil
           Man-width-max (or page-turner-text-width fill-column))))
 
+;;; Notmuch
+
+(defvar notmuch-wash-wrap-lines-length)
+
+(defun page-turner--setup-notmuch ()
+  "Setup notmuch integration."
+  (with-eval-after-load 'notmuch-wash
+    (setf notmuch-wash-wrap-lines-length
+          (or page-turner-text-width fill-column))))
+
 ;;; Entry point
 
 (defun page-turner-setup ()
@@ -273,7 +283,8 @@ If nil use value of `fill-column'."
   (page-turner--setup-elfeed)
   (page-turner--setup-markdown)
   (page-turner--setup-nov)
-  (page-turner--setup-man))
+  (page-turner--setup-man)
+  (page-turner--setup-notmuch))
 
 (provide 'page-turner)
 ;;; page-turner.el ends here

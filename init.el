@@ -30,7 +30,8 @@
 
 (progn ; helpers
   (eval-and-compile
-    (let ((directory (expand-file-name "lisp" user-emacs-directory)))
+    (dolist (directory `(,(expand-file-name "lisp" user-emacs-directory)
+                         "/usr/share/emacs/site-lisp"))
       (when (and (file-directory-p directory)
                  (not (member directory load-path)))
         (push directory load-path))))
@@ -91,8 +92,7 @@
   (load custom-file t nil t)
   (defvar init--org-babel-languages nil "Languages to load for Org Babel.")
 
-  (dolist (key '("M-`" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"
-                 "C-x m" "C-x 4 m" "C-x 5 m"))
+  (dolist (key '("M-`" "M-z" "C-z" "C-x C-z" "C-x C-u" "C-x C-l"))
     (define-key global-map (kbd key) nil))
 
   (defvar init-protected-map (make-sparse-keymap)
@@ -224,7 +224,6 @@
 (confige simple-extras
   :load t
   (:after
-   (setf mail-user-agent 'simple-extras-mail-user-agent)
    (add-hook 'prog-mode-hook #'simple-extras-auto-fill-comments-mode)
    (define-key global-map (kbd "M-z") #'simple-extras-unfill-paragraph)))
 
@@ -852,7 +851,7 @@
                ("Writing" (saved . "writing"))
                ("Executing" (saved . "interpreter"))
                ("Reading" (saved . "reading"))
-               ("Communication" (derived-mode . rcirc-mode)))
+               ("Communication" (saved . "communication")))
               ("By association"
                ("File" (visiting-file))
                ("Directory" (derived-mode . dired-mode))
@@ -881,7 +880,12 @@
                    (derived-mode . nov-mode)
                    (derived-mode . elfeed-show-mode)
                    (derived-mode . elfeed-search-mode)
-                   (derived-mode . eww-mode)))))))))
+                   (derived-mode . eww-mode)))
+              ("communication"
+               (or (derived-mode . rcirc-mode)
+                   (derived-mode . notmuch-hello-mode)
+                   (derived-mode . notmuch-search-mode)
+                   (derived-mode . notmuch-show-mode)))))))))
 
 ;;; File
 
@@ -1299,7 +1303,59 @@
    (setf nov-save-place-file (init--var "nov-places"))
    (cl-pushnew '("\\.epub\\'" . nov-mode) auto-mode-alist :test #'equal)))
 
-;;; Chatting
+;;; Communication
+
+(confige sendmail
+  (:preface (declare-function sendmail-send-it "sendmail"))
+  (:after
+   (setf send-mail-function #'sendmail-send-it)
+   (setf mail-envelope-from 'header)))
+
+(confige message
+  (:after
+   (setf message-confirm-send t)
+   (setf message-make-forward-subject-function '(message-forward-subject-fwd)
+         message-citation-line-format "%N [%F %R %z] wrote:\n")
+   (setf message-mail-alias-type 'ecomplete
+         message-expand-name-databases nil
+         message-expand-name-standard-ui t
+         message-self-insert-commands nil)
+   (add-hook 'message-mode-hook #'use-hard-newlines)))
+
+(confige ecomplete
+  :preload t
+  (:before (setf ecomplete-database-file (init--var "ecompleterc"))))
+
+(confige notmuch
+  :preload t
+  (:preface (autoload 'notmuch "notmuch" nil t))
+  (:before
+   (setf read-mail-command #'notmuch)
+   (define-key global-map (kbd "C-c m e") #'notmuch))
+  (:postface
+   (confige notmuch-hello
+     (:after
+      (setf notmuch-hello-sections
+            '(notmuch-hello-insert-saved-searches
+              notmuch-hello-insert-alltags))
+      (setf notmuch-hello-thousands-separator ""
+            notmuch-show-empty-saved-searches t
+            notmuch-show-all-tags-list t)
+      (setf (default-value 'notmuch-search-oldest-first) nil)
+      (setf notmuch-saved-searches
+            `((:name "recent" :query "tag:inbox and date:1w.." :key ,(kbd "r"))
+              (:name "unread" :query "tag:unread" :key ,(kbd "u"))
+              (:name "flagged" :query "tag:flagged" :key ,(kbd "f"))))))
+
+   (confige notmuch-mua
+     :load t
+     (:before
+      (setf notmuch-fcc-dirs "personal/Sent +sent +inbox -unread"
+            notmuch-draft-folder "personal/Drafts")
+      (setf notmuch-address-use-company nil)
+      (setf mail-user-agent 'notmuch-user-agent))
+     (:after
+      (add-hook 'notmuch-mua-send-hook #'notmuch-mua-attachment-check)))))
 
 (confige rcirc
   :preload t
