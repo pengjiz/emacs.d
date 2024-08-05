@@ -895,12 +895,7 @@
 ;;; File
 
 (progn ; files
-  (let ((prefix (init--var "auto-save/sessions/"))
-        (directory (init--var "auto-save/saves/")))
-    (make-directory directory t)
-    (setf auto-save-list-file-prefix prefix
-          auto-save-file-name-transforms `((".*" ,directory t))))
-
+  (setf auto-save-list-file-prefix (init--var "auto-save/session-"))
   (setf make-backup-files nil
         backup-by-copying t
         delete-old-versions t)
@@ -947,9 +942,7 @@
 
 (confige tramp
   :preload t
-  (:before
-   (setf tramp-persistency-file-name (init--var "tramp/persistency")
-         tramp-auto-save-directory (init--var "tramp/auto-save/")))
+  (:before (setf tramp-persistency-file-name (init--var "tramp/persistency")))
   (:postface
    (confige tramp-sh
      :preload t
