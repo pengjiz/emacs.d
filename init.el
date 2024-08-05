@@ -30,8 +30,12 @@
 
 (progn ; helpers
   (eval-and-compile
-    (dolist (directory `(,(expand-file-name "lisp" user-emacs-directory)
-                         "/usr/share/emacs/site-lisp"))
+    (let ((directory "/usr/share/emacs/site-lisp"))
+      (when (and (eq system-type 'gnu/linux)
+                 (file-directory-p directory)
+                 (not (member directory load-path)))
+        (push directory load-path)))
+    (let ((directory (expand-file-name "lisp" user-emacs-directory)))
       (when (and (file-directory-p directory)
                  (not (member directory load-path)))
         (push directory load-path))))
@@ -1314,9 +1318,12 @@
 
 (confige message
   (:after
+   (when (file-directory-p message-directory)
+     (setf message-auto-save-directory
+           (expand-file-name (convert-standard-filename ".saves/")
+                             message-directory)))
    (setf message-confirm-send t)
-   (setf message-make-forward-subject-function '(message-forward-subject-fwd)
-         message-citation-line-format "%N [%F %R %z] wrote:\n")
+   (setf message-make-forward-subject-function '(message-forward-subject-fwd))
    (setf message-mail-alias-type 'ecomplete
          message-expand-name-databases nil
          message-expand-name-standard-ui t
@@ -1327,6 +1334,11 @@
   :preload t
   (:before (setf ecomplete-database-file (init--var "ecompleterc"))))
 
+(confige mm-decode
+  (:before
+   (setf mm-default-directory
+         (expand-file-name (convert-standard-filename "Downloads/") "~"))))
+
 (confige notmuch
   :preload t
   (:preface (autoload 'notmuch "notmuch" nil t))
@@ -1334,6 +1346,17 @@
    (setf read-mail-command #'notmuch)
    (define-key global-map (kbd "C-c m e") #'notmuch))
   (:postface
+   (confige notmuch-mua
+     :load t
+     (:before
+      (setf notmuch-fcc-dirs "personal/Sent"
+            notmuch-draft-folder "personal/Drafts")
+      (setf notmuch-address-use-company nil)
+      (setf mail-user-agent 'notmuch-user-agent
+            message-mail-user-agent t))
+     (:after
+      (add-hook 'notmuch-mua-send-hook #'notmuch-mua-attachment-check)))
+
    (confige notmuch-hello
      (:after
       (setf notmuch-hello-sections
@@ -1344,19 +1367,10 @@
             notmuch-show-all-tags-list t)
       (setf (default-value 'notmuch-search-oldest-first) nil)
       (setf notmuch-saved-searches
-            `((:name "recent" :query "tag:inbox and date:1w.." :key ,(kbd "r"))
-              (:name "unread" :query "tag:unread" :key ,(kbd "u"))
-              (:name "flagged" :query "tag:flagged" :key ,(kbd "f"))))))
-
-   (confige notmuch-mua
-     :load t
-     (:before
-      (setf notmuch-fcc-dirs "personal/Sent +sent +inbox -unread"
-            notmuch-draft-folder "personal/Drafts")
-      (setf notmuch-address-use-company nil)
-      (setf mail-user-agent 'notmuch-user-agent))
-     (:after
-      (add-hook 'notmuch-mua-send-hook #'notmuch-mua-attachment-check)))))
+            `((:name "unread" :query "tag:unread and tag:inbox" :key ,(kbd "u"))
+              (:name "drafts" :query "tag:draft" :key ,(kbd "d"))
+              (:name "flagged" :query "tag:flagged" :key ,(kbd "f"))
+              (:name "recent" :query "date:2w.." :key ,(kbd "r"))))))))
 
 (confige rcirc
   :preload t
