@@ -558,7 +558,8 @@
 
 (progn ; basic multilingual
   (setf word-wrap-by-category t)
-  (setf default-input-method "TeX"))
+  (setf default-input-method "sgml"
+        default-transient-input-method "TeX"))
 
 (confige kkc
   :preload t
