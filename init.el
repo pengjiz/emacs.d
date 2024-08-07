@@ -1334,10 +1334,14 @@
 
 (confige notmuch
   :preload t
-  (:preface (autoload 'notmuch "notmuch" nil t))
+  (:preface
+   (declare-function notmuch-show-advance "ext:notmuch-show")
+   (autoload 'notmuch "notmuch" nil t))
   (:before
    (setf read-mail-command #'notmuch)
    (define-key global-map (kbd "C-c m e") #'notmuch))
+  (:after
+   (define-key notmuch-show-mode-map (kbd "SPC") #'notmuch-show-advance))
   (:postface
    (confige notmuch-mua
      :load t
