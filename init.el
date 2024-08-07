@@ -1327,6 +1327,14 @@
   :preload t
   (:before (setf ecomplete-database-file (init--var "ecompleterc"))))
 
+(confige footnote
+  :preload t
+  (:before (add-hook 'message-setup-hook #'footnote-mode))
+  (:after
+   (setf footnote-section-tag ""
+         footnote-spaced-footnotes nil
+         footnote-body-tag-spacing 1)))
+
 (confige mm-decode
   (:before
    (setf mm-default-directory
