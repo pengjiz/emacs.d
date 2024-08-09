@@ -967,16 +967,7 @@
 
 (confige bookmark
   :preload t
-  (:before (setf bookmark-default-file (init--var "bookmarks")))
-  (:after
-   (unless (file-exists-p bookmark-default-file)
-     (dolist (bookmark '(("athenaeum" . "athenaeum/catalogue.org")
-                         ("finances" . "ledger/finances.ledger")))
-       (let ((name (car bookmark))
-             (file (init--sync (cdr bookmark))))
-         (when (file-exists-p file)
-           (cl-pushnew `(,name . ((filename . ,file))) bookmark-alist
-                       :test #'equal :key #'car)))))))
+  (:before (setf bookmark-default-file (init--var "bookmarks"))))
 
 (confige dired
   :preload t
@@ -1286,9 +1277,6 @@
 
    (confige elfeed-show
      :preload t
-     (:before
-      (setf elfeed-enclosure-default-dir
-            (expand-file-name (convert-standard-filename "Downloads/") "~")))
      (:after (setf elfeed-show-entry-switch #'pop-to-buffer-same-window)))))
 
 (confige doc-view
@@ -1326,11 +1314,6 @@
 (confige ecomplete
   :preload t
   (:before (setf ecomplete-database-file (init--var "ecompleterc"))))
-
-(confige mm-decode
-  (:before
-   (setf mm-default-directory
-         (expand-file-name (convert-standard-filename "Downloads/") "~"))))
 
 (confige notmuch
   :preload t
