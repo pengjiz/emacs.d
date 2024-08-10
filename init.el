@@ -751,8 +751,7 @@
     (define-key map (kbd "C-c w t") #'window-swap-states)
     (define-key map (kbd "C-c w f") #'fit-window-to-buffer)
     (define-key map (kbd "C-c w l") #'delete-other-windows-vertically)
-    (define-key map (kbd "C-c w s") #'window-toggle-side-windows)
-    (define-key map (kbd "C-x C-z") #'window-toggle-side-windows)))
+    (define-key map (kbd "C-c w s") #'window-toggle-side-windows)))
 
 (confige window-extras
   :load t
@@ -962,7 +961,7 @@
    (setf recentf-max-saved-items 100)
    (setf recentf-exclude '("/elpa/" "/var/" "/\\.git/" "/Trash/"))
    (recentf-mode)
-   (define-key recentf-mode-map (kbd "C-c f r") #'recentf-open)))
+   (define-key recentf-mode-map (kbd "C-x C-z") #'recentf-open)))
 
 (confige bookmark
   :preload t
