@@ -216,7 +216,6 @@
    (setf completion-show-help nil)
    (setf kill-do-not-save-duplicates t)
    (setf set-mark-command-repeat-pop t)
-   (setf async-shell-command-display-buffer nil)
 
    (define-key minibuffer-local-completion-map
                (kbd "M-`") #'switch-to-completions)
