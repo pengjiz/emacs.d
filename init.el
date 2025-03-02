@@ -2158,6 +2158,7 @@
      (:preface
       (declare-function LaTeX-math-mode "ext:latex")
       (defun init--setup-LaTeX-mode ()
+        (setf TeX-command-default "LaTeXMk")
         (make-local-variable 'TeX-electric-math)
         (setf TeX-electric-math '("\\(" . "\\)"))
         (LaTeX-math-mode)))
@@ -2169,12 +2170,6 @@
    (confige preview
      :preload t
      (:after (setf preview-auto-cache-preamble nil)))))
-
-(confige auctex-latexmk
-  (:preface (autoload 'auctex-latexmk-setup "auctex-latexmk"))
-  (:before
-   (with-eval-after-load 'latex
-     (auctex-latexmk-setup))))
 
 (confige latex-snippets
   (:preface (autoload 'latex-snippets-file-template "latex-snippets" nil t))
